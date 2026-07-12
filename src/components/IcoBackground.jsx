@@ -1,0 +1,199 @@
+import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
+import gsap from 'gsap'
+
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+
+import { icoVertex, icoFragment, icoFragmentLines, PostProcessing } from '../shaders/icoshadren'
+import { onIcoTransition } from '../lib/icoBus'
+import landscape from '../assets/textures/skytexture.png'
+
+function IcoBackground() {
+
+    const containerRef = useRef()
+
+    useEffect(() => {
+        const container = containerRef.current
+
+        const scene = new THREE.Scene()
+
+        // 레티나(DPR 2)에서 풀스크린 포스트 패스가 4배 픽셀을 처리하며 프레임이 떨어진다.
+        // 배경은 블러+그레인이 덮어서 1.5 상한으로도 시각 차이가 없다. (AA도 그레인이 대체)
+        const DPR = Math.min(window.devicePixelRatio, 1.5)
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false })
+        renderer.setPixelRatio(DPR)
+        renderer.setSize(window.innerWidth, window.innerHeight * 1.5)
+        renderer.setClearColor(0x111111, 1)
+        renderer.outputColorSpace = THREE.SRGBColorSpace
+        container.appendChild(renderer.domElement)
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000)
+        camera.position.set(0, 0, 1.7)
+
+        const mouseCmove = { x: 0, y: 0 }
+
+        let time = 0
+        let mouse = 0
+        let lastX = 0
+        let speed = 0
+        let running = true
+        let paused = false
+        let composer, customPass, ico, icoLines, material, materialLines
+
+        const texture = new THREE.TextureLoader().load(landscape, (t) => {
+            t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping
+        })
+
+        const geometry = new THREE.IcosahedronGeometry(0.60, 2)
+        const length = geometry.attributes.position.array.length
+
+        const bary = []
+        for (let i = 0; i < length / 3; i++) {
+            bary.push(0, 0, 1, 0, 1, 0, 1, 0, 0)
+        }
+        geometry.setAttribute('aBary', new THREE.BufferAttribute(new Float32Array(bary), 3))
+
+        const uniforms = () => ({
+            time: { value: 0 },
+            landscape: { value: texture },
+            resolution: { value: new THREE.Vector4() },
+            mouse: { value: 0 },
+        })
+
+        material = new THREE.ShaderMaterial({
+            fragmentShader: icoFragment,
+            vertexShader: icoVertex,
+            uniforms: uniforms(),
+            side: THREE.DoubleSide,
+        })
+
+        materialLines = new THREE.ShaderMaterial({
+            fragmentShader: icoFragmentLines,
+            vertexShader: icoVertex,
+            uniforms: uniforms(),
+            side: THREE.DoubleSide,
+        })
+
+        ico = new THREE.Mesh(geometry, material)
+        icoLines = new THREE.Mesh(geometry, materialLines)
+        scene.add(ico)
+
+        composer = new EffectComposer(renderer)
+        composer.addPass(new RenderPass(scene, camera))
+
+        customPass = new ShaderPass(PostProcessing)
+        customPass.uniforms['resolution'].value = new THREE.Vector2(window.innerWidth, window.innerHeight)
+        customPass.uniforms['resolution'].value.multiplyScalar(DPR)
+        customPass.uniforms['noiseblur'].value = 1
+        composer.addPass(customPass)
+
+        const onMouseMove = (e) => {
+            speed = Math.sqrt((e.pageX - lastX) ** 2 + (e.pageX - lastX) ** 2) * 0.003
+            lastX = e.pageX
+            mouseCmove.x = (e.clientX / window.innerWidth) * 2 - 1
+            mouseCmove.y = -(e.clientY / window.innerHeight) * 2 + 1
+
+            icoLines.position.x = mouseCmove.x * 0.039
+            ico.position.x = mouseCmove.x * 0.039
+            icoLines.position.y = mouseCmove.y * 0.039
+            ico.position.y = mouseCmove.y * 0.039
+        }
+
+        const onMouseOut = () => {
+            speed = 0
+            lastX = 0
+        }
+
+        const resize = () => {
+            const width = container.offsetWidth
+            const height = container.offsetHeight
+            renderer.setSize(width, height)
+            composer.setSize(width, height)
+            camera.aspect = width / height
+            camera.updateProjectionMatrix()
+        }
+
+        const render = () => {
+            if (!running) return
+
+            if (paused) {
+                window.requestAnimationFrame(render)
+                return
+            }
+
+            time += 0.001
+            mouse -= (mouse - speed) * 0.005
+            speed *= 0.99
+
+            scene.rotation.x = -time * 6
+            scene.rotation.y = time * 6
+            scene.position.z = 0.2 * Math.sin(time * 3)
+
+            customPass.uniforms.time.value = time
+            customPass.uniforms.howmuchrgbshifticanhaz.value = mouse / 5
+
+            material.uniforms.time.value = time
+            material.uniforms.mouse.value = mouse
+            materialLines.uniforms.time.value = time
+            materialLines.uniforms.mouse.value = mouse
+
+            composer.render()
+            window.requestAnimationFrame(render)
+        }
+
+        // camera dive + blur transitions, same values as the original site
+        const offTransition = onIcoTransition((mode) => {
+            if (mode === 'zoom' || mode === 'zoomHide') {
+                ico.visible = mode === 'zoom'
+                icoLines.visible = mode === 'zoom'
+                gsap.to(camera.position, { duration: 3, z: 0.3 })
+                gsap.to(customPass.uniforms['noiseblur'], { duration: 3, value: mode === 'zoom' ? 17.0 : 37.0 })
+            }
+            if (mode === 'reset') {
+                ico.visible = true
+                icoLines.visible = true
+                gsap.to(camera.position, { duration: 3, z: 1.7 })
+                gsap.to(customPass.uniforms['noiseblur'], { duration: 3, value: 1.0 })
+            }
+            if (mode === 'hide') {
+                // 페이드아웃이 끝나면 GPU 렌더링도 멈춘다 (지구본 화면과의 이중 렌더링 방지)
+                gsap.to(container, {
+                    duration: 1, opacity: 0, display: 'none',
+                    onComplete: () => { paused = true },
+                })
+            }
+            if (mode === 'show') {
+                paused = false
+                gsap.to(container, { duration: 1, opacity: 1, display: 'flex' })
+            }
+        })
+
+        document.addEventListener('mousemove', onMouseMove)
+        document.addEventListener('mouseout', onMouseOut)
+        window.addEventListener('resize', resize)
+
+        resize()
+        render()
+
+        return () => {
+            running = false
+            offTransition()
+            document.removeEventListener('mousemove', onMouseMove)
+            document.removeEventListener('mouseout', onMouseOut)
+            window.removeEventListener('resize', resize)
+            geometry.dispose()
+            material.dispose()
+            materialLines.dispose()
+            texture.dispose()
+            renderer.dispose()
+            container.removeChild(renderer.domElement)
+        }
+    }, [])
+
+    return <div ref={containerRef} id="mesh-container"></div>
+}
+
+export default IcoBackground
