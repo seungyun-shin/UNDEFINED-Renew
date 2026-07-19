@@ -8,12 +8,12 @@
 
 | 항목 | 값 |
 |---|---|
-| 라이브 | https://undefined-renew.vercel.app |
+| 라이브 | **https://seungyunshin.com** (+ undefined-renew.vercel.app) |
 | 저장소 | https://github.com/seungyun-shin/UNDEFINED-Renew (public) |
 | 배포 방식 | main 푸시 → Vercel 자동 배포 (다른 브랜치 푸시 → 미리보기 URL) |
 | 원본 사이트 | https://undefined-shin.com (Route53+CloudFront, 아직 살아있음 — 대체 전까지 유지) |
 | 원본 코드 | github.com/seungyun-shin/UNDEFINED-FrontEnd, UNDEFINED-BackEnd |
-| 도메인 계획 | seungyunshin.com 신규 구매 예정 (2026-07-12 기준 미등록 확인됨) |
+| 도메인 | seungyunshin.com — Cloudflare Registrar에서 2026-07-19 구매, DNS는 Cloudflare(DNS only 필수, Proxy 켜면 안 됨). 현재 www가 primary. 구 도메인 리다이렉트는 미처리 |
 
 ## 개발 명령어
 
@@ -80,7 +80,7 @@ rAF 카운트를 재서 비교한다. 3D 포인트 호버는 좌표 스윕으로
 2. **코드 스플리팅** — EarthScreen lazy 로드 (현재 JS 번들 1.4MB 단일 청크)
 3. **나머지 페이지** — WORK/ABOUT/RECORD, 콘텐츠는 7년치 갱신 필요 (사용자와 상의)
 4. **백엔드 방향** — 원본 Django(shop/record/auth)는 정적화 권장, 사용자 아직 미결정
-5. **도메인** — seungyunshin.com 구매 후 Vercel 연결, 구 도메인 리다이렉트
+5. **구 도메인 리다이렉트** — undefined-shin.com(Route53+CloudFront) → seungyunshin.com, 리뉴얼 완성 시점에
 6. 갤러리 본 디자인, 이미지 WebP화, prefers-reduced-motion, 접근성
 
 ## 사용자에 대해
