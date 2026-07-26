@@ -76,6 +76,16 @@ function Marker({ point, active, onEnter, onLeave, onClick }) {
     const spriteRef = useRef()
     const texture = useMemo(() => glowDotTexture(), [])
 
+    // A flat sprite has zero depth extent, so sitting exactly on the earth's
+    // surface (same radius) z-fights against it almost everywhere — the same
+    // failure mode the dot-matrix globe hit earlier. The old marker was a
+    // small 3D sphere whose outward half naturally poked past the surface;
+    // nudging the sprite outward by ~2% of the radius reproduces that margin.
+    const position = useMemo(
+        () => [point.x * 1.04, point.y * 1.04, point.z * 1.04],
+        [point]
+    )
+
     useFrame(({ clock }) => {
         const t = clock.getElapsedTime()
         const base = active ? 0.16 : 0.09
@@ -84,7 +94,7 @@ function Marker({ point, active, onEnter, onLeave, onClick }) {
     })
 
     return (
-        <group position={[point.x, point.y, point.z]}>
+        <group position={position}>
             {/* generous invisible hit target — separate from the small visible dot */}
             <mesh onClick={onClick} onPointerOver={onEnter} onPointerOut={onLeave}>
                 <sphereGeometry args={[0.09, 8, 8]} />
@@ -320,7 +330,10 @@ function EarthScreen() {
                 </div>
             </div>
 
-            <Canvas dpr={[1, 1.5]}>
+            {/* near/far tightened from R3F's default (0.1/1000) — that huge a range
+                left too little depth-buffer precision at the globe's distance,
+                which is why the marker sprites z-fought against the earth surface */}
+            <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 5], near: 0.5, far: 40 }}>
                 <Suspense fallback={null}>
                     <EarthModel countryInfo={countryInfo} countryInfoName={countryInfoName} activeId={activeId} />
                 </Suspense>
