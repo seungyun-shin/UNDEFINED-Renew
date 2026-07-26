@@ -47,15 +47,29 @@ function thumbnailOf(point) {
     return src.replace('/1170/', '/300/')
 }
 
-// Minimal rotation that brings a local-space point to face wherever the
-// camera currently is (read live, since OrbitControls lets the user orbit
-// freely). A Y-only rotation only fixes longitude — a point at high latitude
-// (e.g. Paris, 48°N) would still end up near the top rim instead of centered,
-// so this aligns the full 3D direction instead.
-function facingQuaternion(x, y, z, cameraPosition) {
-    const pointDir = new THREE.Vector3(x, y, z).normalize()
-    const cameraDir = cameraPosition.clone().normalize()
-    return new THREE.Quaternion().setFromUnitVectors(pointDir, cameraDir)
+// Orbits the camera (not the globe) to face a point, preserving the current
+// zoom distance. Interpolating the position directly (lerp) would cut a
+// straight chord through the sphere and change the zoom mid-flight, so this
+// slerps the direction instead — identity-to-rotQuat by t parametrizes the
+// shortest arc, which keeps the camera at a constant distance throughout.
+function flyCameraTo(camera, controls, worldPos, duration = 1.6) {
+    const distance = camera.position.length()
+    const startDir = camera.position.clone().normalize()
+    const endDir = worldPos.clone().normalize()
+    const rotQuat = new THREE.Quaternion().setFromUnitVectors(startDir, endDir)
+    const proxy = { t: 0 }
+
+    gsap.to(proxy, {
+        t: 1,
+        duration,
+        ease: 'power3.inOut',
+        onUpdate: () => {
+            const stepQuat = new THREE.Quaternion().slerp(rotQuat, proxy.t)
+            camera.position.copy(startDir.clone().applyQuaternion(stepQuat).multiplyScalar(distance))
+            camera.lookAt(0, 0, 0)
+            controls.current?.update()
+        },
+    })
 }
 
 function Marker({ point, active, onEnter, onLeave, onClick }) {
@@ -107,6 +121,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
     const thanksPlanetCover = useRef()
     const projectPlanetCover = useRef()
     const autoRotate = useRef(true)
+    const controlsRef = useRef()
 
     useFrame(({ clock }) => {
         const elapsedTime = clock.getElapsedTime()
@@ -128,7 +143,9 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
     })
 
     // Selecting a destination from the list stops the idle auto-rotate and
-    // snaps the globe to face that point instead.
+    // flies the camera to face that point — the globe itself stays put, so
+    // the background stars and the two side planets visibly shift too,
+    // reading as "your viewpoint moved" rather than "the world spun".
     useEffect(() => {
         if (activeId == null) return
         const point = countryPoints.find((p) => p._id === activeId)
@@ -136,20 +153,8 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
 
         autoRotate.current = false
 
-        const startQuat = earthRef.current.quaternion.clone()
-        const endQuat = facingQuaternion(point.x, point.y, point.z, camera.position)
-        const tmpQuat = new THREE.Quaternion()
-        const proxy = { t: 0 }
-
-        gsap.to(proxy, {
-            t: 1,
-            duration: 1.6,
-            ease: 'power3.inOut',
-            onUpdate: () => {
-                tmpQuat.slerpQuaternions(startQuat, endQuat, proxy.t)
-                earthRef.current.quaternion.copy(tmpQuat)
-            },
-        })
+        const worldPos = new THREE.Vector3(point.x, point.y, point.z).applyMatrix4(earthRef.current.matrixWorld)
+        flyCameraTo(camera, controlsRef, worldPos)
     }, [activeId])
 
     const showName = (name) => {
@@ -176,6 +181,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
             <ambientLight intensity={1} />
             <Stars radius={300} depth={60} count={20000} factor={7} saturation={0} fade={true} />
             <OrbitControls
+                ref={controlsRef}
                 enableZoom={true}
                 enablePan={true}
                 zoomSpeed={0.6}
