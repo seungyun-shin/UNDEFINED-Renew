@@ -358,27 +358,82 @@ a { text-decoration: none; }
 .destination-item.active .destination-item-main img {
   opacity: 1;
   filter: none;
-  outline: 1px solid rgba(243, 233, 216, 0.6);
+  outline: 1px solid var(--accent, #dfd3c3);
   outline-offset: 2px;
 }
 
-.destination-item-view {
-  display: block;
-  margin: 0.2rem 0 0.5rem 3.1rem;
+@media screen and (max-width: 900px) {
+  .destination-list { display: none; }
+}
+
+/* ── leader line + photo card (earth screen) ────── */
+.place-card-line-layer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 215;
+  pointer-events: none;
+}
+
+.place-card {
+  position: fixed;
+  width: 260px;
+  z-index: 216;
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.6rem;
+  background: rgba(8, 9, 12, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid;
+  border-color: rgba(223, 211, 195, 0.5);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.place-card.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.place-card img {
+  width: 84px;
+  height: 100%;
+  min-height: 96px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.place-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.place-card-name {
+  font-family: 'Romelio';
+  color: #f3e9d8;
+  font-size: 1.15rem;
+  margin: 0;
+}
+.place-card-view {
+  align-self: flex-start;
   background: none;
   border: none;
   cursor: pointer;
-  color: #dfd3c3;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   letter-spacing: 0.03em;
   padding: 0;
-  opacity: 0.85;
+  opacity: 0.9;
   transition: opacity 0.2s ease;
 }
-.destination-item-view:hover { opacity: 1; }
+.place-card-view:hover { opacity: 1; }
 
 @media screen and (max-width: 900px) {
-  .destination-list { display: none; }
+  .place-card-line-layer,
+  .place-card { display: none; }
 }
 
 .country-info-show {

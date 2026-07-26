@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { TextureLoader } from 'three'
@@ -47,12 +47,54 @@ function thumbnailOf(point) {
     return src.replace('/1170/', '/300/')
 }
 
+// Curated accent set — one is picked at random per selection so the active
+// point pops against the cream/dark scene, but every option was chosen to sit
+// in the same tonal family (kept away from the earlier "26 arbitrary colors"
+// problem, which read as tacky rather than designed).
+const HIGHLIGHT_PALETTE = ['#f2a65a', '#ef6461', '#4fd1c5', '#b98ee0']
+
+function randomHighlight() {
+    return HIGHLIGHT_PALETTE[Math.floor(Math.random() * HIGHLIGHT_PALETTE.length)]
+}
+
+// Card placement: keep clear of the destination list (left ~340px) and the
+// header (top ~140px), and flip to whichever side of the point has more room
+// so the card stays fully on screen regardless of where on the globe the
+// point sits.
+const CARD_W = 260
+const CARD_H = 168
+const RESERVED_LEFT = 360
+const RESERVED_TOP = 140
+const EDGE_MARGIN = 24
+
+function placeCard(px, py, viewportW, viewportH) {
+    const centerX = RESERVED_LEFT + (viewportW - RESERVED_LEFT) / 2
+    const centerY = RESERVED_TOP + (viewportH - RESERVED_TOP) / 2
+
+    let x = px < centerX ? px + 46 : px - 46 - CARD_W
+    let y = py < centerY ? py + 30 : py - 30 - CARD_H
+
+    x = Math.max(RESERVED_LEFT, Math.min(x, viewportW - CARD_W - EDGE_MARGIN))
+    y = Math.max(RESERVED_TOP, Math.min(y, viewportH - CARD_H - EDGE_MARGIN))
+
+    return { x, y }
+}
+
+// Closest point on the card's rectangle to the marker, so the leader line
+// points at the card's edge instead of cutting through its middle.
+function nearestEdgePoint(px, py, cardX, cardY) {
+    return {
+        x: Math.max(cardX, Math.min(px, cardX + CARD_W)),
+        y: Math.max(cardY, Math.min(py, cardY + CARD_H)),
+    }
+}
+
 // Orbits the camera (not the globe) to face a point, preserving the current
 // zoom distance. Interpolating the position directly (lerp) would cut a
 // straight chord through the sphere and change the zoom mid-flight, so this
 // slerps the direction instead — identity-to-rotQuat by t parametrizes the
 // shortest arc, which keeps the camera at a constant distance throughout.
-function flyCameraTo(camera, controls, worldPos, duration = 1.6) {
+function flyCameraTo(camera, controls, worldPos, onComplete, duration = 1.6) {
     const distance = camera.position.length()
     const startDir = camera.position.clone().normalize()
     const endDir = worldPos.clone().normalize()
@@ -69,10 +111,108 @@ function flyCameraTo(camera, controls, worldPos, duration = 1.6) {
             camera.lookAt(0, 0, 0)
             controls.current?.update()
         },
+        onComplete,
     })
 }
 
-function Marker({ point, active, onEnter, onLeave, onClick }) {
+// Same outward nudge the marker sprite uses (see Marker below) — shared so
+// the leader line always starts exactly at the visible dot, not the raw
+// surface point.
+function markerPosition(point) {
+    return new THREE.Vector3(point.x, point.y, point.z).multiplyScalar(1.04)
+}
+
+function projectToScreen(worldPos, camera, size) {
+    const v = worldPos.clone().project(camera)
+    return {
+        x: (v.x * 0.5 + 0.5) * size.width,
+        y: (-v.y * 0.5 + 0.5) * size.height,
+    }
+}
+
+// DOM overlay (outside the Canvas) showing a dashed leader line from the
+// active point's live screen position to a photo card. EarthModel drives it
+// imperatively every frame — see reveal()/track()/hide() — rather than via
+// React state, so tracking the point during camera drag doesn't re-render
+// the destination list 60 times a second.
+const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
+    const [state, setState] = useState(null) // { point, color, card:{x,y}, edge:{x,y} }
+    const [revealed, setRevealed] = useState(false)
+    const lastMarkerRef = useRef({ x: 0, y: 0 })
+
+    useImperativeHandle(ref, () => ({
+        reveal(point, color, px, py) {
+            const card = placeCard(px, py, window.innerWidth, window.innerHeight)
+            const target = nearestEdgePoint(px, py, card.x, card.y)
+            lastMarkerRef.current = { x: px, y: py }
+            setRevealed(false)
+            setState({ point, color, card, edge: { x: px, y: py } })
+
+            const proxy = { x: px, y: py }
+            gsap.to(proxy, {
+                x: target.x,
+                y: target.y,
+                duration: 0.45,
+                ease: 'power2.out',
+                onUpdate: () => setState((s) => (s ? { ...s, edge: { x: proxy.x, y: proxy.y } } : s)),
+                onComplete: () => setRevealed(true),
+            })
+        },
+        track(px, py, visible) {
+            if (!visible) {
+                setState(null)
+                setRevealed(false)
+                return
+            }
+            setState((s) => {
+                if (!s) return s
+                const dx = px - lastMarkerRef.current.x
+                const dy = py - lastMarkerRef.current.y
+                lastMarkerRef.current = { x: px, y: py }
+                const card = { x: s.card.x + dx, y: s.card.y + dy }
+                return { ...s, card, edge: nearestEdgePoint(px, py, card.x, card.y) }
+            })
+        },
+        hide() {
+            setState(null)
+            setRevealed(false)
+        },
+    }))
+
+    if (!state) return null
+    const { point, color, card, edge } = state
+    const marker = lastMarkerRef.current
+
+    return (
+        <>
+            <svg className="place-card-line-layer">
+                <line
+                    x1={marker.x}
+                    y1={marker.y}
+                    x2={edge.x}
+                    y2={edge.y}
+                    stroke={color}
+                    strokeWidth="1.5"
+                    strokeDasharray="5 5"
+                />
+            </svg>
+            <div
+                className={revealed ? 'place-card revealed' : 'place-card'}
+                style={{ left: card.x, top: card.y, borderColor: color }}
+            >
+                <img src={thumbnailOf(point)} alt="" />
+                <div className="place-card-body">
+                    <p className="place-card-name">{point.name}</p>
+                    <button className="place-card-view" style={{ color }} onClick={() => onView(point)}>
+                        사진 보기 →
+                    </button>
+                </div>
+            </div>
+        </>
+    )
+})
+
+function Marker({ point, active, color, onEnter, onLeave, onClick }) {
     const spriteRef = useRef()
     const texture = useMemo(() => glowDotTexture(), [])
 
@@ -80,11 +220,8 @@ function Marker({ point, active, onEnter, onLeave, onClick }) {
     // surface (same radius) z-fights against it almost everywhere — the same
     // failure mode the dot-matrix globe hit earlier. The old marker was a
     // small 3D sphere whose outward half naturally poked past the surface;
-    // nudging the sprite outward by ~2% of the radius reproduces that margin.
-    const position = useMemo(
-        () => [point.x * 1.04, point.y * 1.04, point.z * 1.04],
-        [point]
-    )
+    // nudging the sprite outward by ~4% of the radius reproduces that margin.
+    const position = useMemo(() => markerPosition(point).toArray(), [point])
 
     useFrame(({ clock }) => {
         const t = clock.getElapsedTime()
@@ -103,7 +240,7 @@ function Marker({ point, active, onEnter, onLeave, onClick }) {
             <sprite ref={spriteRef}>
                 <spriteMaterial
                     map={texture}
-                    color={active ? '#fff6ea' : '#dfd3c3'}
+                    color={active ? color : '#dfd3c3'}
                     opacity={active ? 1 : 0.8}
                     transparent
                     depthWrite={false}
@@ -114,10 +251,10 @@ function Marker({ point, active, onEnter, onLeave, onClick }) {
     )
 }
 
-function EarthModel({ countryInfo, countryInfoName, activeId }) {
+function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overlayRef }) {
 
     const navigate = useNavigate()
-    const { camera } = useThree()
+    const { camera, size } = useThree()
 
     const [colorMap, normalMap, specularMap, cloudsMap, landscape, landscape2] = useLoader(
         TextureLoader,
@@ -155,17 +292,42 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
     // Selecting a destination from the list stops the idle auto-rotate and
     // flies the camera to face that point — the globe itself stays put, so
     // the background stars and the two side planets visibly shift too,
-    // reading as "your viewpoint moved" rather than "the world spun".
+    // reading as "your viewpoint moved" rather than "the world spun". Once
+    // the flight lands, reveal the leader line + photo card at that point.
     useEffect(() => {
         if (activeId == null) return
         const point = countryPoints.find((p) => p._id === activeId)
         if (!point) return
 
         autoRotate.current = false
+        overlayRef.current?.hide()
 
-        const worldPos = new THREE.Vector3(point.x, point.y, point.z).applyMatrix4(earthRef.current.matrixWorld)
-        flyCameraTo(camera, controlsRef, worldPos)
+        const worldPos = markerPosition(point).applyMatrix4(earthRef.current.matrixWorld)
+        flyCameraTo(camera, controlsRef, worldPos, () => {
+            const landedPos = markerPosition(point).applyMatrix4(earthRef.current.matrixWorld)
+            const screen = projectToScreen(landedPos, camera, size)
+            overlayRef.current?.reveal(point, activeColor, screen.x, screen.y)
+        })
     }, [activeId])
+
+    // Keeps the leader line + card pinned to the point every frame — so a
+    // manual drag after landing moves them together instead of leaving them
+    // stranded — and hides them if the point rotates out of view.
+    useFrame(() => {
+        if (activeId == null || !earthRef.current) return
+        const point = countryPoints.find((p) => p._id === activeId)
+        if (!point) return
+
+        const worldPos = markerPosition(point).applyMatrix4(earthRef.current.matrixWorld)
+        const facingCamera = worldPos.clone().normalize().dot(camera.position.clone().normalize()) > 0.12
+
+        if (facingCamera) {
+            const screen = projectToScreen(worldPos, camera, size)
+            overlayRef.current?.track(screen.x, screen.y, true)
+        } else {
+            overlayRef.current?.track(0, 0, false)
+        }
+    })
 
     const showName = (name) => {
         countryInfo.current.style.display = 'flex'
@@ -216,6 +378,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
                         key={point._id}
                         point={point}
                         active={activeId === point._id}
+                        color={activeColor}
                         onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })}
                         onEnter={() => showName(point.name)}
                         onLeave={infoShowingDown}
@@ -258,9 +421,10 @@ function EarthModel({ countryInfo, countryInfoName, activeId }) {
     )
 }
 
-function DestinationList({ activeId, onSelect }) {
-    const navigate = useNavigate()
-
+// The "photo view" action now lives on the floating card next to the globe
+// point (see PlaceCard) — keeping a second copy of that link here would just
+// be a duplicate, inconsistent affordance for the same action.
+function DestinationList({ activeId, activeColor, onSelect }) {
     return (
         <nav className="destination-list">
             {REGIONS.map((region) => (
@@ -269,19 +433,15 @@ function DestinationList({ activeId, onSelect }) {
                     {countryPoints.slice(region.range[0], region.range[1] + 1).map((point) => {
                         const active = activeId === point._id
                         return (
-                            <div key={point._id} className={active ? 'destination-item active' : 'destination-item'}>
+                            <div
+                                key={point._id}
+                                className={active ? 'destination-item active' : 'destination-item'}
+                                style={active ? { '--accent': activeColor } : undefined}
+                            >
                                 <button className="destination-item-main" onClick={() => onSelect(point)}>
                                     <img src={thumbnailOf(point)} alt="" loading="lazy" />
                                     <span>{point.name}</span>
                                 </button>
-                                {active && (
-                                    <button
-                                        className="destination-item-view"
-                                        onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })}
-                                    >
-                                        사진 보기 →
-                                    </button>
-                                )}
                             </div>
                         )
                     })}
@@ -293,9 +453,12 @@ function DestinationList({ activeId, onSelect }) {
 
 function EarthScreen() {
 
+    const navigate = useNavigate()
     const countryInfo = useRef()
     const countryInfoName = useRef()
+    const overlayRef = useRef()
     const [activeId, setActiveId] = useState(null)
+    const [activeColor, setActiveColor] = useState(HIGHLIGHT_PALETTE[0])
 
     useEffect(() => {
         icoTransition('hide')
@@ -306,9 +469,19 @@ function EarthScreen() {
         }
     }, [])
 
+    const handleSelect = (point) => {
+        setActiveColor(randomHighlight())
+        setActiveId(point._id)
+    }
+
     return (
         <div className="earthContainer">
-            <DestinationList activeId={activeId} onSelect={(point) => setActiveId(point._id)} />
+            <DestinationList activeId={activeId} activeColor={activeColor} onSelect={handleSelect} />
+
+            <PlaceCard
+                ref={overlayRef}
+                onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })}
+            />
 
             <div className="country-info-show" ref={countryInfo}>
                 <div className="name-info" ref={countryInfoName}></div>
@@ -335,7 +508,13 @@ function EarthScreen() {
                 which is why the marker sprites z-fought against the earth surface */}
             <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 5], near: 0.5, far: 40 }}>
                 <Suspense fallback={null}>
-                    <EarthModel countryInfo={countryInfo} countryInfoName={countryInfoName} activeId={activeId} />
+                    <EarthModel
+                        countryInfo={countryInfo}
+                        countryInfoName={countryInfoName}
+                        activeId={activeId}
+                        activeColor={activeColor}
+                        overlayRef={overlayRef}
+                    />
                 </Suspense>
             </Canvas>
             <Loader />
