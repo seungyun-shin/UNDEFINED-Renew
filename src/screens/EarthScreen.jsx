@@ -94,6 +94,19 @@ function nearestEdgePoint(px, py, cardX, cardY) {
     }
 }
 
+// The leader line is drawn as an L — sideways first, then up into the card
+// — rather than a single diagonal. The elbow sits directly above/below the
+// point at whichever x the card's edge is nearest, so the second (vertical)
+// leg lands cleanly on the card's edge instead of cutting across it.
+function elbowPath(px, py, card) {
+    const elbowX = Math.max(card.x, Math.min(px, card.x + CARD_W))
+    const end = nearestEdgePoint(px, py, card.x, card.y)
+    return {
+        elbow: { x: elbowX, y: py },
+        end: { x: elbowX, y: end.y },
+    }
+}
+
 // Orbits the camera (not the globe) to face a point, preserving the current
 // zoom distance. Interpolating the position directly (lerp) would cut a
 // straight chord through the sphere and change the zoom mid-flight, so this
@@ -141,35 +154,50 @@ function projectToScreen(worldPos, camera, size) {
 // React state, so tracking the point during camera drag doesn't re-render
 // the destination list 60 times a second.
 const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
-    const [state, setState] = useState(null) // { point, color, card:{x,y}, edge:{x,y} }
+    // p0: point (line start) · p1: elbow (end of the leftward leg) ·
+    // p2: line tip (end of the upward leg, where the arrowhead sits)
+    const [state, setState] = useState(null) // { point, color, card, p0, p1, p2 }
     const [revealed, setRevealed] = useState(false)
     const lastMarkerRef = useRef({ x: 0, y: 0 })
 
     useImperativeHandle(ref, () => ({
         reveal(point, color, px, py) {
-            // Card starts centered on the point and travels there in two legs —
-            // sideways first, then up into its final resting spot — rather than
-            // just fading in at rest. The leader line's edge is recomputed every
-            // step so it stays glued to wherever the card currently is.
-            const finalCard = placeCard(px, py, window.innerWidth, window.innerHeight)
-            const startCard = { x: px - CARD_W / 2, y: py - CARD_H / 2 }
+            // The card sits still at its final spot from the start — only the
+            // leader line moves: left, then up. The card only fades in once
+            // the line has finished drawing, the arrowhead landing first.
+            const card = placeCard(px, py, window.innerWidth, window.innerHeight)
+            const { elbow, end } = elbowPath(px, py, card)
 
             lastMarkerRef.current = { x: px, y: py }
+            setRevealed(false)
             setState({
                 point,
                 color,
-                card: startCard,
-                edge: nearestEdgePoint(px, py, startCard.x, startCard.y),
+                card,
+                p0: { x: px, y: py },
+                p1: { x: px, y: py },
+                p2: { x: px, y: py },
             })
-            setRevealed(true)
 
-            const proxy = { ...startCard }
-            const updateFrame = () =>
-                setState((s) => (s ? { ...s, card: { x: proxy.x, y: proxy.y }, edge: nearestEdgePoint(px, py, proxy.x, proxy.y) } : s))
+            const leg1 = { x: px, y: py }
+            const leg2 = { x: elbow.x, y: elbow.y }
 
             gsap.timeline()
-                .to(proxy, { x: finalCard.x, duration: 0.42, ease: 'power2.inOut', onUpdate: updateFrame })
-                .to(proxy, { y: finalCard.y, duration: 0.36, ease: 'power2.out', onUpdate: updateFrame })
+                .to(leg1, {
+                    x: elbow.x,
+                    y: elbow.y,
+                    duration: 0.4,
+                    ease: 'power2.inOut',
+                    onUpdate: () => setState((s) => (s ? { ...s, p1: { x: leg1.x, y: leg1.y }, p2: { x: leg1.x, y: leg1.y } } : s)),
+                })
+                .to(leg2, {
+                    x: end.x,
+                    y: end.y,
+                    duration: 0.32,
+                    ease: 'power2.out',
+                    onUpdate: () => setState((s) => (s ? { ...s, p2: { x: leg2.x, y: leg2.y } } : s)),
+                    onComplete: () => setRevealed(true),
+                })
         },
         track(px, py, visible) {
             if (!visible) {
@@ -183,7 +211,8 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
                 const dy = py - lastMarkerRef.current.y
                 lastMarkerRef.current = { x: px, y: py }
                 const card = { x: s.card.x + dx, y: s.card.y + dy }
-                return { ...s, card, edge: nearestEdgePoint(px, py, card.x, card.y) }
+                const { elbow, end } = elbowPath(px, py, card)
+                return { ...s, card, p0: { x: px, y: py }, p1: elbow, p2: end }
             })
         },
         hide() {
@@ -193,20 +222,18 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
     }))
 
     if (!state) return null
-    const { point, color, card, edge } = state
-    const marker = lastMarkerRef.current
+    const { point, color, card, p0, p1, p2 } = state
 
     return (
         <>
             <svg className="place-card-line-layer">
-                <line
-                    x1={marker.x}
-                    y1={marker.y}
-                    x2={edge.x}
-                    y2={edge.y}
-                    stroke={color}
-                    strokeWidth="1.5"
-                    strokeDasharray="5 5"
+                <line x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={color} strokeWidth="1.5" strokeDasharray="5 5" />
+                <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth="1.5" strokeDasharray="5 5" />
+                <polygon
+                    points="0,-5 5,4 -5,4"
+                    fill={color}
+                    transform={`translate(${p2.x}, ${p2.y})`}
+                    opacity={p2.y < p0.y ? 1 : 0}
                 />
             </svg>
             <div
