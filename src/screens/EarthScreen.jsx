@@ -50,8 +50,10 @@ function thumbnailOf(point) {
 // Curated accent set — one is picked at random per selection so the active
 // point pops against the cream/dark scene, but every option was chosen to sit
 // in the same tonal family (kept away from the earlier "26 arbitrary colors"
-// problem, which read as tacky rather than designed).
-const HIGHLIGHT_PALETTE = ['#f2a65a', '#ef6461', '#4fd1c5', '#b98ee0']
+// problem, which read as tacky rather than designed). Desaturated antique-
+// metal tones — brass / terracotta / verdigris / dusty mauve — read as part
+// of the site's dark-navy + cream palette instead of generic web accents.
+const HIGHLIGHT_PALETTE = ['#C9A063', '#B5654A', '#6E8F82', '#93748F']
 
 function randomHighlight() {
     return HIGHLIGHT_PALETTE[Math.floor(Math.random() * HIGHLIGHT_PALETTE.length)]
@@ -67,12 +69,15 @@ const RESERVED_LEFT = 360
 const RESERVED_TOP = 140
 const EDGE_MARGIN = 24
 
+// flyCameraTo always brings the selected point to the dead center of the
+// screen, so a point's on-screen position never varies enough to make a
+// quadrant-based left/right choice meaningful — it was always resolving to
+// the same side. The card sits to the upper-left of the point instead, which
+// stays clear of the list/header by construction; the clamp below is just a
+// safety net for extreme zoom levels.
 function placeCard(px, py, viewportW, viewportH) {
-    const centerX = RESERVED_LEFT + (viewportW - RESERVED_LEFT) / 2
-    const centerY = RESERVED_TOP + (viewportH - RESERVED_TOP) / 2
-
-    let x = px < centerX ? px + 46 : px - 46 - CARD_W
-    let y = py < centerY ? py + 30 : py - 30 - CARD_H
+    let x = px - 46 - CARD_W
+    let y = py - 30 - CARD_H
 
     x = Math.max(RESERVED_LEFT, Math.min(x, viewportW - CARD_W - EDGE_MARGIN))
     y = Math.max(RESERVED_TOP, Math.min(y, viewportH - CARD_H - EDGE_MARGIN))
@@ -142,21 +147,29 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
 
     useImperativeHandle(ref, () => ({
         reveal(point, color, px, py) {
-            const card = placeCard(px, py, window.innerWidth, window.innerHeight)
-            const target = nearestEdgePoint(px, py, card.x, card.y)
-            lastMarkerRef.current = { x: px, y: py }
-            setRevealed(false)
-            setState({ point, color, card, edge: { x: px, y: py } })
+            // Card starts centered on the point and travels there in two legs —
+            // sideways first, then up into its final resting spot — rather than
+            // just fading in at rest. The leader line's edge is recomputed every
+            // step so it stays glued to wherever the card currently is.
+            const finalCard = placeCard(px, py, window.innerWidth, window.innerHeight)
+            const startCard = { x: px - CARD_W / 2, y: py - CARD_H / 2 }
 
-            const proxy = { x: px, y: py }
-            gsap.to(proxy, {
-                x: target.x,
-                y: target.y,
-                duration: 0.45,
-                ease: 'power2.out',
-                onUpdate: () => setState((s) => (s ? { ...s, edge: { x: proxy.x, y: proxy.y } } : s)),
-                onComplete: () => setRevealed(true),
+            lastMarkerRef.current = { x: px, y: py }
+            setState({
+                point,
+                color,
+                card: startCard,
+                edge: nearestEdgePoint(px, py, startCard.x, startCard.y),
             })
+            setRevealed(true)
+
+            const proxy = { ...startCard }
+            const updateFrame = () =>
+                setState((s) => (s ? { ...s, card: { x: proxy.x, y: proxy.y }, edge: nearestEdgePoint(px, py, proxy.x, proxy.y) } : s))
+
+            gsap.timeline()
+                .to(proxy, { x: finalCard.x, duration: 0.42, ease: 'power2.inOut', onUpdate: updateFrame })
+                .to(proxy, { y: finalCard.y, duration: 0.36, ease: 'power2.out', onUpdate: updateFrame })
         },
         track(px, py, visible) {
             if (!visible) {
