@@ -375,10 +375,17 @@ a { text-decoration: none; }
   z-index: 215;
   pointer-events: none;
 }
+.place-card-arrowhead {
+  transition: opacity 0.25s ease;
+}
 
 .place-card {
   position: fixed;
   width: 260px;
+  /* fixed to match CARD_H in EarthScreen.jsx — the leader line's landing
+     point is computed against that constant, so the rendered card must be
+     exactly that tall or the two drift apart (this was the misalignment) */
+  height: 168px;
   z-index: 216;
   display: flex;
   gap: 0.7rem;

@@ -158,6 +158,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
     // p2: line tip (end of the upward leg, where the arrowhead sits)
     const [state, setState] = useState(null) // { point, color, card, p0, p1, p2 }
     const [revealed, setRevealed] = useState(false)
+    const [arrowVisible, setArrowVisible] = useState(false)
     const lastMarkerRef = useRef({ x: 0, y: 0 })
 
     useImperativeHandle(ref, () => ({
@@ -170,6 +171,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
 
             lastMarkerRef.current = { x: px, y: py }
             setRevealed(false)
+            setArrowVisible(false)
             setState({
                 point,
                 color,
@@ -196,13 +198,19 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
                     duration: 0.32,
                     ease: 'power2.out',
                     onUpdate: () => setState((s) => (s ? { ...s, p2: { x: leg2.x, y: leg2.y } } : s)),
-                    onComplete: () => setRevealed(true),
+                    onComplete: () => {
+                        // arrowhead lands and fades in first, the card follows —
+                        // both driven by CSS opacity transitions, not a hard pop
+                        setArrowVisible(true)
+                        setTimeout(() => setRevealed(true), 120)
+                    },
                 })
         },
         track(px, py, visible) {
             if (!visible) {
                 setState(null)
                 setRevealed(false)
+                setArrowVisible(false)
                 return
             }
             setState((s) => {
@@ -218,6 +226,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
         hide() {
             setState(null)
             setRevealed(false)
+            setArrowVisible(false)
         },
     }))
 
@@ -230,10 +239,11 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
                 <line x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={color} strokeWidth="1.5" strokeDasharray="5 5" />
                 <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth="1.5" strokeDasharray="5 5" />
                 <polygon
+                    className="place-card-arrowhead"
                     points="0,-5 5,4 -5,4"
                     fill={color}
                     transform={`translate(${p2.x}, ${p2.y})`}
-                    opacity={p2.y < p0.y ? 1 : 0}
+                    opacity={arrowVisible ? 1 : 0}
                 />
             </svg>
             <div
