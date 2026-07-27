@@ -85,13 +85,16 @@ function placeCard(px, py, viewportW, viewportH) {
     return { x, y }
 }
 
-// The leader line is drawn as an L — sideways first, then up — landing at the
-// horizontal center of the card's bottom edge (not a corner), so the arrow
-// visibly "points into" the card. The elbow is directly below that center, at
-// the point's height, so the first leg is horizontal and the second vertical.
+// The leader line is drawn as an L — sideways first, then up — landing just
+// below the horizontal center of the card's bottom edge, so the arrowhead sits
+// in the gap and points up into the card instead of being hidden under it.
+// The elbow is directly below that center, at the point's height, so the first
+// leg is horizontal and the second vertical.
+const ARROW_GAP = 12
+
 function elbowPath(py, card) {
     const targetX = card.x + CARD_W / 2
-    const targetY = card.y + CARD_H
+    const targetY = card.y + CARD_H + ARROW_GAP
     return {
         elbow: { x: targetX, y: py },
         end: { x: targetX, y: targetY },
@@ -179,23 +182,23 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
                 .to(leg1, {
                     x: elbow.x,
                     y: elbow.y,
-                    duration: 0.4,
+                    duration: 0.75,
                     ease: 'power2.inOut',
                     onUpdate: () => setState((s) => (s ? { ...s, p1: { x: leg1.x, y: leg1.y }, p2: { x: leg1.x, y: leg1.y } } : s)),
                 })
                 .to(leg2, {
                     x: end.x,
                     y: end.y,
-                    duration: 0.32,
+                    duration: 0.6,
                     ease: 'power2.out',
                     onUpdate: () => setState((s) => (s ? { ...s, p2: { x: leg2.x, y: leg2.y } } : s)),
                     onComplete: () => {
                         // arrowhead lands and fades in first, the card follows —
                         // both driven by CSS opacity transitions, not a hard pop
                         setArrowVisible(true)
-                        setTimeout(() => setRevealed(true), 120)
+                        setTimeout(() => setRevealed(true), 200)
                     },
-                })
+                }, '+=0.05')
         },
         track(px, py, visible) {
             if (!visible) {

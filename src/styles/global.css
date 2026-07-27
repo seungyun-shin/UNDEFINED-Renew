@@ -376,7 +376,7 @@ a { text-decoration: none; }
   pointer-events: none;
 }
 .place-card-arrowhead {
-  transition: opacity 0.25s ease;
+  transition: opacity 0.4s ease;
 }
 
 .place-card {
