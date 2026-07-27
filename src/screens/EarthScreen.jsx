@@ -64,7 +64,7 @@ function randomHighlight() {
 // so the card stays fully on screen regardless of where on the globe the
 // point sits.
 const CARD_W = 260
-const CARD_H = 168
+const CARD_H = 116
 const RESERVED_LEFT = 360
 const RESERVED_TOP = 140
 const EDGE_MARGIN = 24
@@ -85,25 +85,16 @@ function placeCard(px, py, viewportW, viewportH) {
     return { x, y }
 }
 
-// Closest point on the card's rectangle to the marker, so the leader line
-// points at the card's edge instead of cutting through its middle.
-function nearestEdgePoint(px, py, cardX, cardY) {
+// The leader line is drawn as an L — sideways first, then up — landing at the
+// horizontal center of the card's bottom edge (not a corner), so the arrow
+// visibly "points into" the card. The elbow is directly below that center, at
+// the point's height, so the first leg is horizontal and the second vertical.
+function elbowPath(py, card) {
+    const targetX = card.x + CARD_W / 2
+    const targetY = card.y + CARD_H
     return {
-        x: Math.max(cardX, Math.min(px, cardX + CARD_W)),
-        y: Math.max(cardY, Math.min(py, cardY + CARD_H)),
-    }
-}
-
-// The leader line is drawn as an L — sideways first, then up into the card
-// — rather than a single diagonal. The elbow sits directly above/below the
-// point at whichever x the card's edge is nearest, so the second (vertical)
-// leg lands cleanly on the card's edge instead of cutting across it.
-function elbowPath(px, py, card) {
-    const elbowX = Math.max(card.x, Math.min(px, card.x + CARD_W))
-    const end = nearestEdgePoint(px, py, card.x, card.y)
-    return {
-        elbow: { x: elbowX, y: py },
-        end: { x: elbowX, y: end.y },
+        elbow: { x: targetX, y: py },
+        end: { x: targetX, y: targetY },
     }
 }
 
@@ -167,7 +158,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             // leader line moves: left, then up. The card only fades in once
             // the line has finished drawing, the arrowhead landing first.
             const card = placeCard(px, py, window.innerWidth, window.innerHeight)
-            const { elbow, end } = elbowPath(px, py, card)
+            const { elbow, end } = elbowPath(py, card)
 
             lastMarkerRef.current = { x: px, y: py }
             setRevealed(false)
@@ -219,7 +210,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
                 const dy = py - lastMarkerRef.current.y
                 lastMarkerRef.current = { x: px, y: py }
                 const card = { x: s.card.x + dx, y: s.card.y + dy }
-                const { elbow, end } = elbowPath(px, py, card)
+                const { elbow, end } = elbowPath(py, card)
                 return { ...s, card, p0: { x: px, y: py }, p1: elbow, p2: end }
             })
         },

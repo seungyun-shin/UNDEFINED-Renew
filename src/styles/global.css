@@ -385,7 +385,7 @@ a { text-decoration: none; }
   /* fixed to match CARD_H in EarthScreen.jsx — the leader line's landing
      point is computed against that constant, so the rendered card must be
      exactly that tall or the two drift apart (this was the misalignment) */
-  height: 168px;
+  height: 116px;
   z-index: 216;
   display: flex;
   gap: 0.7rem;
@@ -408,7 +408,6 @@ a { text-decoration: none; }
 .place-card img {
   width: 84px;
   height: 100%;
-  min-height: 96px;
   object-fit: cover;
   flex-shrink: 0;
 }
