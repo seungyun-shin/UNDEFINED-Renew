@@ -154,6 +154,11 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
     const [revealed, setRevealed] = useState(false)
     const [arrowVisible, setArrowVisible] = useState(false)
     const lastMarkerRef = useRef({ x: 0, y: 0 })
+    // True while the reveal timeline is drawing the line. The per-frame track()
+    // must not run then — it would overwrite the animated p1/p2 with the fully
+    // drawn positions every frame, fighting gsap and causing a stutter.
+    const animatingRef = useRef(false)
+    const timelineRef = useRef(null)
 
     useImperativeHandle(ref, () => ({
         reveal(point, color, px, py) {
@@ -163,7 +168,9 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             const card = placeCard(px, py, window.innerWidth, window.innerHeight)
             const { elbow, end } = elbowPath(py, card)
 
+            timelineRef.current?.kill()
             lastMarkerRef.current = { x: px, y: py }
+            animatingRef.current = true
             setRevealed(false)
             setArrowVisible(false)
             setState({
@@ -178,7 +185,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             const leg1 = { x: px, y: py }
             const leg2 = { x: elbow.x, y: elbow.y }
 
-            gsap.timeline()
+            timelineRef.current = gsap.timeline()
                 .to(leg1, {
                     x: elbow.x,
                     y: elbow.y,
@@ -195,12 +202,15 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
                     onComplete: () => {
                         // arrowhead lands and fades in first, the card follows —
                         // both driven by CSS opacity transitions, not a hard pop
+                        animatingRef.current = false
                         setArrowVisible(true)
                         setTimeout(() => setRevealed(true), 200)
                     },
                 }, '+=0.05')
         },
         track(px, py, visible) {
+            // Don't touch the line while the reveal animation owns it.
+            if (animatingRef.current) return
             if (!visible) {
                 setState(null)
                 setRevealed(false)
@@ -218,6 +228,8 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             })
         },
         hide() {
+            timelineRef.current?.kill()
+            animatingRef.current = false
             setState(null)
             setRevealed(false)
             setArrowVisible(false)
