@@ -65,7 +65,7 @@ function randomHighlight() {
 // point sits.
 const CARD_W = 260
 const CARD_H = 116
-const RESERVED_LEFT = 360
+const RESERVED_LEFT = 420
 const RESERVED_TOP = 140
 const EDGE_MARGIN = 24
 // How far above / left of the point the card sits. The vertical gap is large
