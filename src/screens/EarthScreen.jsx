@@ -68,6 +68,11 @@ const CARD_H = 116
 const RESERVED_LEFT = 360
 const RESERVED_TOP = 140
 const EDGE_MARGIN = 24
+// How far above / left of the point the card sits. The vertical gap is large
+// so the upward leg of the leader line reads as long as the sideways leg
+// rather than a stubby little hop.
+const CARD_OFFSET_X = 46
+const CARD_OFFSET_Y = 110
 
 // flyCameraTo always brings the selected point to the dead center of the
 // screen, so a point's on-screen position never varies enough to make a
@@ -76,8 +81,8 @@ const EDGE_MARGIN = 24
 // stays clear of the list/header by construction; the clamp below is just a
 // safety net for extreme zoom levels.
 function placeCard(px, py, viewportW, viewportH) {
-    let x = px - 46 - CARD_W
-    let y = py - 30 - CARD_H
+    let x = px - CARD_OFFSET_X - CARD_W
+    let y = py - CARD_OFFSET_Y - CARD_H
 
     x = Math.max(RESERVED_LEFT, Math.min(x, viewportW - CARD_W - EDGE_MARGIN))
     y = Math.max(RESERVED_TOP, Math.min(y, viewportH - CARD_H - EDGE_MARGIN))
