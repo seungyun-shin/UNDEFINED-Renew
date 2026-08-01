@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import * as THREE from 'three'
-import { OrbitControls, Stars, Loader, Line } from '@react-three/drei'
+import { OrbitControls, Stars, Loader } from '@react-three/drei'
 import gsap from 'gsap'
 
 import { icoTransition } from '../lib/icoBus'
@@ -17,6 +17,9 @@ import EarthSpecularMap from '../assets/textures/2k_earth_specular_map.jpg'
 import EarthCloudMap from '../assets/textures/2k_earth_clouds.jpg'
 import Landscape from '../assets/textures/skytexture.png'
 import Landscape2 from '../assets/textures/test2.jpg'
+
+// A cylinder's local axis is +Y; the leader lines orient it along base→tip.
+const CYL_UP = new THREE.Vector3(0, 1, 0)
 
 // lat/lon → position on the sphere surface (radius 2), same math as the original
 const countryPoints = countryPointData.map((p) => {
@@ -230,20 +233,20 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
     const autoRotate = useRef(true)
     const controlsRef = useRef()
 
-    // 3D leader (targeting ring + glowing line + node) that annotates the active
-    // point. Base/end are world-space; progress/ringScale are gsap-driven; the
-    // DOM card follows the projected end via overlayRef.
+    // 3D leader (targeting ring + glowing line) that annotates the active point.
+    // Base/end are world-space; progress/ringScale are gsap-driven; the DOM card
+    // follows the projected end via overlayRef.
     const leaderRingRef = useRef()
     const leaderGlowRef = useRef()
     const leaderCoreRef = useRef()
-    const leaderNodeRef = useRef()
     const leaderVisibleRef = useRef(false)
     const leaderBase = useRef(new THREE.Vector3())
     const leaderEnd = useRef(new THREE.Vector3())
     const leaderProgress = useRef(0)
     const leaderRingScale = useRef(0)
     const leaderTip = useMemo(() => new THREE.Vector3(), [])
-    const nodeTexture = useMemo(() => glowDotTexture(), [])
+    const leaderDir = useMemo(() => new THREE.Vector3(), [])
+    const leaderMid = useMemo(() => new THREE.Vector3(), [])
 
     useFrame(({ clock }) => {
         const elapsedTime = clock.getElapsedTime()
@@ -304,11 +307,18 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
         })
     }, [activeId])
 
-    // Every frame: keep the 3D leader (ring/line/node) pinned to the point and
-    // the DOM card following the leader's projected endpoint. Both hide when the
+    // Every frame: keep the 3D leader (ring/line) pinned to the point and the
+    // DOM card following the leader's projected endpoint. Both hide when the
     // point rotates to the far side of the globe.
     useFrame(() => {
-        if (!leaderVisibleRef.current) return
+        // When inactive (or between selections) explicitly hide the meshes —
+        // just returning would leave the previous ring/line frozen on screen.
+        if (!leaderVisibleRef.current) {
+            if (leaderRingRef.current) leaderRingRef.current.visible = false
+            if (leaderGlowRef.current) leaderGlowRef.current.visible = false
+            if (leaderCoreRef.current) leaderCoreRef.current.visible = false
+            return
+        }
 
         const base = leaderBase.current
         const end = leaderEnd.current
@@ -320,20 +330,26 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
             leaderRingRef.current.visible = facing
             leaderRingRef.current.position.copy(base)
             leaderRingRef.current.lookAt(camera.position)
-            leaderRingRef.current.scale.setScalar(Math.max(leaderRingScale.current * 0.16, 0.0001))
+            leaderRingRef.current.scale.setScalar(Math.max(leaderRingScale.current * 0.085, 0.0001))
         }
-        const positions = [base.x, base.y, base.z, tip.x, tip.y, tip.z]
+        // orient the two cylinders along base→tip; hide until the draw has length
+        const dir = leaderDir.copy(tip).sub(base)
+        const len = dir.length()
+        const hasLen = facing && len > 0.001
+        if (len > 0.001) dir.multiplyScalar(1 / len)
+        const mid = leaderMid.copy(base).add(tip).multiplyScalar(0.5)
+
         if (leaderGlowRef.current) {
-            leaderGlowRef.current.visible = facing
-            leaderGlowRef.current.geometry.setPositions(positions)
+            leaderGlowRef.current.visible = hasLen
+            leaderGlowRef.current.position.copy(mid)
+            leaderGlowRef.current.quaternion.setFromUnitVectors(CYL_UP, dir)
+            leaderGlowRef.current.scale.set(0.028, len, 0.028)
         }
         if (leaderCoreRef.current) {
-            leaderCoreRef.current.visible = facing
-            leaderCoreRef.current.geometry.setPositions(positions)
-        }
-        if (leaderNodeRef.current) {
-            leaderNodeRef.current.visible = facing
-            leaderNodeRef.current.position.copy(tip)
+            leaderCoreRef.current.visible = hasLen
+            leaderCoreRef.current.position.copy(mid)
+            leaderCoreRef.current.quaternion.setFromUnitVectors(CYL_UP, dir)
+            leaderCoreRef.current.scale.set(0.009, len, 0.009)
         }
 
         const scr = projectToScreen(end, camera, size)
@@ -379,14 +395,19 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 Positions are driven imperatively in useFrame above. */}
             <group>
                 <mesh ref={leaderRingRef} visible={false} renderOrder={10}>
-                    <ringGeometry args={[0.9, 1, 48]} />
-                    <meshBasicMaterial color={activeColor} transparent opacity={0.9} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} side={THREE.DoubleSide} />
+                    <ringGeometry args={[0.86, 1, 48]} />
+                    <meshBasicMaterial color={activeColor} transparent opacity={0.95} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} side={THREE.DoubleSide} />
                 </mesh>
-                <Line ref={leaderGlowRef} points={[[0, 0, 0], [0, 0, 0]]} color={activeColor} lineWidth={6} transparent opacity={0.22} depthWrite={false} depthTest={false} toneMapped={false} renderOrder={10} visible={false} />
-                <Line ref={leaderCoreRef} points={[[0, 0, 0], [0, 0, 0]]} color={activeColor} lineWidth={2} transparent opacity={1} depthWrite={false} depthTest={false} toneMapped={false} renderOrder={11} visible={false} />
-                <sprite ref={leaderNodeRef} scale={0.12} visible={false} renderOrder={12}>
-                    <spriteMaterial map={nodeTexture} color={activeColor} transparent depthWrite={false} depthTest={false} toneMapped={false} />
-                </sprite>
+                {/* leader line as two cylinders (glow halo + bright core) — reliably
+                    visible and thickness-controllable, unlike thin GL lines */}
+                <mesh ref={leaderGlowRef} visible={false} renderOrder={10}>
+                    <cylinderGeometry args={[1, 1, 1, 8]} />
+                    <meshBasicMaterial color={activeColor} transparent opacity={0.28} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
+                </mesh>
+                <mesh ref={leaderCoreRef} visible={false} renderOrder={11}>
+                    <cylinderGeometry args={[1, 1, 1, 8]} />
+                    <meshBasicMaterial color={activeColor} transparent opacity={0.95} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
+                </mesh>
             </group>
 
             <mesh ref={cloudeRef} position={[0, 0, 0]}>
