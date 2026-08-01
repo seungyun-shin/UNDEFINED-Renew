@@ -158,11 +158,11 @@ function projectToScreen(worldPos, camera, size) {
 // React state, so tracking the point during camera drag doesn't re-render
 // the destination list 60 times a second.
 const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
-    // p0: point (line start) · p1: elbow (end of the leftward leg) ·
-    // p2: line tip (end of the upward leg, where the arrowhead sits)
-    const [state, setState] = useState(null) // { point, color, card, p0, p1, p2 }
+    // "Observation record" style: a targeting ring blooms at the point, a thin
+    // solid line traces out to a small node, and a cream caption card fades in.
+    // p0: point (line start / ring center) · p1: elbow · p2: line tip / node.
+    const [state, setState] = useState(null) // { point, color, card, p0, p1, p2, ringR, ringO }
     const [revealed, setRevealed] = useState(false)
-    const [arrowVisible, setArrowVisible] = useState(false)
     const lastMarkerRef = useRef({ x: 0, y: 0 })
     // True while the reveal timeline is drawing the line. The per-frame track()
     // must not run then — it would overwrite the animated p1/p2 with the fully
@@ -172,9 +172,6 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
 
     useImperativeHandle(ref, () => ({
         reveal(point, color, px, py) {
-            // The card sits still at its final spot from the start — only the
-            // leader line moves: left, then up. The card only fades in once
-            // the line has finished drawing, the arrowhead landing first.
             const card = placeCard(px, py, window.innerWidth, window.innerHeight)
             const { elbow, end } = elbowPath(py, card)
 
@@ -182,41 +179,38 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             lastMarkerRef.current = { x: px, y: py }
             animatingRef.current = true
             setRevealed(false)
-            setArrowVisible(false)
             setState({
-                point,
-                color,
-                card,
+                point, color, card,
                 p0: { x: px, y: py },
                 p1: { x: px, y: py },
                 p2: { x: px, y: py },
+                ringR: 3, ringO: 0,
             })
 
             const leg1 = { x: px, y: py }
             const leg2 = { x: elbow.x, y: elbow.y }
+            const ring = { r: 3, o: 0 }
 
             timelineRef.current = gsap.timeline()
+                // targeting ring blooms at the point, in parallel with the line start
+                .to(ring, {
+                    r: 13, o: 0.85, duration: 0.55, ease: 'power2.out',
+                    onUpdate: () => setState((s) => (s ? { ...s, ringR: ring.r, ringO: ring.o } : s)),
+                }, 0)
+                // leg 1: sideways
                 .to(leg1, {
-                    x: elbow.x,
-                    y: elbow.y,
-                    duration: 0.75,
-                    ease: 'power2.inOut',
+                    x: elbow.x, y: elbow.y, duration: 0.75, ease: 'power2.inOut',
                     onUpdate: () => setState((s) => (s ? { ...s, p1: { x: leg1.x, y: leg1.y }, p2: { x: leg1.x, y: leg1.y } } : s)),
-                })
+                }, 0)
+                // leg 2: up into the card
                 .to(leg2, {
-                    x: end.x,
-                    y: end.y,
-                    duration: 0.6,
-                    ease: 'power2.out',
+                    x: end.x, y: end.y, duration: 0.6, ease: 'power2.out',
                     onUpdate: () => setState((s) => (s ? { ...s, p2: { x: leg2.x, y: leg2.y } } : s)),
                     onComplete: () => {
-                        // arrowhead lands and fades in first, the card follows —
-                        // both driven by CSS opacity transitions, not a hard pop
                         animatingRef.current = false
-                        setArrowVisible(true)
-                        setTimeout(() => setRevealed(true), 200)
+                        setTimeout(() => setRevealed(true), 120)
                     },
-                }, '+=0.05')
+                }, '>+0.05')
         },
         track(px, py, visible) {
             // Don't touch the line while the reveal animation owns it.
@@ -224,7 +218,6 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             if (!visible) {
                 setState(null)
                 setRevealed(false)
-                setArrowVisible(false)
                 return
             }
             setState((s) => {
@@ -242,36 +235,37 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
             animatingRef.current = false
             setState(null)
             setRevealed(false)
-            setArrowVisible(false)
         },
     }))
 
     if (!state) return null
-    const { point, color, card, p0, p1, p2 } = state
+    const { point, color, card, p0, p1, p2, ringR, ringO } = state
+    const linePoints = `${p0.x},${p0.y} ${p1.x},${p1.y} ${p2.x},${p2.y}`
 
     return (
         <>
             <svg className="place-card-line-layer">
-                <line x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={color} strokeWidth="1.5" strokeDasharray="5 5" />
-                <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth="1.5" strokeDasharray="5 5" />
-                <polygon
-                    className="place-card-arrowhead"
-                    points="0,-5 5,4 -5,4"
-                    fill={color}
-                    transform={`translate(${p2.x}, ${p2.y})`}
-                    opacity={arrowVisible ? 1 : 0}
-                />
+                {/* soft glow halo under the line — a signal being traced */}
+                <polyline points={linePoints} fill="none" stroke={color} strokeWidth="4"
+                    opacity="0.12" strokeLinejoin="round" strokeLinecap="round" />
+                {/* thin solid leader line */}
+                <polyline points={linePoints} fill="none" stroke={color} strokeWidth="1"
+                    opacity="0.85" strokeLinejoin="round" strokeLinecap="round" />
+                {/* leading tip during draw / node at rest, with a subtle bloom */}
+                <circle cx={p2.x} cy={p2.y} r="6" fill={color} opacity="0.2" />
+                <circle cx={p2.x} cy={p2.y} r="2.5" fill={color} />
+                {/* targeting ring + core dot at the observed point */}
+                <circle cx={p0.x} cy={p0.y} r={ringR} fill="none" stroke={color} strokeWidth="1" opacity={ringO} />
+                <circle cx={p0.x} cy={p0.y} r="1.6" fill={color} opacity={ringO} />
             </svg>
             <div
                 className={revealed ? 'place-card revealed' : 'place-card'}
-                style={{ left: card.x, top: card.y, borderColor: color }}
+                style={{ left: card.x, top: card.y, '--accent': color }}
             >
                 <img src={thumbnailOf(point)} alt="" />
                 <div className="place-card-body">
                     <p className="place-card-name">{point.name}</p>
-                    <button className="place-card-view" style={{ color }} onClick={() => onView(point)}>
-                        사진 보기 →
-                    </button>
+                    <button className="place-card-view" onClick={() => onView(point)}>사진 보기 →</button>
                 </div>
             </div>
         </>

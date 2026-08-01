@@ -366,7 +366,7 @@ a { text-decoration: none; }
   .destination-list { display: none; }
 }
 
-/* ── leader line + photo card (earth screen) ────── */
+/* ── observation leader line + caption card (earth screen) ── */
 .place-card-line-layer {
   position: fixed;
   inset: 0;
@@ -375,29 +375,27 @@ a { text-decoration: none; }
   z-index: 215;
   pointer-events: none;
 }
-.place-card-arrowhead {
-  transition: opacity 0.4s ease;
-}
 
+/* Caption card styled like an aged-paper observation label: cream ground,
+   hairline accent rule, serif name — reads as a field note rather than a
+   map-app tooltip. */
 .place-card {
   position: fixed;
   width: 260px;
   /* fixed to match CARD_H in EarthScreen.jsx — the leader line's landing
      point is computed against that constant, so the rendered card must be
-     exactly that tall or the two drift apart (this was the misalignment) */
+     exactly that tall or the two drift apart */
   height: 116px;
   z-index: 216;
   display: flex;
-  gap: 0.7rem;
-  padding: 0.6rem;
-  background: rgba(8, 9, 12, 0.82);
-  backdrop-filter: blur(6px);
-  border: 1px solid;
-  border-color: rgba(223, 211, 195, 0.5);
-  /* position (left/top) is driven from JS as the card travels to its spot —
-     CSS only handles the fade-in so the two don't fight over transform */
+  gap: 0.85rem;
+  padding: 0.5rem;
+  background: #e9e0cf;
+  color: #221f1a;
+  border: 1px solid var(--accent, #b9ad97);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.3s ease;
   pointer-events: none;
 }
 .place-card.revealed {
@@ -406,22 +404,26 @@ a { text-decoration: none; }
 }
 
 .place-card img {
-  width: 84px;
+  width: 92px;
   height: 100%;
   object-fit: cover;
   flex-shrink: 0;
+  /* thin inset frame so the photo reads as a print mounted on the card */
+  border: 1px solid rgba(34, 31, 26, 0.25);
 }
 
 .place-card-body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  padding-right: 0.4rem;
 }
 .place-card-name {
   font-family: 'Romelio';
-  color: #f3e9d8;
-  font-size: 1.15rem;
+  color: #221f1a;
+  font-size: 1.35rem;
+  line-height: 1;
   margin: 0;
 }
 .place-card-view {
@@ -429,13 +431,14 @@ a { text-decoration: none; }
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 0.8rem;
-  letter-spacing: 0.03em;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   padding: 0;
-  opacity: 0.9;
+  color: var(--accent, #6b5a3a);
   transition: opacity 0.2s ease;
 }
-.place-card-view:hover { opacity: 1; }
+.place-card-view:hover { opacity: 0.65; }
 
 @media screen and (max-width: 900px) {
   .place-card-line-layer,
