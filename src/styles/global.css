@@ -366,7 +366,33 @@ a { text-decoration: none; }
   .destination-list { display: none; }
 }
 
-/* ── caption card (earth screen) — the leader line + ring are 3D now ── */
+/* ── leader line (earth screen) — thin glowing L from the 3D ring to card ── */
+.leader-svg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 215;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.leader-glow {
+  fill: none;
+  stroke-width: 3.5;
+  opacity: 0.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: blur(2px);
+}
+.leader-core {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── caption card (earth screen) ── */
 
 /* Dark-glass caption: translucent deep-navy + blur + an accent glow rim, so it
    reads as the same luminous material as the globe/atmosphere rather than a

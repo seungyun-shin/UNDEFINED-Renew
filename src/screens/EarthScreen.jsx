@@ -18,9 +18,6 @@ import EarthCloudMap from '../assets/textures/2k_earth_clouds.jpg'
 import Landscape from '../assets/textures/skytexture.png'
 import Landscape2 from '../assets/textures/test2.jpg'
 
-// A cylinder's local axis is +Y; the leader lines orient it along base→tip.
-const CYL_UP = new THREE.Vector3(0, 1, 0)
-
 // lat/lon → position on the sphere surface (radius 2), same math as the original
 const countryPoints = countryPointData.map((p) => {
     const lat = parseFloat(p.lat)
@@ -75,12 +72,12 @@ const EDGE_MARGIN = 24
 // projects into clear space rather than behind the list (which would eat the click).
 const PROJECT_PLANET_POS = [-4.5, 4.6, -5]
 
-// The 3D leader lifts off the point toward this world-space offset, expressed
-// in the camera's up/left basis at reveal time so it reads as "up and to the
-// left" on screen (into the clear area where the card sits). Rigid in world
-// space afterwards, so the whole pin tilts naturally as the camera orbits.
-const LEADER_LEFT = 0.95
-const LEADER_UP = 0.8
+// The connecting line is drawn in screen space as an L (left, then up) from
+// the 3D ring's edge to the card. These are the card's screen offsets from the
+// ring center, and how far in from the ring center the line starts (~ring edge).
+const LEADER_DX = 168
+const LEADER_DY = 128
+const RING_EDGE = 15
 
 // Orbits the camera (not the globe) to face a point, preserving the current
 // zoom distance. Interpolating the position directly (lerp) would cut a
@@ -123,55 +120,83 @@ function projectToScreen(worldPos, camera, size) {
     }
 }
 
-// DOM overlay (outside the Canvas) showing a dashed leader line from the
-// active point's live screen position to a photo card. EarthModel drives it
-// imperatively every frame — see reveal()/track()/hide() — rather than via
-// React state, so tracking the point during camera drag doesn't re-render
-// the destination list 60 times a second.
-// DOM caption card only — the leader line + targeting ring now live in the 3D
-// scene (see LeaderPin) so they share the globe's glowing material. The card
-// stays DOM so the photo and text render crisply; it just follows the line's
-// 3D endpoint, projected to screen each frame.
+// DOM overlay: the connecting line + caption card. The 3D ring (EarthModel)
+// hands us its projected screen position (rx, ry) every frame; from that we
+// draw an L-shaped leader — left from the ring's edge, then up into the card —
+// as a thin glowing SVG polyline, and hang the card above it. The line "draws
+// in" via a single eased stroke-dashoffset sweep (left then up in one motion).
 const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
-    // (nx, ny) = the leader's endpoint node in screen space; the card hangs
-    // above it with its bottom-center meeting the node.
-    const [state, setState] = useState(null) // { point, color, nx, ny, visible }
+    const [state, setState] = useState(null) // { point, color, rx, ry, visible }
+    const [draw, setDraw] = useState(0)       // 0..1 line-draw progress
     const [revealed, setRevealed] = useState(false)
+    const drawTween = useRef(null)
 
     useImperativeHandle(ref, () => ({
-        show(point, color, nx, ny) {
-            setState({ point, color, nx, ny, visible: true })
-            setRevealed(true)
+        reveal(point, color, rx, ry) {
+            drawTween.current?.kill()
+            setRevealed(false)
+            setDraw(0)
+            setState({ point, color, rx, ry, visible: true })
+            const p = { d: 0 }
+            drawTween.current = gsap.to(p, {
+                d: 1,
+                duration: 0.8,
+                ease: 'power2.inOut',
+                onUpdate: () => setDraw(p.d),
+                onComplete: () => setRevealed(true),
+            })
         },
-        move(nx, ny, visible) {
-            setState((s) => (s ? { ...s, nx, ny, visible } : s))
+        track(rx, ry, visible) {
+            setState((s) => (s ? { ...s, rx, ry, visible } : s))
         },
         hide() {
+            drawTween.current?.kill()
             setState(null)
+            setDraw(0)
             setRevealed(false)
         },
     }))
 
     if (!state) return null
-    const { point, color, nx, ny, visible } = state
+    const { point, color, rx, ry, visible } = state
 
-    // clamp so the card never rides under the header or the destination list
-    let left = nx - CARD_W / 2
-    let top = ny - CARD_H - 14
+    // card sits up-and-left of the ring, clamped clear of the header + list
+    let cardCenterX = rx - LEADER_DX
+    let cardBottomY = ry - LEADER_DY
+    let left = cardCenterX - CARD_W / 2
+    let top = cardBottomY - CARD_H
     left = Math.max(RESERVED_LEFT, Math.min(left, window.innerWidth - CARD_W - EDGE_MARGIN))
     top = Math.max(RESERVED_TOP, Math.min(top, window.innerHeight - CARD_H - EDGE_MARGIN))
+    cardCenterX = left + CARD_W / 2
+    cardBottomY = top + CARD_H
+
+    // L path: ring edge → left to elbow → up to card's bottom-center
+    const start = { x: rx - RING_EDGE, y: ry }
+    const elbow = { x: cardCenterX, y: ry }
+    const end = { x: cardCenterX, y: cardBottomY }
+    const total = Math.hypot(elbow.x - start.x, elbow.y - start.y) + Math.hypot(end.x - elbow.x, end.y - elbow.y)
+    const dashoffset = total * (1 - draw)
+    const points = `${start.x},${start.y} ${elbow.x},${elbow.y} ${end.x},${end.y}`
 
     return (
-        <div
-            className={revealed && visible ? 'place-card revealed' : 'place-card'}
-            style={{ left, top, '--accent': color }}
-        >
-            <img src={thumbnailOf(point)} alt="" />
-            <div className="place-card-body">
-                <p className="place-card-name">{point.name}</p>
-                <button className="place-card-view" onClick={() => onView(point)}>사진 보기 →</button>
+        <>
+            <svg className="leader-svg" style={{ opacity: visible ? 1 : 0 }}>
+                <polyline className="leader-glow" points={points}
+                    style={{ stroke: color, strokeDasharray: total, strokeDashoffset: dashoffset }} />
+                <polyline className="leader-core" points={points}
+                    style={{ stroke: color, strokeDasharray: total, strokeDashoffset: dashoffset }} />
+            </svg>
+            <div
+                className={revealed && visible ? 'place-card revealed' : 'place-card'}
+                style={{ left, top, '--accent': color }}
+            >
+                <img src={thumbnailOf(point)} alt="" />
+                <div className="place-card-body">
+                    <p className="place-card-name">{point.name}</p>
+                    <button className="place-card-view" onClick={() => onView(point)}>사진 보기 →</button>
+                </div>
             </div>
-        </div>
+        </>
     )
 })
 
@@ -233,20 +258,12 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
     const autoRotate = useRef(true)
     const controlsRef = useRef()
 
-    // 3D leader (targeting ring + glowing line) that annotates the active point.
-    // Base/end are world-space; progress/ringScale are gsap-driven; the DOM card
-    // follows the projected end via overlayRef.
+    // 3D targeting ring at the active point. base is world-space; ringScale is
+    // gsap-driven; the DOM overlay draws the line + card off the ring's screen pos.
     const leaderRingRef = useRef()
-    const leaderGlowRef = useRef()
-    const leaderCoreRef = useRef()
     const leaderVisibleRef = useRef(false)
     const leaderBase = useRef(new THREE.Vector3())
-    const leaderEnd = useRef(new THREE.Vector3())
-    const leaderProgress = useRef(0)
     const leaderRingScale = useRef(0)
-    const leaderTip = useMemo(() => new THREE.Vector3(), [])
-    const leaderDir = useMemo(() => new THREE.Vector3(), [])
-    const leaderMid = useMemo(() => new THREE.Vector3(), [])
 
     useFrame(({ clock }) => {
         const elapsedTime = clock.getElapsedTime()
@@ -283,77 +300,42 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
 
         const worldPos = markerPosition(point).applyMatrix4(earthRef.current.matrixWorld)
         flyCameraTo(camera, controlsRef, worldPos, () => {
-            // Anchor the leader in world space at the point, offset up-and-left
-            // in the camera's current basis so it projects into the clear area.
-            const base = markerPosition(point).applyMatrix4(earthRef.current.matrixWorld)
-            const camRight = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize()
-            const camUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize()
-            const offset = camRight.multiplyScalar(-LEADER_LEFT).add(camUp.multiplyScalar(LEADER_UP))
-
-            leaderBase.current.copy(base)
-            leaderEnd.current.copy(base.clone().add(offset))
-            leaderProgress.current = 0
+            leaderBase.current.copy(markerPosition(point).applyMatrix4(earthRef.current.matrixWorld))
             leaderRingScale.current = 0
             leaderVisibleRef.current = true
 
-            const anim = { prog: 0, ring: 0 }
+            // ring blooms first (3D), then the DOM overlay draws the L-line + card
+            const anim = { ring: 0 }
             gsap.timeline()
-                .to(anim, { ring: 1, duration: 0.5, ease: 'power2.out', onUpdate: () => { leaderRingScale.current = anim.ring } }, 0)
-                .to(anim, { prog: 1, duration: 0.9, ease: 'power2.inOut', onUpdate: () => { leaderProgress.current = anim.prog } }, 0.15)
+                .to(anim, { ring: 1, duration: 0.5, ease: 'power2.out', onUpdate: () => { leaderRingScale.current = anim.ring } })
                 .add(() => {
-                    const scr = projectToScreen(leaderEnd.current, camera, size)
-                    overlayRef.current?.show(point, activeColor, scr.x, scr.y)
-                })
+                    const scr = projectToScreen(leaderBase.current, camera, size)
+                    overlayRef.current?.reveal(point, activeColor, scr.x, scr.y)
+                }, '-=0.1')
         })
     }, [activeId])
 
-    // Every frame: keep the 3D leader (ring/line) pinned to the point and the
-    // DOM card following the leader's projected endpoint. Both hide when the
-    // point rotates to the far side of the globe.
+    // Every frame: keep the 3D ring pinned to the point and feed its projected
+    // screen position to the DOM overlay (which draws the connecting line + card).
+    // Everything hides when the point rotates to the far side of the globe.
     useFrame(() => {
-        // When inactive (or between selections) explicitly hide the meshes —
-        // just returning would leave the previous ring/line frozen on screen.
         if (!leaderVisibleRef.current) {
             if (leaderRingRef.current) leaderRingRef.current.visible = false
-            if (leaderGlowRef.current) leaderGlowRef.current.visible = false
-            if (leaderCoreRef.current) leaderCoreRef.current.visible = false
             return
         }
 
         const base = leaderBase.current
-        const end = leaderEnd.current
-        const tip = leaderTip.copy(base).lerp(end, leaderProgress.current)
-
         const facing = base.clone().normalize().dot(camera.position.clone().normalize()) > 0.12
 
         if (leaderRingRef.current) {
             leaderRingRef.current.visible = facing
             leaderRingRef.current.position.copy(base)
             leaderRingRef.current.lookAt(camera.position)
-            leaderRingRef.current.scale.setScalar(Math.max(leaderRingScale.current * 0.085, 0.0001))
-        }
-        // orient the two cylinders along base→tip; hide until the draw has length
-        const dir = leaderDir.copy(tip).sub(base)
-        const len = dir.length()
-        const hasLen = facing && len > 0.001
-        if (len > 0.001) dir.multiplyScalar(1 / len)
-        const mid = leaderMid.copy(base).add(tip).multiplyScalar(0.5)
-
-        if (leaderGlowRef.current) {
-            leaderGlowRef.current.visible = hasLen
-            leaderGlowRef.current.position.copy(mid)
-            leaderGlowRef.current.quaternion.setFromUnitVectors(CYL_UP, dir)
-            leaderGlowRef.current.scale.set(0.028, len, 0.028)
-        }
-        if (leaderCoreRef.current) {
-            leaderCoreRef.current.visible = hasLen
-            leaderCoreRef.current.position.copy(mid)
-            leaderCoreRef.current.quaternion.setFromUnitVectors(CYL_UP, dir)
-            leaderCoreRef.current.scale.set(0.009, len, 0.009)
+            leaderRingRef.current.scale.setScalar(Math.max(leaderRingScale.current * 0.075, 0.0001))
         }
 
-        const scr = projectToScreen(end, camera, size)
-        overlayRef.current?.move(scr.x, scr.y, facing)
+        const scr = projectToScreen(base, camera, size)
+        overlayRef.current?.track(scr.x, scr.y, facing)
     })
 
     const showName = (name) => {
@@ -390,25 +372,14 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 minDistance={3}
             />
 
-            {/* 3D leader — shares the glowing/additive look of the globe markers
-                so the annotation feels part of the same world, not a UI overlay.
-                Positions are driven imperatively in useFrame above. */}
-            <group>
-                <mesh ref={leaderRingRef} visible={false} renderOrder={10}>
-                    <ringGeometry args={[0.86, 1, 48]} />
-                    <meshBasicMaterial color={activeColor} transparent opacity={0.95} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} side={THREE.DoubleSide} />
-                </mesh>
-                {/* leader line as two cylinders (glow halo + bright core) — reliably
-                    visible and thickness-controllable, unlike thin GL lines */}
-                <mesh ref={leaderGlowRef} visible={false} renderOrder={10}>
-                    <cylinderGeometry args={[1, 1, 1, 8]} />
-                    <meshBasicMaterial color={activeColor} transparent opacity={0.28} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
-                </mesh>
-                <mesh ref={leaderCoreRef} visible={false} renderOrder={11}>
-                    <cylinderGeometry args={[1, 1, 1, 8]} />
-                    <meshBasicMaterial color={activeColor} transparent opacity={0.95} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
-                </mesh>
-            </group>
+            {/* 3D targeting ring at the active point — glows with the same
+                additive material as the globe markers. The connecting line +
+                card are the DOM overlay (see PlaceCard), driven off this ring's
+                projected screen position. */}
+            <mesh ref={leaderRingRef} visible={false} renderOrder={10}>
+                <ringGeometry args={[0.86, 1, 48]} />
+                <meshBasicMaterial color={activeColor} transparent opacity={0.95} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} side={THREE.DoubleSide} />
+            </mesh>
 
             <mesh ref={cloudeRef} position={[0, 0, 0]}>
                 <sphereGeometry args={[2.05, 32, 32]} />
