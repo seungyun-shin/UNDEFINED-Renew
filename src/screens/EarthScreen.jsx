@@ -8,6 +8,7 @@ import gsap from 'gsap'
 
 import { icoTransition } from '../lib/icoBus'
 import countryPointData from '../assets/data/countryPoint.json'
+import planetGalleries from '../assets/data/planetGalleries.json'
 import { glowDotTexture } from '../lib/glowDot'
 
 import EarthDayMap from '../assets/textures/2k_earth_daymap.jpg'
@@ -73,6 +74,10 @@ const EDGE_MARGIN = 24
 // rather than a stubby little hop.
 const CARD_OFFSET_X = 46
 const CARD_OFFSET_Y = 110
+
+// Project planet sits upper-left; raised well above the destination list so it
+// projects into clear space rather than behind the list (which would eat the click).
+const PROJECT_PLANET_POS = [-4.5, 4.6, -5]
 
 // flyCameraTo always brings the selected point to the dead center of the
 // screen, so a point's on-screen position never varies enough to make a
@@ -447,13 +452,19 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 ))}
             </mesh>
 
-            {/* Project planet */}
-            <mesh position={[-9, 2, -6]} onClick={() => navigate('/SSYProject')} ref={projectPlanetCover}>
+            {/* Project planet — opens its own photo gallery, same as a travel point.
+                Raised from y=2 to clear the (now wider) destination list, which
+                otherwise sits on top of it in the DOM and swallows the click. */}
+            <mesh
+                position={PROJECT_PLANET_POS}
+                onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: planetGalleries.project } })}
+                ref={projectPlanetCover}
+            >
                 <icosahedronGeometry args={[1.35, 1]} />
                 <meshPhongMaterial map={landscape} opacity={0.7} depthWrite={true} transparent={true} side={THREE.DoubleSide} />
             </mesh>
             <mesh
-                position={[-9, 2, -6]}
+                position={PROJECT_PLANET_POS}
                 ref={projectPlanet}
                 userData={{ name: 'Project' }}
                 onPointerOver={infoShowingUp}
@@ -463,8 +474,12 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 <meshPhongMaterial color={0xffffff} opacity={1} side={THREE.DoubleSide} />
             </mesh>
 
-            {/* Thanks planet */}
-            <mesh position={[9, -3, -3]} onClick={() => navigate('/warningscreen')} ref={thanksPlanetCover}>
+            {/* Appreciate planet — opens its own photo gallery, same as a travel point */}
+            <mesh
+                position={[9, -3, -3]}
+                onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: planetGalleries.appreciate } })}
+                ref={thanksPlanetCover}
+            >
                 <tetrahedronGeometry args={[1.5, 3]} />
                 <meshPhongMaterial map={landscape2} opacity={0.7} depthWrite={true} transparent={true} side={THREE.DoubleSide} />
             </mesh>
