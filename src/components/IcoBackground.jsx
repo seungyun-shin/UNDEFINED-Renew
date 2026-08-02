@@ -130,12 +130,13 @@ function IcoBackground() {
         }
 
         // FOV(70°)는 세로 기준 고정값이라, 세로로 긴 화면(좁은 aspect)일수록
-        // 가로 시야가 좁아져 같은 크기의 구가 화면을 더 많이 채운다.
-        // aspect가 1 미만으로 좁아질수록 구를 함께 축소해 상쇄한다.
+        // 가로 시야가 좁아져 같은 크기의 구가 가로 폭을 훨씬 많이 채운다.
+        // scale을 aspect에 정비례시키면 "구 지름 / 가로 시야폭" 비율이
+        // 화면비와 무관하게 항상 일정해진다 (가로 채움 비율 고정).
         const getIcoScale = (width, height) => {
             const aspect = width / height
             if (aspect >= 1) return 1
-            return THREE.MathUtils.clamp(0.6 + (aspect - 0.45) / (1 - 0.45) * 0.4, 0.6, 1)
+            return THREE.MathUtils.clamp(aspect, 0.3, 1)
         }
 
         const resize = () => {
