@@ -41,6 +41,7 @@ function IcoBackground() {
         let speed = 0
         let running = true
         let paused = false
+        let icoScale = 1
         let composer, customPass, ico, icoLines, material, materialLines
 
         const texture = new THREE.TextureLoader().load(landscape, (t) => {
@@ -145,9 +146,9 @@ function IcoBackground() {
             camera.aspect = width / height
             camera.updateProjectionMatrix()
 
-            const scale = getIcoScale(width, height)
-            ico.scale.setScalar(scale)
-            icoLines.scale.setScalar(scale)
+            icoScale = getIcoScale(width, height)
+            ico.scale.setScalar(icoScale)
+            icoLines.scale.setScalar(icoScale)
         }
 
         const render = () => {
@@ -167,7 +168,9 @@ function IcoBackground() {
 
             scene.rotation.x = -time * 6
             scene.rotation.y = time * 6
-            scene.position.z = 0.2 * Math.sin(time * 3)
+            // 카메라와의 거리가 진동하며 겉보기 크기도 같이 요동친다 — 모바일에서
+            // 구를 축소한 비율만큼 진폭도 같이 줄여 "커졌다 작아졌다" 하는 느낌을 죽인다.
+            scene.position.z = 0.2 * icoScale * Math.sin(time * 3)
 
             customPass.uniforms.time.value = time
             customPass.uniforms.howmuchrgbshifticanhaz.value = mouse / 5
