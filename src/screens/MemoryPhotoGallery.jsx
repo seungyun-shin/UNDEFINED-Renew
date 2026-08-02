@@ -1,10 +1,50 @@
-import { useLocation, Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 
-// Minimal gallery stub: renders the photos attached to the clicked point
-// (original site's MemoryPhotoGallery equivalent)
+function toThumb(src) {
+    return src.replace('/1170/', '/300/')
+}
+
 function MemoryPhotoGallery() {
     const location = useLocation()
+    const navigate = useNavigate()
     const countryPoint = location.state?.countryPoint
+    const accent = location.state?.accentColor || '#C9A063'
+
+    const photos = countryPoint?.imgList || []
+    const [lightboxIndex, setLightboxIndex] = useState(null)
+    const touchStartX = useRef(null)
+
+    const closeLightbox = () => setLightboxIndex(null)
+    const prevPhoto = () => setLightboxIndex((i) => (i - 1 + photos.length) % photos.length)
+    const nextPhoto = () => setLightboxIndex((i) => (i + 1) % photos.length)
+
+    // 라이트박스가 열려있는 동안 배경 스크롤을 막고, 키보드로도 넘길 수 있게.
+    useEffect(() => {
+        if (lightboxIndex === null) return
+
+        document.body.style.overflow = 'hidden'
+        const onKey = (e) => {
+            if (e.key === 'Escape') closeLightbox()
+            if (e.key === 'ArrowLeft') prevPhoto()
+            if (e.key === 'ArrowRight') nextPhoto()
+        }
+        window.addEventListener('keydown', onKey)
+
+        return () => {
+            document.body.style.overflow = ''
+            window.removeEventListener('keydown', onKey)
+        }
+    }, [lightboxIndex, photos.length])
+
+    const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
+    const onTouchEnd = (e) => {
+        if (touchStartX.current === null) return
+        const dx = e.changedTouches[0].clientX - touchStartX.current
+        if (Math.abs(dx) > 50) (dx > 0 ? prevPhoto() : nextPhoto())
+        touchStartX.current = null
+    }
 
     if (!countryPoint) {
         return (
@@ -16,14 +56,63 @@ function MemoryPhotoGallery() {
     }
 
     return (
-        <div className="memory-gallery">
-            <h1>{countryPoint.name}</h1>
-            <div className="grid">
-                {countryPoint.mainImg && <img src={countryPoint.mainImg} alt={countryPoint.name} />}
-                {(countryPoint.imgList || []).map((img) => (
-                    <img key={img.id} src={img.imgSrc} alt={`${countryPoint.name}-${img.id}`} loading="lazy" />
-                ))}
-            </div>
+        <div className="memory-gallery" style={{ '--accent': accent }}>
+            <button className="gallery-back" onClick={() => navigate('/MemoryScreen')}>← EARTH</button>
+
+            {countryPoint.mainImg && (
+                <div className="gallery-hero">
+                    <img src={countryPoint.mainImg} alt={countryPoint.name} />
+                    <div className="gallery-hero-overlay">
+                        <h1>{countryPoint.name}</h1>
+                        {photos.length > 0 && <span className="gallery-count">{photos.length} PHOTOS</span>}
+                    </div>
+                </div>
+            )}
+
+            {photos.length > 0 && (
+                <div className="gallery-masonry">
+                    {photos.map((img, i) => (
+                        <button key={img.id} className="gallery-thumb" onClick={() => setLightboxIndex(i)}>
+                            <img src={toThumb(img.imgSrc)} alt={`${countryPoint.name} ${i + 1}`} loading="lazy" />
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {lightboxIndex !== null && createPortal(
+                // 전역 Header가 .overall-Layout(z-index:199)보다 위(200)에 고정돼
+                // 있어서, 이 안에 렌더링하면 z-index를 아무리 올려도 라이트박스가
+                // 헤더 뒤로 깔린다. body로 포탈해서 그 스태킹 컨텍스트를 벗어난다.
+                <div className="gallery-lightbox" style={{ '--accent': accent }} onClick={closeLightbox}>
+                    <button className="lightbox-close" onClick={closeLightbox}>×</button>
+
+                    {photos.length > 1 && (
+                        <button
+                            className="lightbox-nav prev"
+                            onClick={(e) => { e.stopPropagation(); prevPhoto() }}
+                        >‹</button>
+                    )}
+
+                    <img
+                        className="lightbox-img"
+                        src={photos[lightboxIndex].imgSrc}
+                        alt={`${countryPoint.name} ${lightboxIndex + 1}`}
+                        onClick={(e) => e.stopPropagation()}
+                        onTouchStart={onTouchStart}
+                        onTouchEnd={onTouchEnd}
+                    />
+
+                    {photos.length > 1 && (
+                        <button
+                            className="lightbox-nav next"
+                            onClick={(e) => { e.stopPropagation(); nextPhoto() }}
+                        >›</button>
+                    )}
+
+                    <span className="lightbox-counter">{lightboxIndex + 1} / {photos.length}</span>
+                </div>,
+                document.body
+            )}
         </div>
     )
 }

@@ -569,7 +569,7 @@ function EarthScreen() {
     // "사진 보기" then navigates. On desktop, a direct-click shortcut stays.
     const handlePointPick = (point) => {
         if (isMobile) handleSelect(point)
-        else navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })
+        else navigate('/MemoryPhotoGallery', { state: { countryPoint: point, accentColor: activeColor } })
     }
 
     return (
@@ -584,7 +584,7 @@ function EarthScreen() {
             <PlaceCard
                 ref={overlayRef}
                 mobile={isMobile}
-                onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })}
+                onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point, accentColor: activeColor } })}
             />
 
             <div className="country-info-show" ref={countryInfo}>
