@@ -37,7 +37,7 @@ function MainScreen() {
             ease: 'expo.inOut',
             stagger: { amount: 0.5 },
             transformOrigin: 'top',
-        }, '-=0.4').from('.header-container', {
+        }, 2.1).from('.header-container', {
             duration: 1.6,
             y: -70,
             opacity: 0,
@@ -61,9 +61,9 @@ function MainScreen() {
             duration: 0.6,
             scaleY: 0,
             ease: 'expo.inOut',
-            stagger: { amount: 0.5 },
+            stagger: { amount: 0.5, from: 'end' },
             transformOrigin: 'bottom',
-        }, '-=0.4').from('.mainfooter-container', {
+        }, 2.1).from('.mainfooter-container', {
             duration: 1.6,
             y: 70,
             opacity: 0,
