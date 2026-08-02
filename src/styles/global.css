@@ -223,6 +223,10 @@ a { text-decoration: none; }
   padding-left: 9%;
   padding-right: 9%;
 }
+.main-title .char,
+.sub-title .char {
+  display: inline-block;
+}
 @media (max-width: 1200px) {
   .main-title { font-size: 7.7rem; }
   .sub-title { font-size: 5.9rem; }
