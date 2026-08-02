@@ -169,9 +169,12 @@ function IcoBackground() {
 
             scene.rotation.x = -time * 6
             scene.rotation.y = time * 6
-            // 카메라와의 거리가 진동하며 겉보기 크기도 같이 요동친다 — 모바일에서
-            // 구를 축소한 비율만큼 진폭도 같이 줄여 "커졌다 작아졌다" 하는 느낌을 죽인다.
-            scene.position.z = 0.2 * icoScale * Math.sin(time * 3)
+            // 카메라와의 거리가 진동하며 겉보기 크기도 같이 요동친다. 모바일에서는
+            // 이 진동이 기준 크기보다 "커지는" 쪽으로 가는 순간에 화면을 꽉 채우는
+            // 것처럼 보였다 — 앞으로 나오는 방향은 아예 막고, 뒤로 물러나는
+            // 방향만 허용해 기준 크기를 절대 넘지 않게 한다.
+            const zPulse = 0.2 * Math.sin(time * 3)
+            scene.position.z = icoScale < 1 ? Math.min(zPulse * icoScale, 0) : zPulse
 
             customPass.uniforms.time.value = time
             customPass.uniforms.howmuchrgbshifticanhaz.value = mouse / 5
