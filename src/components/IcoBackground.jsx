@@ -128,6 +128,15 @@ function IcoBackground() {
             lastX = 0
         }
 
+        // FOV(70°)는 세로 기준 고정값이라, 세로로 긴 화면(좁은 aspect)일수록
+        // 가로 시야가 좁아져 같은 크기의 구가 화면을 더 많이 채운다.
+        // aspect가 1 미만으로 좁아질수록 구를 함께 축소해 상쇄한다.
+        const getIcoScale = (width, height) => {
+            const aspect = width / height
+            if (aspect >= 1) return 1
+            return THREE.MathUtils.clamp(0.6 + (aspect - 0.45) / (1 - 0.45) * 0.4, 0.6, 1)
+        }
+
         const resize = () => {
             const width = container.offsetWidth
             const height = container.offsetHeight
@@ -135,6 +144,10 @@ function IcoBackground() {
             composer.setSize(width, height)
             camera.aspect = width / height
             camera.updateProjectionMatrix()
+
+            const scale = getIcoScale(width, height)
+            ico.scale.setScalar(scale)
+            icoLines.scale.setScalar(scale)
         }
 
         const render = () => {
