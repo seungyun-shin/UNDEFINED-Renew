@@ -107,6 +107,27 @@ function IcoBackground() {
             lastX = 0
         }
 
+        // 터치 디바이스는 mousemove 이벤트가 없어 대리석 굴곡이 전혀 반응하지
+        // 않았다. 손가락 드래그를 마우스 이동과 동일하게 speed로 환산한다.
+        const onTouchMove = (e) => {
+            const touch = e.touches[0]
+            if (!touch) return
+            speed = Math.sqrt((touch.pageX - lastX) ** 2 + (touch.pageX - lastX) ** 2) * 0.003
+            lastX = touch.pageX
+            mouseCmove.x = (touch.clientX / window.innerWidth) * 2 - 1
+            mouseCmove.y = -(touch.clientY / window.innerHeight) * 2 + 1
+
+            icoLines.position.x = mouseCmove.x * 0.039
+            ico.position.x = mouseCmove.x * 0.039
+            icoLines.position.y = mouseCmove.y * 0.039
+            ico.position.y = mouseCmove.y * 0.039
+        }
+
+        const onTouchEnd = () => {
+            speed = 0
+            lastX = 0
+        }
+
         const resize = () => {
             const width = container.offsetWidth
             const height = container.offsetHeight
@@ -125,7 +146,10 @@ function IcoBackground() {
             }
 
             time += 0.001
-            mouse -= (mouse - speed) * 0.005
+            // 입력이 없어도(특히 로드 직후 모바일) 표면이 완전히 매끈해지지 않도록
+            // 은은한 앰비언트 굴곡을 깔아두고, 그 위에 마우스/터치 반응을 더한다.
+            const idle = 0.12 + Math.sin(time * 0.7) * 0.06
+            mouse -= (mouse - (idle + speed)) * 0.005
             speed *= 0.99
 
             scene.rotation.x = -time * 6
@@ -173,6 +197,8 @@ function IcoBackground() {
 
         document.addEventListener('mousemove', onMouseMove)
         document.addEventListener('mouseout', onMouseOut)
+        document.addEventListener('touchmove', onTouchMove, { passive: true })
+        document.addEventListener('touchend', onTouchEnd)
         window.addEventListener('resize', resize)
 
         resize()
@@ -183,6 +209,8 @@ function IcoBackground() {
             offTransition()
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseout', onMouseOut)
+            document.removeEventListener('touchmove', onTouchMove)
+            document.removeEventListener('touchend', onTouchEnd)
             window.removeEventListener('resize', resize)
             geometry.dispose()
             material.dispose()
