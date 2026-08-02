@@ -125,7 +125,7 @@ function projectToScreen(worldPos, camera, size) {
 // draw an L-shaped leader — left from the ring's edge, then up into the card —
 // as a thin glowing SVG polyline, and hang the card above it. The line "draws
 // in" via a single eased stroke-dashoffset sweep (left then up in one motion).
-const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
+const PlaceCard = forwardRef(function PlaceCard({ onView, mobile }, ref) {
     const [state, setState] = useState(null) // { point, color, rx, ry, visible }
     const [draw, setDraw] = useState(0)       // 0..1 line-draw progress
     const [revealed, setRevealed] = useState(false)
@@ -159,6 +159,24 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
 
     if (!state) return null
     const { point, color, rx, ry, visible } = state
+
+    // Mobile: the left list geometry doesn't apply — pin the card top-center
+    // (below the header) and skip the screen-space leader line; the 3D ring on
+    // the globe already marks the point.
+    if (mobile) {
+        return (
+            <div
+                className={revealed && visible ? 'place-card place-card-mobile revealed' : 'place-card place-card-mobile'}
+                style={{ '--accent': color }}
+            >
+                <img src={thumbnailOf(point)} alt="" />
+                <div className="place-card-body">
+                    <p className="place-card-name">{point.name}</p>
+                    <button className="place-card-view" onClick={() => onView(point)}>사진 보기 →</button>
+                </div>
+            </div>
+        )
+    }
 
     // card sits up-and-left of the ring, clamped clear of the header + list
     let cardCenterX = rx - LEADER_DX
@@ -200,7 +218,7 @@ const PlaceCard = forwardRef(function PlaceCard({ onView }, ref) {
     )
 })
 
-function Marker({ point, active, color, onEnter, onLeave, onClick }) {
+function Marker({ point, active, color, onEnter, onLeave, onClick, hitScale = 1 }) {
     const spriteRef = useRef()
     const texture = useMemo(() => glowDotTexture(), [])
 
@@ -220,9 +238,10 @@ function Marker({ point, active, color, onEnter, onLeave, onClick }) {
 
     return (
         <group position={position}>
-            {/* generous invisible hit target — separate from the small visible dot */}
+            {/* generous invisible hit target — separate from the small visible dot;
+                enlarged on touch where fingers need a bigger tap zone */}
             <mesh onClick={onClick} onPointerOver={onEnter} onPointerOut={onLeave}>
-                <sphereGeometry args={[0.09, 8, 8]} />
+                <sphereGeometry args={[0.09 * hitScale, 8, 8]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
             <sprite ref={spriteRef}>
@@ -239,7 +258,7 @@ function Marker({ point, active, color, onEnter, onLeave, onClick }) {
     )
 }
 
-function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overlayRef }) {
+function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overlayRef, onPointPick, isMobile }) {
 
     const navigate = useNavigate()
     const { camera, size } = useThree()
@@ -390,9 +409,10 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                         point={point}
                         active={activeId === point._id}
                         color={activeColor}
-                        onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })}
+                        onClick={() => onPointPick(point)}
                         onEnter={() => showName(point.name)}
                         onLeave={infoShowingDown}
+                        hitScale={isMobile ? 1.7 : 1}
                     />
                 ))}
             </mesh>
@@ -450,10 +470,30 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
 
 // The "photo view" action now lives on the floating card next to the globe
 // point (see PlaceCard) — keeping a second copy of that link here would just
+// matchMedia-backed mobile flag (≤900px) that re-renders on viewport changes.
+function useIsMobile() {
+    const [mobile, setMobile] = useState(
+        typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches
+    )
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 900px)')
+        const onChange = () => setMobile(mq.matches)
+        mq.addEventListener('change', onChange)
+        return () => mq.removeEventListener('change', onChange)
+    }, [])
+    return mobile
+}
+
 // be a duplicate, inconsistent affordance for the same action.
-function DestinationList({ activeId, activeColor, onSelect }) {
+// On desktop this is a fixed left column; on mobile CSS turns it into a
+// bottom sheet — the handle (visible only on mobile) toggles the `open` class.
+function DestinationList({ activeId, activeColor, onSelect, open, onToggle }) {
     return (
-        <nav className="destination-list">
+        <nav className={open ? 'destination-list open' : 'destination-list'}>
+            <button className="sheet-handle" onClick={onToggle}>
+                <span className="sheet-handle-grip" />
+                <span className="sheet-handle-label">여행지 {countryPoints.length}곳</span>
+            </button>
             {REGIONS.map((region) => (
                 <div key={region.name} className="destination-group">
                     <p className="destination-group-title">{region.name}</p>
@@ -489,6 +529,8 @@ function EarthScreen() {
     // The hint shows on entry, then fades on the first interaction (a selection
     // or a drag) — so it invites without lingering as permanent chrome.
     const [hintOn, setHintOn] = useState(true)
+    const [sheetOpen, setSheetOpen] = useState(false)
+    const isMobile = useIsMobile()
 
     useEffect(() => {
         icoTransition('hide')
@@ -501,16 +543,32 @@ function EarthScreen() {
 
     const handleSelect = (point) => {
         setHintOn(false)
+        setSheetOpen(false)
         setActiveColor(randomHighlight())
         setActiveId(point._id)
     }
 
+    // On touch there's no hover, so tapping a globe point selects it (fly +
+    // ring + card) rather than jumping straight to the gallery; the card's
+    // "사진 보기" then navigates. On desktop, a direct-click shortcut stays.
+    const handlePointPick = (point) => {
+        if (isMobile) handleSelect(point)
+        else navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })
+    }
+
     return (
         <div className="earthContainer" onPointerDown={() => setHintOn(false)}>
-            <DestinationList activeId={activeId} activeColor={activeColor} onSelect={handleSelect} />
+            <DestinationList
+                activeId={activeId}
+                activeColor={activeColor}
+                onSelect={handleSelect}
+                open={sheetOpen}
+                onToggle={() => setSheetOpen((v) => !v)}
+            />
 
             <PlaceCard
                 ref={overlayRef}
+                mobile={isMobile}
                 onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point } })}
             />
 
@@ -535,6 +593,8 @@ function EarthScreen() {
                         activeId={activeId}
                         activeColor={activeColor}
                         overlayRef={overlayRef}
+                        onPointPick={handlePointPick}
+                        isMobile={isMobile}
                     />
                 </Suspense>
             </Canvas>

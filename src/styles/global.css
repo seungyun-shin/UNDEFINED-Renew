@@ -299,6 +299,7 @@ a { text-decoration: none; }
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* avoids the mobile address-bar 100vh jump */
   background-color: #01040c;
   opacity: 0;
 }
@@ -362,8 +363,65 @@ a { text-decoration: none; }
   outline-offset: 2px;
 }
 
+/* handle is desktop-hidden; on mobile it's the grab bar of the bottom sheet */
+.sheet-handle { display: none; }
+
 @media screen and (max-width: 900px) {
-  .destination-list { display: none; }
+  /* the list becomes a bottom sheet: collapsed to just the handle, slides up
+     to reveal the scrollable list when opened */
+  .destination-list {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-height: 62dvh;
+    padding: 0 5% env(safe-area-inset-bottom);
+    background: rgba(8, 11, 18, 0.86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(223, 211, 195, 0.15);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(calc(100% - 54px));
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-mask-image: none;
+    mask-image: none;
+    overscroll-behavior: contain;
+  }
+  .destination-list.open {
+    transform: translateY(0);
+    overflow-y: auto;
+  }
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 54px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(243, 236, 224, 0.85);
+  }
+  .sheet-handle-grip {
+    position: absolute;
+    top: 9px;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(223, 211, 195, 0.4);
+  }
+  .sheet-handle-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding-top: 6px;
+  }
+  .destination-group + .destination-group { margin-top: 1.2rem; }
+  .destination-item-main img { width: 48px; height: 48px; }
 }
 
 /* ── leader line (earth screen) — thin glowing L from the 3D ring to card ── */
@@ -460,8 +518,20 @@ a { text-decoration: none; }
 }
 .place-card-view:hover { opacity: 0.65; }
 
+/* mobile card: pinned top-center below the header, no screen-space leader line */
+.place-card-mobile {
+  left: 50%;
+  top: calc(9vh + 14px);
+  transform: translateX(-50%) translateY(-6px);
+  width: min(320px, 88vw);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.place-card-mobile.revealed {
+  transform: translateX(-50%) translateY(0);
+}
 @media screen and (max-width: 900px) {
-  .place-card { display: none; }
+  /* the desktop leader line never renders on mobile (JS skips it), but guard anyway */
+  .leader-svg { display: none; }
 }
 
 .country-info-show {
@@ -497,6 +567,12 @@ a { text-decoration: none; }
 .earth-hint.hidden {
   opacity: 0 !important;
   transform: translateY(8px);
+}
+@media screen and (max-width: 900px) {
+  /* sit above the collapsed bottom sheet (54px handle) */
+  .earth-hint { bottom: calc(54px + 5vh); }
+  .earth-hint-lead { font-size: 0.72rem; letter-spacing: 0.28em; }
+  .earth-hint-sub { font-size: 0.72rem; }
 }
 .earth-hint-lead {
   color: rgba(243, 236, 224, 0.92);
