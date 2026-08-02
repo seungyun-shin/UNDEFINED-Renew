@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import gsap from 'gsap'
 
 import IntroOverlay from '../components/IntroOverlay'
@@ -13,10 +13,20 @@ function splitChars(text) {
     ))
 }
 
+// 세션 중 처음 한 번만 타이틀 캐스케이드+오버레이 인트로를 재생한다.
+// 다른 페이지에서 로고를 눌러 돌아올 때는 다시 볼 필요가 없고, 대신
+// 배경 카메라가 줌인 상태에서 제자리로 돌아오는(icoTransition('reset'))
+// 기존 애니메이션만 가려지지 않고 그대로 보이게 둔다.
+let hasIntroPlayed = false
+
 function MainScreen() {
+    const [showIntro] = useState(() => !hasIntroPlayed)
 
     useEffect(() => {
         icoTransition('reset')
+
+        if (!showIntro) return
+        hasIntroPlayed = true
 
         const ctx = gsap.context(() => {
 
@@ -66,11 +76,11 @@ function MainScreen() {
         })
 
         return () => ctx.revert()
-    }, [])
+    }, [showIntro])
 
     return (
         <>
-            <IntroOverlay />
+            {showIntro && <IntroOverlay />}
             <div className="main-title-section">
                 <div className="main-text-container">
                     <div className="main-title-wraper">
