@@ -31,20 +31,19 @@ function MainScreen() {
             skewY: 7,
             stagger: { amount: 0.5 },
             opacity: 0,
-        }).to('.overlay-top', {
-            duration: 0.6,
-            scaleY: 0,
-            ease: 'expo.inOut',
-            stagger: { amount: 0.5 },
-            transformOrigin: 'top',
-        }, 2.1).from('.header-container', {
+        // 글자는 리듬감 있게 등장하고, 그 뒤에서 배경/헤더/푸터는 패널이
+        // 걷히는 대신 아주 느리고 은은하게 스며나오도록 한다.
+        }).to('.overlay-container', {
+            duration: 2.8,
+            opacity: 0,
+            ease: 'sine.inOut',
+        }, 1.2).set('.overlay-container', {
+            display: 'none',
+        }).from('.header-container', {
             duration: 1.6,
             y: -70,
             opacity: 0,
             ease: 'power4.out',
-        }).to('.overlay-container', {
-            opacity: 0,
-            display: 'none',
         })
 
         // UNDEFINED는 CREATOR보다 살짝 늦게 시작해 두 줄이 동시에 뜨는 대신
@@ -57,18 +56,12 @@ function MainScreen() {
             skewY: 7,
             stagger: { amount: 0.6 },
             opacity: 0,
-        }).to('.overlay-bottom', {
-            duration: 0.6,
-            scaleY: 0,
-            ease: 'expo.inOut',
-            stagger: { amount: 0.5, from: 'end' },
-            transformOrigin: 'bottom',
-        }, 2.1).from('.mainfooter-container', {
+        }).from('.mainfooter-container', {
             duration: 1.6,
             y: 70,
             opacity: 0,
             ease: 'power4.out',
-        })
+        }, 4.15)
 
         })
 
