@@ -76,12 +76,26 @@ function MemoryPhotoGallery() {
             )}
 
             {photos.length > 0 && (
-                <div className="gallery-masonry">
-                    {photos.map((img, i) => (
-                        <button key={img.id} className="gallery-thumb" onClick={() => setLightboxIndex(i)}>
-                            <img src={toThumb(img.imgSrc)} alt={`${countryPoint.name} ${i + 1}`} loading="lazy" />
-                        </button>
-                    ))}
+                <div className="gallery-grid">
+                    {photos.map((img, i) => {
+                        // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
+                        // 사진을 끼워 스크롤에 숨 쉬는 지점을 만든다.
+                        const isBreakout = photos.length > 8 && (i + 1) % 12 === 0
+                        return (
+                            <button
+                                key={img.id}
+                                className={isBreakout ? 'gallery-cell gallery-breakout' : 'gallery-cell'}
+                                onClick={() => setLightboxIndex(i)}
+                            >
+                                <img
+                                    src={isBreakout ? img.imgSrc : toThumb(img.imgSrc)}
+                                    alt={`${countryPoint.name} ${i + 1}`}
+                                    loading="lazy"
+                                />
+                                <span className="gallery-index">{String(i + 1).padStart(2, '0')} / {photos.length}</span>
+                            </button>
+                        )
+                    })}
                 </div>
             )}
 
