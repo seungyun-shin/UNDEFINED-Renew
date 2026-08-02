@@ -34,6 +34,7 @@ function IcoBackground() {
         camera.position.set(0, 0, 1.7)
 
         const mouseCmove = { x: 0, y: 0 }
+        const targetPos = { x: 0, y: 0 }
 
         let time = 0
         let mouse = 0
@@ -97,10 +98,8 @@ function IcoBackground() {
             mouseCmove.x = (e.clientX / window.innerWidth) * 2 - 1
             mouseCmove.y = -(e.clientY / window.innerHeight) * 2 + 1
 
-            icoLines.position.x = mouseCmove.x * 0.039
-            ico.position.x = mouseCmove.x * 0.039
-            icoLines.position.y = mouseCmove.y * 0.039
-            ico.position.y = mouseCmove.y * 0.039
+            targetPos.x = mouseCmove.x * 0.039
+            targetPos.y = mouseCmove.y * 0.039
         }
 
         const onMouseOut = () => {
@@ -118,10 +117,8 @@ function IcoBackground() {
             mouseCmove.x = (touch.clientX / window.innerWidth) * 2 - 1
             mouseCmove.y = -(touch.clientY / window.innerHeight) * 2 + 1
 
-            icoLines.position.x = mouseCmove.x * 0.039
-            ico.position.x = mouseCmove.x * 0.039
-            icoLines.position.y = mouseCmove.y * 0.039
-            ico.position.y = mouseCmove.y * 0.039
+            targetPos.x = mouseCmove.x * 0.039
+            targetPos.y = mouseCmove.y * 0.039
         }
 
         const onTouchEnd = () => {
@@ -166,6 +163,13 @@ function IcoBackground() {
             const idle = 0.12 + Math.sin(time * 0.7) * 0.06
             mouse -= (mouse - (idle + speed)) * 0.005
             speed *= 0.99
+
+            // 목표 위치로 즉시 대입하지 않고 매 프레임 조금씩 따라가게 한다.
+            // 마우스는 이동이 연속적이라 체감상 차이가 없지만, 터치는 손가락이
+            // 착지한 첫 지점부터 이미 먼 좌표라 즉시 대입하면 순간이동처럼 보였다.
+            ico.position.x += (targetPos.x - ico.position.x) * 0.08
+            ico.position.y += (targetPos.y - ico.position.y) * 0.08
+            icoLines.position.copy(ico.position)
 
             scene.rotation.x = -time * 6
             scene.rotation.y = time * 6
