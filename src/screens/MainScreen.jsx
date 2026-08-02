@@ -35,7 +35,7 @@ function MainScreen() {
             duration: 0.6,
             scaleY: 0,
             ease: 'expo.inOut',
-            stagger: 0.4,
+            stagger: { amount: 0.5 },
             transformOrigin: 'top',
         }, '-=0.4').from('.header-container', {
             duration: 1.6,
@@ -61,7 +61,7 @@ function MainScreen() {
             duration: 0.6,
             scaleY: 0,
             ease: 'expo.inOut',
-            stagger: 0.4,
+            stagger: { amount: 0.5 },
             transformOrigin: 'bottom',
         }, '-=0.4').from('.mainfooter-container', {
             duration: 1.6,

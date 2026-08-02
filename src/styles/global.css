@@ -58,14 +58,12 @@ a { text-decoration: none; }
   width: 100%;
   top: 0;
   left: 0;
+  display: flex;
 }
 .overlay-container .top .overlay-top {
-  position: absolute;
   height: 100%;
-  width: 100%;
+  flex: 1 1 0;
   background: black;
-  top: 0;
-  left: 0;
 }
 .overlay-container .bottom {
   height: 50vh;
@@ -73,14 +71,12 @@ a { text-decoration: none; }
   width: 100%;
   bottom: 0;
   left: 0;
+  display: flex;
 }
 .overlay-container .bottom .overlay-bottom {
-  position: absolute;
   height: 100%;
-  width: 100%;
+  flex: 1 1 0;
   background: black;
-  bottom: 0;
-  left: 0;
 }
 
 /* ── header ─────────────────────────────────────── */
