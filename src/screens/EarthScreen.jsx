@@ -465,13 +465,19 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
 
 // The "photo view" action now lives on the floating card next to the globe
 // point (see PlaceCard) — keeping a second copy of that link here would just
-// matchMedia-backed mobile flag (≤900px) that re-renders on viewport changes.
+// matchMedia-backed "simple layout" flag that re-renders on viewport changes.
+// Threshold is 1200px, not a typical 900px phone breakpoint: the desktop
+// up-left card + L-shaped leader line needs real room (left list ~420px +
+// leftward offset ~300px) to stay left of the point. Below ~1100px viewport
+// width the clamp that keeps the card clear of the list pushes it past the
+// point's x position, flipping the line to the right — an inversion, not
+// just a squeeze. 1200px keeps a safety margin above that flip threshold.
 function useIsMobile() {
     const [mobile, setMobile] = useState(
-        typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches
+        typeof window !== 'undefined' && window.matchMedia('(max-width: 1200px)').matches
     )
     useEffect(() => {
-        const mq = window.matchMedia('(max-width: 900px)')
+        const mq = window.matchMedia('(max-width: 1200px)')
         const onChange = () => setMobile(mq.matches)
         mq.addEventListener('change', onChange)
         return () => mq.removeEventListener('change', onChange)

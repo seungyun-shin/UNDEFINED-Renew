@@ -523,7 +523,7 @@ a { text-decoration: none; }
 .place-card-mobile.revealed {
   transform: translateX(-50%) translateY(0);
 }
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1200px) {
   /* the desktop leader line never renders on mobile (JS skips it), but guard anyway */
   .leader-svg { display: none; }
 }
@@ -562,7 +562,7 @@ a { text-decoration: none; }
   opacity: 0 !important;
   transform: translateY(8px);
 }
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1200px) {
   /* sit above the horizontal reel (~118px tall incl. safe-area) */
   .earth-hint { bottom: calc(118px + env(safe-area-inset-bottom)); }
   .earth-hint-lead { font-size: 0.72rem; letter-spacing: 0.28em; }
