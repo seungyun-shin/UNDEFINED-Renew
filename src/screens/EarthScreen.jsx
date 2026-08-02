@@ -160,9 +160,10 @@ const PlaceCard = forwardRef(function PlaceCard({ onView, mobile }, ref) {
     if (!state) return null
     const { point, color, rx, ry, visible } = state
 
-    // Mobile: the left list geometry doesn't apply — pin the card top-center
-    // (below the header) and skip the screen-space leader line; the 3D ring on
-    // the globe already marks the point.
+    // Mobile: pin the card just above the horizontal reel (map-app pin-card
+    // style) so it stays close to what was just tapped, instead of floating
+    // near the header with no visible link to the selected point. No
+    // screen-space leader line on mobile — the 3D ring marks the point.
     if (mobile) {
         return (
             <div
