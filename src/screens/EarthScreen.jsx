@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import * as THREE from 'three'
-import { OrbitControls, Stars, Loader, Html } from '@react-three/drei'
+import { OrbitControls, Stars, Loader } from '@react-three/drei'
 import gsap from 'gsap'
 
 import { icoTransition } from '../lib/icoBus'
@@ -438,9 +438,6 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 <icosahedronGeometry args={[1.3, 1]} />
                 <meshPhongMaterial color={0xffffff} opacity={1} side={THREE.DoubleSide} />
             </mesh>
-            <Html position={PROJECT_PLANET_POS} center distanceFactor={13} zIndexRange={[100, 0]} pointerEvents="none">
-                <span className="planet-label">PROJECT</span>
-            </Html>
 
             {/* Appreciate planet — opens its own photo gallery, same as a travel point */}
             <mesh
@@ -461,9 +458,6 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 <tetrahedronGeometry args={[1.45, 3]} />
                 <meshPhongMaterial color={0x000000} opacity={1} side={THREE.DoubleSide} />
             </mesh>
-            <Html position={[9, -3, -3]} center distanceFactor={13} zIndexRange={[100, 0]} pointerEvents="none">
-                <span className="planet-label">APPRECIATE</span>
-            </Html>
         </>
     )
 }
@@ -485,15 +479,32 @@ function useIsMobile() {
 }
 
 // be a duplicate, inconsistent affordance for the same action.
-// On desktop this is a fixed left column; on mobile CSS turns it into a
-// bottom sheet — the handle (visible only on mobile) toggles the `open` class.
-function DestinationList({ activeId, activeColor, onSelect, open, onToggle }) {
+// Desktop: fixed left column, grouped by region. Mobile: a horizontal photo
+// reel pinned to the bottom (covers less of the globe than a full sheet).
+function DestinationList({ activeId, activeColor, onSelect, mobile }) {
+    if (mobile) {
+        return (
+            <nav className="destination-strip">
+                {countryPoints.map((point) => {
+                    const active = activeId === point._id
+                    return (
+                        <button
+                            key={point._id}
+                            className={active ? 'strip-item active' : 'strip-item'}
+                            style={active ? { '--accent': activeColor } : undefined}
+                            onClick={() => onSelect(point)}
+                        >
+                            <img src={thumbnailOf(point)} alt="" loading="lazy" />
+                            <span>{point.name}</span>
+                        </button>
+                    )
+                })}
+            </nav>
+        )
+    }
+
     return (
-        <nav className={open ? 'destination-list open' : 'destination-list'}>
-            <button className="sheet-handle" onClick={onToggle}>
-                <span className="sheet-handle-grip" />
-                <span className="sheet-handle-label">여행지 {countryPoints.length}곳</span>
-            </button>
+        <nav className="destination-list">
             {REGIONS.map((region) => (
                 <div key={region.name} className="destination-group">
                     <p className="destination-group-title">{region.name}</p>
@@ -529,7 +540,6 @@ function EarthScreen() {
     // The hint shows on entry, then fades on the first interaction (a selection
     // or a drag) — so it invites without lingering as permanent chrome.
     const [hintOn, setHintOn] = useState(true)
-    const [sheetOpen, setSheetOpen] = useState(false)
     const isMobile = useIsMobile()
 
     useEffect(() => {
@@ -543,7 +553,6 @@ function EarthScreen() {
 
     const handleSelect = (point) => {
         setHintOn(false)
-        setSheetOpen(false)
         setActiveColor(randomHighlight())
         setActiveId(point._id)
     }
@@ -562,8 +571,7 @@ function EarthScreen() {
                 activeId={activeId}
                 activeColor={activeColor}
                 onSelect={handleSelect}
-                open={sheetOpen}
-                onToggle={() => setSheetOpen((v) => !v)}
+                mobile={isMobile}
             />
 
             <PlaceCard
