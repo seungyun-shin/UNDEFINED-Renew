@@ -57,7 +57,13 @@ function MemoryPhotoGallery() {
 
     return (
         <div className="memory-gallery" style={{ '--accent': accent }}>
-            <button className="gallery-back" onClick={() => navigate('/MemoryScreen')}>← EARTH</button>
+            {/* 전역 Header가 .overall-Layout(z-index:199)보다 위(200)라, 이 안의
+            버튼은 z-index를 얼마로 두든 헤더 왼쪽 여백 아래 깔려 클릭이 먹지
+            않았다. body로 포탈해서 그 스태킹 컨텍스트를 벗어난다. */}
+            {createPortal(
+                <button className="gallery-back" style={{ '--accent': accent }} onClick={() => navigate('/MemoryScreen')}>← EARTH</button>,
+                document.body
+            )}
 
             {countryPoint.mainImg && (
                 <div className="gallery-hero">
