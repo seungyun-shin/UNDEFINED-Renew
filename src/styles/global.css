@@ -477,99 +477,54 @@ a { text-decoration: none; }
   font-family: 'Romelio';
 }
 .country-name-show-up { font-family: 'Romelio'; }
-.guide-container {
-  color: #fff;
+
+/* ── entry hint (earth screen) — minimal, bottom-centered, self-dismissing ── */
+.earth-hint {
   position: absolute;
-  font-weight: 900;
-  font-size: 2rem;
-  top: 30%;
-  right: 20%;
-  z-index: 99999;
-  transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  opacity: 0;
-}
-.guide-info {
+  left: 0;
+  right: 0;
+  bottom: 7vh;
+  z-index: 205;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  font-size: 2vw;
+  gap: 0.5rem;
+  pointer-events: none;
+  opacity: 0;
+  animation: earth-hint-in 1.2s ease 0.6s forwards;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
-.guide-info span {
-  font-family: 'Romelio';
-  animation: text-ani 1.9s linear infinite;
+.earth-hint.hidden {
+  opacity: 0 !important;
+  transform: translateY(8px);
 }
-@media screen and (max-width: 700px) {
-  .guide-info { font-size: 3vw; }
+.earth-hint-lead {
+  color: rgba(243, 236, 224, 0.92);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+}
+.earth-hint-sub {
+  color: rgba(223, 211, 195, 0.5);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+@keyframes earth-hint-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* mouse scroll indicator */
-.mouse_scroll {
-  display: block;
-  width: 24px;
-  height: 100px;
-  margin: 25px auto 0;
-}
-@media screen and (max-width: 900px) {
-  .mouse_scroll { margin-top: 13px; }
-}
-.m_scroll_arrows {
-  display: block;
-  transform: rotate(45deg);
-  border-right: 2px solid #fff;
-  border-bottom: 2px solid #fff;
-  margin: 0 0 3px 4px;
-  width: 16px;
-  height: 16px;
-}
-.unu { margin-top: 1px; }
-.doi, .trei, .unu {
-  animation: mouse-scroll 1s infinite;
-  animation-direction: alternate;
-}
-.unu { animation-delay: 0.1s; }
-.doi { animation-delay: 0.2s; margin-top: -6px; }
-.trei { animation-delay: 0.3s; margin-top: -6px; }
-.mouse {
-  height: 42px;
-  width: 24px;
-  border-radius: 14px;
-  transform: none;
-  border: 2px solid #fff;
-  top: 170px;
-}
-@media screen and (max-width: 900px) {
-  .mouse { height: 36px; width: 20px; }
-}
-.wheel {
-  display: block;
-  margin: 5px auto;
-  background: #fff;
-  position: relative;
-  height: 4px;
-  width: 4px;
-  border: 2px solid #fff;
-  border-radius: 8px;
-  animation: mouse-wheel 0.6s linear infinite;
-}
-@keyframes mouse-wheel {
-  0% { top: 1px; }
-  25% { top: 2px; }
-  50% { top: 3px; }
-  75% { top: 2px; }
-  100% { top: 1px; }
-}
-@keyframes mouse-scroll {
-  0% { opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-@keyframes text-ani {
-  0% { opacity: 0.7; }
-  25% { opacity: 0.89; }
-  50% { opacity: 1; }
-  75% { opacity: 0.89; }
-  100% { opacity: 0.7; }
+/* ── planet labels (earth screen) — always-on, quiet ── */
+.planet-label {
+  color: rgba(243, 236, 224, 0.78);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+  user-select: none;
 }
 
 /* ── stub screens ───────────────────────────────── */

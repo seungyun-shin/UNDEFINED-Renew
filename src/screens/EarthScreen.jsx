@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import * as THREE from 'three'
-import { OrbitControls, Stars, Loader } from '@react-three/drei'
+import { OrbitControls, Stars, Loader, Html } from '@react-three/drei'
 import gsap from 'gsap'
 
 import { icoTransition } from '../lib/icoBus'
@@ -349,13 +349,6 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
         countryInfo.current.style.display = 'none'
     }
 
-    useEffect(() => {
-        gsap.to('.guide-container', {
-            duration: 1,
-            opacity: 1,
-            ease: 'power3.inOut',
-        })
-    }, [])
 
     return (
         <>
@@ -425,6 +418,9 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 <icosahedronGeometry args={[1.3, 1]} />
                 <meshPhongMaterial color={0xffffff} opacity={1} side={THREE.DoubleSide} />
             </mesh>
+            <Html position={PROJECT_PLANET_POS} center distanceFactor={13} zIndexRange={[100, 0]} pointerEvents="none">
+                <span className="planet-label">PROJECT</span>
+            </Html>
 
             {/* Appreciate planet — opens its own photo gallery, same as a travel point */}
             <mesh
@@ -445,6 +441,9 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 <tetrahedronGeometry args={[1.45, 3]} />
                 <meshPhongMaterial color={0x000000} opacity={1} side={THREE.DoubleSide} />
             </mesh>
+            <Html position={[9, -3, -3]} center distanceFactor={13} zIndexRange={[100, 0]} pointerEvents="none">
+                <span className="planet-label">APPRECIATE</span>
+            </Html>
         </>
     )
 }
@@ -487,6 +486,9 @@ function EarthScreen() {
     const overlayRef = useRef()
     const [activeId, setActiveId] = useState(null)
     const [activeColor, setActiveColor] = useState(HIGHLIGHT_PALETTE[0])
+    // The hint shows on entry, then fades on the first interaction (a selection
+    // or a drag) — so it invites without lingering as permanent chrome.
+    const [hintOn, setHintOn] = useState(true)
 
     useEffect(() => {
         icoTransition('hide')
@@ -498,12 +500,13 @@ function EarthScreen() {
     }, [])
 
     const handleSelect = (point) => {
+        setHintOn(false)
         setActiveColor(randomHighlight())
         setActiveId(point._id)
     }
 
     return (
-        <div className="earthContainer">
+        <div className="earthContainer" onPointerDown={() => setHintOn(false)}>
             <DestinationList activeId={activeId} activeColor={activeColor} onSelect={handleSelect} />
 
             <PlaceCard
@@ -515,20 +518,10 @@ function EarthScreen() {
                 <div className="name-info" ref={countryInfoName}></div>
             </div>
 
-            <div className="guide-container">
-                <div className="guide-info">
-                    <span>Click the Points or Planet</span>
-                    <div className="mouse_scroll">
-                        <div className="mouse">
-                            <div className="wheel"></div>
-                        </div>
-                        <div>
-                            <span className="m_scroll_arrows unu"></span>
-                            <span className="m_scroll_arrows doi"></span>
-                            <span className="m_scroll_arrows trei"></span>
-                        </div>
-                    </div>
-                </div>
+            {/* Minimal entry hint — invites, then fades on first interaction */}
+            <div className={hintOn ? 'earth-hint' : 'earth-hint hidden'}>
+                <span className="earth-hint-lead">SELECT A DESTINATION</span>
+                <span className="earth-hint-sub">여행지를 선택하거나 지구를 돌려보세요</span>
             </div>
 
             {/* near/far tightened from R3F's default (0.1/1000) — that huge a range
