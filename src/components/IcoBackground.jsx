@@ -33,12 +33,6 @@ function IcoBackground() {
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000)
         camera.position.set(0, 0, 1.7)
 
-        // TEMP DEBUG — 실기기에서 보고되는 실제 뷰포트 값을 확인하기 위한 임시
-        // 오버레이. 원인 파악 후 제거할 것.
-        const debugEl = document.createElement('div')
-        debugEl.style.cssText = 'position:fixed;top:6px;left:6px;z-index:9999;color:#0f0;font:10px monospace;background:rgba(0,0,0,0.6);padding:4px 6px;white-space:pre;pointer-events:none;'
-        document.body.appendChild(debugEl)
-
         const mouseCmove = { x: 0, y: 0 }
 
         let time = 0
@@ -142,7 +136,7 @@ function IcoBackground() {
         const getIcoScale = (width, height) => {
             const aspect = width / height
             if (aspect >= 1) return 1
-            return THREE.MathUtils.clamp(aspect, 0.3, 1)
+            return THREE.MathUtils.clamp(aspect * 1.2, 0.35, 1)
         }
 
         const resize = () => {
@@ -156,14 +150,6 @@ function IcoBackground() {
             icoScale = getIcoScale(width, height)
             ico.scale.setScalar(icoScale)
             icoLines.scale.setScalar(icoScale)
-
-            debugEl.textContent =
-                `innerWidth: ${window.innerWidth}\n` +
-                `innerHeight: ${window.innerHeight}\n` +
-                `container: ${width}x${height}\n` +
-                `aspect: ${(width / height).toFixed(3)}\n` +
-                `icoScale: ${icoScale.toFixed(3)}\n` +
-                `DPR: ${window.devicePixelRatio}`
         }
 
         const render = () => {
@@ -241,7 +227,6 @@ function IcoBackground() {
         return () => {
             running = false
             offTransition()
-            debugEl.remove()
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseout', onMouseOut)
             document.removeEventListener('touchmove', onTouchMove)
