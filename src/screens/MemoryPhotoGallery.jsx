@@ -2,10 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 
-function toThumb(src) {
-    return src.replace('/1170/', '/300/')
-}
-
 function MemoryPhotoGallery() {
     const location = useLocation()
     const navigate = useNavigate()
@@ -15,6 +11,7 @@ function MemoryPhotoGallery() {
     const photos = countryPoint?.imgList || []
     const [lightboxIndex, setLightboxIndex] = useState(null)
     const touchStartX = useRef(null)
+    const stripRef = useRef(null)
 
     const closeLightbox = () => setLightboxIndex(null)
     const prevPhoto = () => setLightboxIndex((i) => (i - 1 + photos.length) % photos.length)
@@ -44,6 +41,28 @@ function MemoryPhotoGallery() {
         const dx = e.changedTouches[0].clientX - touchStartX.current
         if (Math.abs(dx) > 50) (dx > 0 ? prevPhoto() : nextPhoto())
         touchStartX.current = null
+    }
+
+    // 트랙패드 없이 마우스 휠만 있는 데스크톱에서도 필름 스트립을
+    // 좌우로 넘길 수 있도록 세로 휠 입력을 가로 스크롤로 바꿔준다.
+    useEffect(() => {
+        const el = stripRef.current
+        if (!el) return
+        const onWheel = (e) => {
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return
+            e.preventDefault()
+            el.scrollLeft += e.deltaY
+        }
+        el.addEventListener('wheel', onWheel, { passive: false })
+        return () => el.removeEventListener('wheel', onWheel)
+    }, [photos.length])
+
+    const scrollStrip = (dir) => {
+        const el = stripRef.current
+        if (!el) return
+        const frame = el.querySelector('.filmstrip-frame')
+        const step = frame ? frame.getBoundingClientRect().width + 4 : el.clientWidth * 0.8
+        el.scrollBy({ left: dir * step, behavior: 'smooth' })
     }
 
     if (!countryPoint) {
@@ -76,26 +95,30 @@ function MemoryPhotoGallery() {
             )}
 
             {photos.length > 0 && (
-                <div className="gallery-grid">
-                    {photos.map((img, i) => {
-                        // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
-                        // 사진을 끼워 스크롤에 숨 쉬는 지점을 만든다.
-                        const isBreakout = photos.length > 8 && (i + 1) % 12 === 0
-                        return (
+                <div className="filmstrip-section">
+                    <div className="filmstrip-sprockets" aria-hidden="true" />
+
+                    <div className="filmstrip" ref={stripRef}>
+                        {photos.map((img, i) => (
                             <button
                                 key={img.id}
-                                className={isBreakout ? 'gallery-cell gallery-breakout' : 'gallery-cell'}
+                                className="filmstrip-frame"
                                 onClick={() => setLightboxIndex(i)}
                             >
-                                <img
-                                    src={isBreakout ? img.imgSrc : toThumb(img.imgSrc)}
-                                    alt={`${countryPoint.name} ${i + 1}`}
-                                    loading="lazy"
-                                />
-                                <span className="gallery-index">{String(i + 1).padStart(2, '0')} / {photos.length}</span>
+                                <img src={img.imgSrc} alt={`${countryPoint.name} ${i + 1}`} loading="lazy" />
+                                <span className="frame-number">N° {String(i + 1).padStart(2, '0')}</span>
                             </button>
-                        )
-                    })}
+                        ))}
+                    </div>
+
+                    <div className="filmstrip-sprockets" aria-hidden="true" />
+
+                    {photos.length > 1 && (
+                        <>
+                            <button className="filmstrip-nav prev" onClick={() => scrollStrip(-1)}>‹</button>
+                            <button className="filmstrip-nav next" onClick={() => scrollStrip(1)}>›</button>
+                        </>
+                    )}
                 </div>
             )}
 
