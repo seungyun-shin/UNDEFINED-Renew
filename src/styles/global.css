@@ -183,6 +183,7 @@ a { text-decoration: none; }
   opacity: 0.86;
   padding-left: 9%;
   padding-right: 9%;
+  white-space: nowrap;
 }
 .sub-title {
   font-family: 'Romelio';
@@ -193,6 +194,7 @@ a { text-decoration: none; }
   opacity: 0.86;
   padding-left: 9%;
   padding-right: 9%;
+  white-space: nowrap;
 }
 .main-title .char,
 .sub-title .char {
