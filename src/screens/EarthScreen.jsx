@@ -612,25 +612,26 @@ function EarthScreen() {
                     <span className="earth-hint-lead">SELECT A DESTINATION</span>
                     <span className="earth-hint-sub">여행지를 선택하거나 지구를 돌려보세요</span>
                 </div>
-            </div>
 
-            {/* near/far tightened from R3F's default (0.1/1000) — that huge a range
-                left too little depth-buffer precision at the globe's distance,
-                which is why the marker sprites z-fought against the earth surface */}
-            <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 5], near: 0.5, far: 40 }}>
-                <Suspense fallback={null}>
-                    <EarthModel
-                        countryInfo={countryInfo}
-                        countryInfoName={countryInfoName}
-                        activeId={activeId}
-                        activeColor={activeColor}
-                        overlayRef={overlayRef}
-                        onPointPick={handlePointPick}
-                        isMobile={isMobile}
-                        onReady={() => setSceneReady(true)}
-                    />
-                </Suspense>
-            </Canvas>
+                {/* Canvas 자체는 텍스처가 준비되기 전에도 마운트되고, 그 안에서
+                지구본이 로드되는 순간 바로 픽셀이 그려진다 — CSS 트랜지션이
+                안 걸린 채였어서, 리스트/힌트는 같이 페이드인해도 지구본만
+                "팍" 하고 켜졌다. .earth-ui 안으로 옮겨 같은 페이드를 공유한다. */}
+                <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 5], near: 0.5, far: 40 }}>
+                    <Suspense fallback={null}>
+                        <EarthModel
+                            countryInfo={countryInfo}
+                            countryInfoName={countryInfoName}
+                            activeId={activeId}
+                            activeColor={activeColor}
+                            overlayRef={overlayRef}
+                            onPointPick={handlePointPick}
+                            isMobile={isMobile}
+                            onReady={() => setSceneReady(true)}
+                        />
+                    </Suspense>
+                </Canvas>
+            </div>
         </div>
     )
 }
