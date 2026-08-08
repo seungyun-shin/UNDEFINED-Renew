@@ -603,16 +603,18 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   font-family: 'Romelio';
   font-size: 1.6rem;
 }
+/* position:fixed + inset:0로 뷰포트 전체(헤더가 차지하는 문서 흐름 위쪽
+공간까지) 덮는다 — 기본값(static)이면 헤더 높이만큼 아래에서 시작해서,
+그 위쪽 띠로 마블 배경이 비쳐 보였다. 콘텐츠가 화면보다 기니 자체
+스크롤(overflow-y)을 준다. 페이드인은 공용 PageTransition이 이미
+담당하므로 여기서 또 애니메이션을 걸지 않는다(안 그러면 두 번 어두워짐). */
 .memory-gallery {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
   background: #000;
   color: #dfd3c3;
   padding-bottom: 10vh;
-  animation: gallery-fade-in 0.6s ease;
-}
-@keyframes gallery-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 /* countryPoint 없이 들어온 빈 상태 (직접 URL 진입 등) */
 .memory-gallery h1 {
@@ -710,7 +712,9 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   flex-direction: column;
   justify-content: center;
   padding: 10%;
-  background: #0a0a0a;
+  background-color: #0a0a0a;
+  background-size: cover;
+  background-position: center;
 }
 .gallery-id-card h1 {
   font-family: 'Romelio';
@@ -718,6 +722,9 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   line-height: 1.05;
   color: #fff;
   margin: 0;
+  /* 메인페이지 CREATOR/UNDEFINED와 같은 처리 — flat한 카드보다
+  존재감이 있고, 배경 사진 밝기와 무관하게 항상 읽힌다. */
+  mix-blend-mode: difference;
 }
 .gallery-id-card .gallery-count {
   display: block;
@@ -725,6 +732,7 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   font-size: 0.68rem;
   letter-spacing: 0.16em;
   color: var(--accent, #C9A063);
+  mix-blend-mode: difference;
 }
 
 @media (max-width: 900px) {

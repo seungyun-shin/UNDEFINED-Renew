@@ -565,12 +565,14 @@ function EarthScreen() {
     // 화면 자체의 페이드인은 이제 공용 PageTransition이 담당한다. 예전엔
     // 여기서 opacity를 0.5초 지연 후 따로 올렸는데, PageTransition의 페이드와
     // 겹치면 두 번 어두워지는 데다 그 지연 구간이 암전처럼 보였다.
+    //
+    // 언마운트 때 icoTransition('show')를 호출하지 않는다 — 예전엔 그렇게
+    // "떠나는 화면이 복구까지 책임"졌는데, AnimatePresence 크로스페이드 중엔
+    // 이 cleanup이 다음 화면의 mount 이펙트보다 늦게 실행돼서 경합이 있었다
+    // (다음 화면이 보낸 'hide'를 이 뒤늦은 'show'가 덮어씀). 마블이 필요한
+    // 화면(MainScreen)이 자기 마운트 시점에 스스로 복구를 요청하는 쪽이 안전하다.
     useEffect(() => {
         icoTransition('hide')
-
-        return () => {
-            icoTransition('show')
-        }
     }, [])
 
     const handleSelect = (point) => {

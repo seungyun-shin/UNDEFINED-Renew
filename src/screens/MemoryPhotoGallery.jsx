@@ -1,9 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { icoTransition } from '../lib/icoBus'
 
 function toThumb(src) {
     return src.replace('/1170/', '/300/')
+}
+
+// .gallery-tile:nth-child(7n+1)/(11n+5) CSS 리듬과 반드시 같은 식이어야 한다.
+// nth-child는 이름 카드(첫 번째 자식)까지 포함해서 세므로, 사진 배열의
+// 0-based 인덱스 i는 DOM 위치 i+2에 해당한다 — 그래서 오프셋이 이렇게 어긋난다.
+function isLargeTile(i) {
+    return i % 7 === 6 || i % 11 === 3
 }
 
 function MemoryPhotoGallery() {
@@ -15,6 +23,15 @@ function MemoryPhotoGallery() {
     const photos = countryPoint?.imgList || []
     const [lightboxIndex, setLightboxIndex] = useState(null)
     const touchStartX = useRef(null)
+
+    // 지구본 화면과 동일하게, 이 화면을 보는 동안 마블 배경 렌더 루프를
+    // 멈춘다 — 안 그러면 화면엔 안 보여도 GPU가 계속 마블을 그리고 있었다.
+    // 언마운트 시 'show'는 호출하지 않는다 — 마블이 필요한 화면(MainScreen)이
+    // 자기 마운트 시점에 스스로 복구를 요청하는 쪽이 AnimatePresence
+    // 크로스페이드 타이밍 경합에 안전하다 (EarthScreen과 동일한 이유).
+    useEffect(() => {
+        icoTransition('hide')
+    }, [])
 
     const closeLightbox = () => setLightboxIndex(null)
     const prevPhoto = () => setLightboxIndex((i) => (i - 1 + photos.length) % photos.length)
@@ -66,9 +83,14 @@ function MemoryPhotoGallery() {
             )}
 
             {/* 히어로 배너 없이, 장소 이름을 사진들과 같은 그리드 타일 하나로
-            통합한다 — "배너 + 콘텐츠"라는 흔한 템플릿 구조 자체를 없앤다. */}
+            통합한다 — "배너 + 콘텐츠"라는 흔한 템플릿 구조 자체를 없앤다.
+            카드 배경엔 mainImg를 깔고, 메인페이지와 같은 mix-blend-mode로
+            이름을 얹어서 밋밋한 flat 카드보다 존재감을 준다. */}
             <div className="gallery-grid">
-                <div className="gallery-id-card">
+                <div
+                    className="gallery-id-card"
+                    style={countryPoint.mainImg ? { backgroundImage: `url(${countryPoint.mainImg})` } : undefined}
+                >
                     <h1>{countryPoint.name}</h1>
                     {photos.length > 0 && <span className="gallery-count">{photos.length} PHOTOS</span>}
                 </div>
@@ -77,6 +99,9 @@ function MemoryPhotoGallery() {
                     // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
                     // 사진을 끼워 스크롤에 숨 쉬는 지점을 만든다.
                     const isBreakout = photos.length > 8 && (i + 1) % 12 === 0
+                    // 큰 타일(2x2 등)에 작은 썸네일을 늘려 쓰면 흐릿해진다 —
+                    // 크게 표시되는 타일은 원본을 쓴다.
+                    const useFullRes = isBreakout || isLargeTile(i)
                     return (
                         <button
                             key={img.id}
@@ -84,7 +109,7 @@ function MemoryPhotoGallery() {
                             onClick={() => setLightboxIndex(i)}
                         >
                             <img
-                                src={isBreakout ? img.imgSrc : toThumb(img.imgSrc)}
+                                src={useFullRes ? img.imgSrc : toThumb(img.imgSrc)}
                                 alt={`${countryPoint.name} ${i + 1}`}
                                 loading="lazy"
                             />

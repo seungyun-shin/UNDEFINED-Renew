@@ -205,6 +205,15 @@ function IcoBackground() {
                 icoLines.visible = true
                 gsap.to(camera.position, { duration: 3, z: 1.7 })
                 gsap.to(customPass.uniforms['noiseblur'], { duration: 3, value: 1.0 })
+                // 컨테이너 복구도 여기서 같이 한다 — 예전엔 'show'(지구본 등
+                // 다른 화면의 언마운트 cleanup)가 이 역할을 했는데, AnimatePresence
+                // 크로스페이드 중엔 나가는 화면의 cleanup이 들어오는 화면의
+                // mount 이펙트보다 늦게 실행돼서, 갤러리가 마운트하며 보낸
+                // 'hide'를 지구본의 뒤늦은 'show'가 덮어써버리는 경합이 있었다.
+                // "마블이 필요한 화면(MainScreen)이 자기 마운트 시점에 스스로
+                // 복구를 요청"하는 쪽이 타이밍에 안전하다.
+                paused = false
+                gsap.to(container, { duration: 1, opacity: 1, display: 'flex' })
             }
             if (mode === 'hide') {
                 // 페이드아웃이 끝나면 GPU 렌더링도 멈춘다 (지구본 화면과의 이중 렌더링 방지)
@@ -212,10 +221,6 @@ function IcoBackground() {
                     duration: 1, opacity: 0, display: 'none',
                     onComplete: () => { paused = true },
                 })
-            }
-            if (mode === 'show') {
-                paused = false
-                gsap.to(container, { duration: 1, opacity: 1, display: 'flex' })
             }
         })
 
