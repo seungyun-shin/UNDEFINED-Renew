@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 // exit 애니메이션을 지원하지 않아 AnimatePresence로 언마운트를 늦춘다).
 const variants = {
     initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.7, ease: [0.65, 0, 0.35, 1] } },
+    animate: { opacity: 1, transition: { duration: 1.1, ease: [0.65, 0, 0.35, 1] } },
     exit: { opacity: 0, transition: { duration: 0.5, ease: [0.65, 0, 0.35, 1] } },
 }
 
