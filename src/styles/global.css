@@ -52,6 +52,10 @@ a { text-decoration: none; }
   width: 100vw;
   height: 100vh;
   background: black;
+  /* .main-title/.sub-title는 z-index:103 명시라, opacity와 무관하게 이
+  값보다 낮으면 타이틀이 오버레이 위로 새어 보인다 (스태킹은 opacity가
+  아니라 z-index로 결정됨). 항상 타이틀 위에 확실히 덮이도록 더 높게. */
+  z-index: 150;
 }
 
 /* ── header ─────────────────────────────────────── */
