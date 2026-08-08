@@ -645,12 +645,12 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   color: var(--accent, #C9A063);
 }
 
-/* 히어로 배너 없이, 처음부터 하나의 통일된 그리드 — 장소 이름 카드도
-사진들과 같은 크기의 타일 하나로 섞여 들어간다("배너+콘텐츠" 구조 자체를
-없앰). 헤더가 위에 떠 있으니 그리드는 화면 맨 위부터 시작해도 된다. */
+/* 레퍼런스(nrly.co) 실측: 1440px에서 5열 고정, 정사각 타일, 이름 카드도
+사진과 똑같은 크기/무게로 섞여 들어감 — 그라데이션 등 특별 장식 없이 평평한
+카드 한 장. 열 개수를 auto-fill 대신 고정값으로 둬서 실제로 5열이 되게 함. */
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 3px;
 }
 .gallery-tile,
@@ -679,11 +679,11 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   flex-direction: column;
   justify-content: center;
   padding: 10%;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent, #C9A063) 20%, #0a0a0a), #0a0a0a 70%);
+  background: #0a0a0a;
 }
 .gallery-id-card h1 {
   font-family: 'Romelio';
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   line-height: 1.05;
   color: #fff;
   margin: 0;
@@ -691,15 +691,17 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
 .gallery-id-card .gallery-count {
   display: block;
   margin-top: 0.7rem;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   letter-spacing: 0.16em;
   color: var(--accent, #C9A063);
 }
 
+@media (max-width: 900px) {
+  .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+}
 @media (max-width: 700px) {
-  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 2px; }
-  .gallery-id-card { grid-column: span 2; grid-row: span 2; padding: 8%; }
-  .gallery-id-card h1 { font-size: 2rem; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+  .gallery-id-card h1 { font-size: 1.6rem; }
 }
 
 .gallery-lightbox {
