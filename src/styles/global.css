@@ -290,7 +290,6 @@ a { text-decoration: none; }
   height: 100vh;
   height: 100dvh; /* avoids the mobile address-bar 100vh jump */
   background-color: #01040c;
-  opacity: 0;
 }
 /* ── destination list (earth screen) ────────────── */
 .destination-list {

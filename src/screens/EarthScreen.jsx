@@ -549,9 +549,11 @@ function EarthScreen() {
     const [hintOn, setHintOn] = useState(true)
     const isMobile = useIsMobile()
 
+    // 화면 자체의 페이드인은 이제 공용 PageTransition이 담당한다. 예전엔
+    // 여기서 opacity를 0.5초 지연 후 따로 올렸는데, PageTransition의 페이드와
+    // 겹치면 두 번 어두워지는 데다 그 지연 구간이 암전처럼 보였다.
     useEffect(() => {
         icoTransition('hide')
-        gsap.to('.earthContainer', { duration: 1, opacity: 1, delay: 0.5 })
 
         return () => {
             icoTransition('show')
