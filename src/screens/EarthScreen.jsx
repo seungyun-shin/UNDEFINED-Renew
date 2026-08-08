@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import * as THREE from 'three'
-import { OrbitControls, Stars, Loader } from '@react-three/drei'
+import { OrbitControls, Stars } from '@react-three/drei'
 import gsap from 'gsap'
 
 import { icoTransition } from '../lib/icoBus'
@@ -259,7 +259,7 @@ function Marker({ point, active, color, onEnter, onLeave, onClick, hitScale = 1 
     )
 }
 
-function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overlayRef, onPointPick, isMobile }) {
+function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overlayRef, onPointPick, isMobile, onReady }) {
 
     const navigate = useNavigate()
     const { camera, size } = useThree()
@@ -268,6 +268,14 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
         TextureLoader,
         [EarthDayMap, EarthNormalMap, EarthSpecularMap, EarthCloudMap, Landscape, Landscape2]
     )
+
+    // useLoader가 위에서 Suspense를 던지기 때문에, 이 컴포넌트는 텍스처가
+    // 전부 준비된 뒤에야 마운트된다 — 즉 이 이펙트가 도는 시점 자체가
+    // "지구본을 그릴 준비가 끝났다"는 신호다. 부모(EarthScreen)가 이걸로
+    // 좌측 리스트/힌트 같은 DOM UI를 지구본과 같은 타이밍에 맞춰 보여준다.
+    useEffect(() => {
+        onReady?.()
+    }, [])
 
     const earthRef = useRef()
     const cloudeRef = useRef()
@@ -548,6 +556,11 @@ function EarthScreen() {
     // or a drag) — so it invites without lingering as permanent chrome.
     const [hintOn, setHintOn] = useState(true)
     const isMobile = useIsMobile()
+    // 지구본 텍스처가 로드되는 동안 리스트/힌트 같은 DOM UI가 먼저 혼자
+    // 떠 있다가 나중에 지구본만 뒤늦게 나타나던 문제 — EarthModel이 실제로
+    // 마운트되는(=텍스처 준비 완료) 시점까지 이 UI 전체를 같이 숨겨서,
+    // 준비되면 한 번에 같이 나타나도록 통일한다.
+    const [sceneReady, setSceneReady] = useState(false)
 
     // 화면 자체의 페이드인은 이제 공용 PageTransition이 담당한다. 예전엔
     // 여기서 opacity를 0.5초 지연 후 따로 올렸는데, PageTransition의 페이드와
@@ -576,27 +589,29 @@ function EarthScreen() {
 
     return (
         <div className="earthContainer" onPointerDown={() => setHintOn(false)}>
-            <DestinationList
-                activeId={activeId}
-                activeColor={activeColor}
-                onSelect={handleSelect}
-                mobile={isMobile}
-            />
+            <div className={sceneReady ? 'earth-ui ready' : 'earth-ui'}>
+                <DestinationList
+                    activeId={activeId}
+                    activeColor={activeColor}
+                    onSelect={handleSelect}
+                    mobile={isMobile}
+                />
 
-            <PlaceCard
-                ref={overlayRef}
-                mobile={isMobile}
-                onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point, accentColor: activeColor } })}
-            />
+                <PlaceCard
+                    ref={overlayRef}
+                    mobile={isMobile}
+                    onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point, accentColor: activeColor } })}
+                />
 
-            <div className="country-info-show" ref={countryInfo}>
-                <div className="name-info" ref={countryInfoName}></div>
-            </div>
+                <div className="country-info-show" ref={countryInfo}>
+                    <div className="name-info" ref={countryInfoName}></div>
+                </div>
 
-            {/* Minimal entry hint — invites, then fades on first interaction */}
-            <div className={hintOn ? 'earth-hint' : 'earth-hint hidden'}>
-                <span className="earth-hint-lead">SELECT A DESTINATION</span>
-                <span className="earth-hint-sub">여행지를 선택하거나 지구를 돌려보세요</span>
+                {/* Minimal entry hint — invites, then fades on first interaction */}
+                <div className={hintOn ? 'earth-hint' : 'earth-hint hidden'}>
+                    <span className="earth-hint-lead">SELECT A DESTINATION</span>
+                    <span className="earth-hint-sub">여행지를 선택하거나 지구를 돌려보세요</span>
+                </div>
             </div>
 
             {/* near/far tightened from R3F's default (0.1/1000) — that huge a range
@@ -612,10 +627,10 @@ function EarthScreen() {
                         overlayRef={overlayRef}
                         onPointPick={handlePointPick}
                         isMobile={isMobile}
+                        onReady={() => setSceneReady(true)}
                     />
                 </Suspense>
             </Canvas>
-            <Loader />
         </div>
     )
 }

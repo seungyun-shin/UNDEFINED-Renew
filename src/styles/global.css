@@ -299,6 +299,16 @@ a { text-decoration: none; }
   height: 100dvh; /* avoids the mobile address-bar 100vh jump */
   background-color: #01040c;
 }
+/* 지구본 텍스처가 로드될 때까지 리스트/힌트 등 DOM UI를 같이 숨겨서,
+준비되면 지구본과 한 타이밍에 같이 나타나게 한다 (position은 안 건드려서
+absolute/fixed 자식들의 containing block에 영향 없음). */
+.earth-ui {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.earth-ui.ready {
+  opacity: 1;
+}
 /* ── destination list (earth screen) ────────────── */
 .destination-list {
   position: absolute;
