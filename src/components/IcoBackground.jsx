@@ -8,7 +8,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 
 import { icoVertex, icoFragment, icoFragmentLines, PostProcessing } from '../shaders/icoshadren'
 import { onIcoTransition } from '../lib/icoBus'
-import landscape from '../assets/textures/skytexture.png'
+import landscape from '../assets/textures/skytexture.jpg'
 
 function IcoBackground() {
 

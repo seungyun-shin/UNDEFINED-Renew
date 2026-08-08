@@ -15,7 +15,7 @@ import EarthDayMap from '../assets/textures/2k_earth_daymap.jpg'
 import EarthNormalMap from '../assets/textures/2k_earth_normal_map.jpg'
 import EarthSpecularMap from '../assets/textures/2k_earth_specular_map.jpg'
 import EarthCloudMap from '../assets/textures/2k_earth_clouds.jpg'
-import Landscape from '../assets/textures/skytexture.png'
+import Landscape from '../assets/textures/skytexture.jpg'
 import Landscape2 from '../assets/textures/test2.jpg'
 
 // lat/lon → position on the sphere surface (radius 2), same math as the original
