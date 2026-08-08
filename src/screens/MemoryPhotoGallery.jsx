@@ -82,12 +82,6 @@ function MemoryPhotoGallery() {
                 document.body
             )}
 
-            {/* 그리드가 화면 맨 위부터 시작해서, 스크롤 중 어떤 사진이 지나가든
-            헤더 글자가 항상 또렷하게 읽히도록 헤더 뒤에 고정 그라데이션을
-            깐다. 헤더는 .memory-gallery의 내부 스크롤과 무관하게 화면에
-            고정돼 있어서, 이 scrim도 position:fixed로 항상 같이 떠 있는다. */}
-            <div className="gallery-header-scrim" aria-hidden="true" />
-
             {/* 히어로 배너 없이, 장소 이름을 사진들과 같은 그리드 타일 하나로
             통합한다 — "배너 + 콘텐츠"라는 흔한 템플릿 구조 자체를 없앤다.
             카드 배경엔 mainImg를 깔고, 메인페이지와 같은 mix-blend-mode로

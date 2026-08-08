@@ -647,27 +647,18 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   color: var(--accent, #C9A063);
 }
 
-.gallery-header-scrim {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 18vh;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
-  pointer-events: none;
-  z-index: 10;
-}
-
 /* 히어로 없이 이름 카드는 그리드 안에 그대로 두되, 타일 크기는 메인
 브랜치에 있던 비대칭 리듬(큰 타일 하나 + 작은 타일들 반복, 12장마다
 풀와이드 브레이크아웃)으로 되돌린다 — 5열 균일 그리드는 사진이 너무
-작고 화질도 아쉬워서 되돌아감. */
+작고 화질도 아쉬워서 되돌아감. 그라데이션 scrim 대신, 헤더 높이만큼
+그냥 아래에서 시작하도록 상단 여백을 준다(더 단순하고 명확함). */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: 190px;
   grid-auto-flow: dense;
   gap: 12px;
+  padding-top: 18vh;
 }
 .gallery-tile,
 .gallery-id-card {
