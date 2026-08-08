@@ -8,10 +8,10 @@ function toThumb(src) {
 }
 
 // .gallery-tile:nth-child(7n+1)/(11n+5) CSS 리듬과 반드시 같은 식이어야 한다.
-// nth-child는 이름 카드(첫 번째 자식)까지 포함해서 세므로, 사진 배열의
-// 0-based 인덱스 i는 DOM 위치 i+2에 해당한다 — 그래서 오프셋이 이렇게 어긋난다.
+// 이름 카드 없이 사진이 첫 번째 자식이라, 0-based 인덱스 i가 그대로
+// DOM 위치 i+1에 해당한다.
 function isLargeTile(i) {
-    return i % 7 === 6 || i % 11 === 3
+    return i % 7 === 0 || i % 11 === 4
 }
 
 function MemoryPhotoGallery() {
@@ -82,19 +82,9 @@ function MemoryPhotoGallery() {
                 document.body
             )}
 
-            {/* 히어로 배너 없이, 장소 이름을 사진들과 같은 그리드 타일 하나로
-            통합한다 — "배너 + 콘텐츠"라는 흔한 템플릿 구조 자체를 없앤다.
-            카드 배경엔 mainImg를 깔고, 메인페이지와 같은 mix-blend-mode로
-            이름을 얹어서 밋밋한 flat 카드보다 존재감을 준다. */}
+            {/* 이름 카드는 일단 빼고 사진 그리드만 — 카드 형태는 다른 방법을
+            다시 고민해보기로 함. */}
             <div className="gallery-grid">
-                <div
-                    className="gallery-id-card"
-                    style={countryPoint.mainImg ? { backgroundImage: `url(${countryPoint.mainImg})` } : undefined}
-                >
-                    <h1>{countryPoint.name}</h1>
-                    {photos.length > 0 && <span className="gallery-count">{photos.length} PHOTOS</span>}
-                </div>
-
                 {photos.map((img, i) => {
                     // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
                     // 사진을 끼워 스크롤에 숨 쉬는 지점을 만든다.
