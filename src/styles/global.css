@@ -647,6 +647,17 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   color: var(--accent, #C9A063);
 }
 
+.gallery-header-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 18vh;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  pointer-events: none;
+  z-index: 10;
+}
+
 /* 히어로 없이 이름 카드는 그리드 안에 그대로 두되, 타일 크기는 메인
 브랜치에 있던 비대칭 리듬(큰 타일 하나 + 작은 타일들 반복, 12장마다
 풀와이드 브레이크아웃)으로 되돌린다 — 5열 균일 그리드는 사진이 너무
