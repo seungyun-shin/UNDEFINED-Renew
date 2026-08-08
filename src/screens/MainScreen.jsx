@@ -71,7 +71,7 @@ function MainScreen() {
             y: 70,
             opacity: 0,
             ease: 'power4.out',
-        }, 4.15)
+        }, 4.0)
 
         })
 
