@@ -52,10 +52,14 @@ a { text-decoration: none; }
   width: 100vw;
   height: 100vh;
   background: black;
-  /* .main-title/.sub-title는 z-index:103 명시라, opacity와 무관하게 이
-  값보다 낮으면 타이틀이 오버레이 위로 새어 보인다 (스태킹은 opacity가
-  아니라 z-index로 결정됨). 항상 타이틀 위에 확실히 덮이도록 더 높게. */
-  z-index: 150;
+  /* z-index를 일부러 안 준다 — .main-title(z-index:103)이 auto인 이
+  오버레이보다 항상 위에 그려져야, 글자가 커튼 아래서 뜨는 게 아니라
+  검은 배경을 뚫고 위로 올라오는 것처럼 보인다. 이전엔 로드 초기에
+  헤더/타이틀이 GSAP이 숨기기 전 기본 상태로 잠깐 보이는 깜빡임이
+  있었는데, 그건 MainScreen의 훅을 useLayoutEffect로 바꿔 페인트 전에
+  숨기는 것으로 해결했다 (z-index로 덮어서 막는 방식은 캐스케이드
+  애니메이션 자체를 안 보이게 만드는 부작용이 있었다).
+  */
 }
 
 /* ── header ─────────────────────────────────────── */

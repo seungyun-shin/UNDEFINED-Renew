@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import gsap from 'gsap'
 
 import IntroOverlay from '../components/IntroOverlay'
@@ -22,7 +22,12 @@ let hasIntroPlayed = false
 function MainScreen() {
     const [showIntro] = useState(() => !hasIntroPlayed)
 
-    useEffect(() => {
+    // useEffect(일반)는 브라우저가 첫 페인트를 한 뒤에 실행될 수 있어서,
+    // 그 사이 헤더/타이틀이 기본 CSS 상태(완전히 보임)로 잠깐 그려졌다가
+    // GSAP이 숨기는 "깜빡임"이 있었다. useLayoutEffect는 페인트 전에
+    // 동기적으로 실행되도록 보장돼서, 숨겨진 초기 상태가 적용된 뒤에야
+    // 화면이 그려진다 — 깜빡일 프레임 자체가 없어진다.
+    useLayoutEffect(() => {
         icoTransition('reset')
 
         if (!showIntro) return
