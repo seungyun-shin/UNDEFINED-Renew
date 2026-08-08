@@ -475,6 +475,7 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
+  cursor: pointer;
 }
 .place-card.revealed {
   opacity: 1;

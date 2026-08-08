@@ -169,11 +169,12 @@ const PlaceCard = forwardRef(function PlaceCard({ onView, mobile }, ref) {
             <div
                 className={revealed && visible ? 'place-card place-card-mobile revealed' : 'place-card place-card-mobile'}
                 style={{ '--accent': color }}
+                onClick={() => onView(point)}
             >
                 <img src={thumbnailOf(point)} alt="" />
                 <div className="place-card-body">
                     <p className="place-card-name">{point.name}</p>
-                    <button className="place-card-view" onClick={() => onView(point)}>사진 보기 →</button>
+                    <span className="place-card-view">사진 보기 →</span>
                 </div>
             </div>
         )
@@ -208,11 +209,12 @@ const PlaceCard = forwardRef(function PlaceCard({ onView, mobile }, ref) {
             <div
                 className={revealed && visible ? 'place-card revealed' : 'place-card'}
                 style={{ left, top, '--accent': color }}
+                onClick={() => onView(point)}
             >
                 <img src={thumbnailOf(point)} alt="" />
                 <div className="place-card-body">
                     <p className="place-card-name">{point.name}</p>
-                    <button className="place-card-view" onClick={() => onView(point)}>사진 보기 →</button>
+                    <span className="place-card-view">사진 보기 →</span>
                 </div>
             </div>
         </>
