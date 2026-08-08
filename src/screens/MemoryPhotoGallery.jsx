@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 
+function toThumb(src) {
+    return src.replace('/1170/', '/300/')
+}
+
 function MemoryPhotoGallery() {
     const location = useLocation()
     const navigate = useNavigate()
@@ -11,7 +15,6 @@ function MemoryPhotoGallery() {
     const photos = countryPoint?.imgList || []
     const [lightboxIndex, setLightboxIndex] = useState(null)
     const touchStartX = useRef(null)
-    const stripRef = useRef(null)
 
     const closeLightbox = () => setLightboxIndex(null)
     const prevPhoto = () => setLightboxIndex((i) => (i - 1 + photos.length) % photos.length)
@@ -43,28 +46,6 @@ function MemoryPhotoGallery() {
         touchStartX.current = null
     }
 
-    // 트랙패드 없이 마우스 휠만 있는 데스크톱에서도 필름 스트립을
-    // 좌우로 넘길 수 있도록 세로 휠 입력을 가로 스크롤로 바꿔준다.
-    useEffect(() => {
-        const el = stripRef.current
-        if (!el) return
-        const onWheel = (e) => {
-            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return
-            e.preventDefault()
-            el.scrollLeft += e.deltaY
-        }
-        el.addEventListener('wheel', onWheel, { passive: false })
-        return () => el.removeEventListener('wheel', onWheel)
-    }, [photos.length])
-
-    const scrollStrip = (dir) => {
-        const el = stripRef.current
-        if (!el) return
-        const frame = el.querySelector('.filmstrip-frame')
-        const step = frame ? frame.getBoundingClientRect().width + 4 : el.clientWidth * 0.8
-        el.scrollBy({ left: dir * step, behavior: 'smooth' })
-    }
-
     if (!countryPoint) {
         return (
             <div className="memory-gallery">
@@ -84,43 +65,20 @@ function MemoryPhotoGallery() {
                 document.body
             )}
 
-            {countryPoint.mainImg && (
-                <div className="gallery-hero">
-                    <img src={countryPoint.mainImg} alt={countryPoint.name} />
-                    <div className="gallery-hero-overlay">
-                        <h1>{countryPoint.name}</h1>
-                        {photos.length > 0 && <span className="gallery-count">{photos.length} PHOTOS</span>}
-                    </div>
+            {/* 히어로 배너 없이, 장소 이름을 사진들과 같은 그리드 타일 하나로
+            통합한다 — "배너 + 콘텐츠"라는 흔한 템플릿 구조 자체를 없앤다. */}
+            <div className="gallery-grid">
+                <div className="gallery-id-card">
+                    <h1>{countryPoint.name}</h1>
+                    {photos.length > 0 && <span className="gallery-count">{photos.length} PHOTOS</span>}
                 </div>
-            )}
 
-            {photos.length > 0 && (
-                <div className="filmstrip-section">
-                    <div className="filmstrip-sprockets" aria-hidden="true" />
-
-                    <div className="filmstrip" ref={stripRef}>
-                        {photos.map((img, i) => (
-                            <button
-                                key={img.id}
-                                className="filmstrip-frame"
-                                onClick={() => setLightboxIndex(i)}
-                            >
-                                <img src={img.imgSrc} alt={`${countryPoint.name} ${i + 1}`} loading="lazy" />
-                                <span className="frame-number">N° {String(i + 1).padStart(2, '0')}</span>
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="filmstrip-sprockets" aria-hidden="true" />
-
-                    {photos.length > 1 && (
-                        <>
-                            <button className="filmstrip-nav prev" onClick={() => scrollStrip(-1)}>‹</button>
-                            <button className="filmstrip-nav next" onClick={() => scrollStrip(1)}>›</button>
-                        </>
-                    )}
-                </div>
-            )}
+                {photos.map((img, i) => (
+                    <button key={img.id} className="gallery-tile" onClick={() => setLightboxIndex(i)}>
+                        <img src={toThumb(img.imgSrc)} alt={`${countryPoint.name} ${i + 1}`} loading="lazy" />
+                    </button>
+                ))}
+            </div>
 
             {lightboxIndex !== null && createPortal(
                 // 전역 Header가 .overall-Layout(z-index:199)보다 위(200)에 고정돼
