@@ -3,17 +3,6 @@ import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { icoTransition } from '../lib/icoBus'
 
-function toThumb(src) {
-    return src.replace('/1170/', '/300/')
-}
-
-// .gallery-tile:nth-child(7n+1)/(11n+5) CSS 리듬과 반드시 같은 식이어야 한다.
-// 이름 카드 없이 사진이 첫 번째 자식이라, 0-based 인덱스 i가 그대로
-// DOM 위치 i+1에 해당한다.
-function isLargeTile(i) {
-    return i % 7 === 0 || i % 11 === 4
-}
-
 function MemoryPhotoGallery() {
     const location = useLocation()
     const navigate = useNavigate()
@@ -89,17 +78,17 @@ function MemoryPhotoGallery() {
                     // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
                     // 사진을 끼워 스크롤에 숨 쉬는 지점을 만든다.
                     const isBreakout = photos.length > 8 && (i + 1) % 12 === 0
-                    // 큰 타일(2x2 등)에 작은 썸네일을 늘려 쓰면 흐릿해진다 —
-                    // 크게 표시되는 타일은 원본을 쓴다.
-                    const useFullRes = isBreakout || isLargeTile(i)
                     return (
                         <button
                             key={img.id}
                             className={isBreakout ? 'gallery-tile gallery-breakout' : 'gallery-tile'}
                             onClick={() => setLightboxIndex(i)}
                         >
+                            {/* 타일 크기와 무관하게 항상 원본(1170px) — loading="lazy"라
+                            스크롤해서 보이는 만큼만 점진적으로 받아오므로, 화면에 안
+                            보이는 사진들 때문에 처음부터 무거워지진 않는다. */}
                             <img
-                                src={useFullRes ? img.imgSrc : toThumb(img.imgSrc)}
+                                src={img.imgSrc}
                                 alt={`${countryPoint.name} ${i + 1}`}
                                 loading="lazy"
                             />
