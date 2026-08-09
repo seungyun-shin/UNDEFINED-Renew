@@ -726,11 +726,14 @@ pointer-events:none이라 겹친 사진도 그대로 클릭된다. */
   mix-blend-mode: difference;
 }
 
+/* 타일 배치(어떤 사진이 몇 칸을 차지하는지)는 MemoryPhotoGallery.jsx의
+layoutGallery()가 JS에서 직접 계산해 grid-column/row 인라인 스타일로 지정한다
+— CSS auto-flow에 맡기면(구 nth-child+dense 방식) 풀와이드 브레이크아웃 앞에서
+칸이 어중간하게 비는 문제가 있었다. 여기 grid는 열 수/행 높이/간격만 정의. */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: 190px;
-  grid-auto-flow: dense;
   gap: 12px;
 }
 .gallery-tile {
@@ -768,23 +771,9 @@ pointer-events:none이라 겹친 사진도 그대로 클릭된다. */
   transform: translateY(0);
 }
 
-/* 리듬: 큰 타일 하나 + 작은 타일들이 반복되는 비대칭 패턴 */
-.gallery-tile:nth-child(7n+1) {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-.gallery-tile:nth-child(11n+5) {
-  grid-row: span 2;
-}
-.gallery-tile.gallery-breakout {
-  grid-column: 1 / -1;
-  grid-row: span 3;
-}
-
 @media (max-width: 900px) {
   .gallery-title { margin-bottom: -8vw; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; gap: 8px; }
-  .gallery-tile:nth-child(7n+1) { grid-column: span 2; grid-row: span 2; }
 }
 
 .gallery-lightbox {
