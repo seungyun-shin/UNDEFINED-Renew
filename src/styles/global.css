@@ -697,22 +697,33 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
 풀와이드 브레이크아웃)으로 되돌린다 — 5열 균일 그리드는 사진이 너무
 작고 화질도 아쉬워서 되돌아감. 그라데이션 scrim 대신, 헤더 높이만큼
 그냥 아래에서 시작하도록 상단 여백을 준다(더 단순하고 명확함). */
+/* 원본 사이트의 "가운데 정렬 + 반투명 큰 Romelio 타이틀" 정신을 이어받되,
+가운데 대신 그리드/헤더와 같은 왼쪽 정렬로, 반투명 대신 메인페이지
+CREATOR/UNDEFINED와 같은 mix-blend-mode로 — 따로 뜬 배너가 아니라 그리드
+첫 줄 사진과 살짝 겹치게 걸쳐서 레이아웃에 섞여 들어가도록 한다.
+pointer-events:none이라 겹친 사진도 그대로 클릭된다. */
 .gallery-title {
-  padding: 14vh 6% 3vh;
+  position: relative;
+  z-index: 2;
+  padding: 14vh 6% 0;
+  margin-bottom: -4vw;
+  pointer-events: none;
 }
 .gallery-title h1 {
   font-family: 'Romelio';
-  font-size: 2.6rem;
+  font-size: 6.5vw;
   color: #fff;
   margin: 0;
-  line-height: 1.05;
+  line-height: 1;
+  mix-blend-mode: difference;
 }
 .gallery-count {
   display: block;
   margin-top: 0.6rem;
   font-size: 0.72rem;
   letter-spacing: 0.16em;
-  color: var(--accent, #C9A063);
+  color: #fff;
+  mix-blend-mode: difference;
 }
 
 .gallery-grid {
@@ -771,7 +782,7 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
 }
 
 @media (max-width: 900px) {
-  .gallery-title h1 { font-size: 2rem; }
+  .gallery-title { margin-bottom: -8vw; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; gap: 8px; }
   .gallery-tile:nth-child(7n+1) { grid-column: span 2; grid-row: span 2; }
 }
