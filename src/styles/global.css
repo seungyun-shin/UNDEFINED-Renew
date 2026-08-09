@@ -639,7 +639,7 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   position: fixed;
   inset: 0;
   overflow-y: auto;
-  background: #050505;
+  background: #1c1c1c;
   color: #dfd3c3;
   padding-bottom: 10vh;
 }
