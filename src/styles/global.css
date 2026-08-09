@@ -639,9 +639,27 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   position: fixed;
   inset: 0;
   overflow-y: auto;
-  background: #000;
+  background: #050505;
   color: #dfd3c3;
   padding-bottom: 10vh;
+}
+/* 메뉴에 쓴 것과 같은 방식의 정적 그레인 — 타일 사이 얇은 틈에 비치는
+정도라 효과는 은은하지만, 배경이 밋밋한 순검정으로 붕 뜨지 않게 한다.
+그리드 스크롤과 무관하게 화면에 고정돼 있도록 position:fixed. */
+.memory-gallery::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+  animation: grain-flicker 0.5s steps(1) infinite;
+}
+.memory-gallery > * {
+  position: relative;
+  z-index: 1;
 }
 /* countryPoint 없이 들어온 빈 상태 (직접 URL 진입 등) */
 .memory-gallery h1 {
