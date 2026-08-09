@@ -697,13 +697,30 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
 풀와이드 브레이크아웃)으로 되돌린다 — 5열 균일 그리드는 사진이 너무
 작고 화질도 아쉬워서 되돌아감. 그라데이션 scrim 대신, 헤더 높이만큼
 그냥 아래에서 시작하도록 상단 여백을 준다(더 단순하고 명확함). */
+.gallery-title {
+  padding: 14vh 6% 3vh;
+}
+.gallery-title h1 {
+  font-family: 'Romelio';
+  font-size: 2.6rem;
+  color: #fff;
+  margin: 0;
+  line-height: 1.05;
+}
+.gallery-count {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--accent, #C9A063);
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: 190px;
   grid-auto-flow: dense;
   gap: 12px;
-  padding-top: 18vh;
 }
 .gallery-tile {
   position: relative;
@@ -754,6 +771,7 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
 }
 
 @media (max-width: 900px) {
+  .gallery-title h1 { font-size: 2rem; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; gap: 8px; }
   .gallery-tile:nth-child(7n+1) { grid-column: span 2; grid-row: span 2; }
 }

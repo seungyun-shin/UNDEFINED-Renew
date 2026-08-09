@@ -71,8 +71,13 @@ function MemoryPhotoGallery() {
                 document.body
             )}
 
-            {/* 이름 카드는 일단 빼고 사진 그리드만 — 카드 형태는 다른 방법을
-            다시 고민해보기로 함. */}
+            {/* 카드 없이, 그리드 시작 전 헤더 아래 빈 공간에 타이포그래피만
+            — 사이트 전체에서 써온 Romelio로, 별도 배경/테두리 없이. */}
+            <div className="gallery-title">
+                <h1>{countryPoint.name}</h1>
+                {photos.length > 0 && <span className="gallery-count">{photos.length} PHOTOS</span>}
+            </div>
+
             <div className="gallery-grid">
                 {photos.map((img, i) => {
                     // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
