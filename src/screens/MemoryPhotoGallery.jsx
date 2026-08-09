@@ -80,9 +80,14 @@ function MemoryPhotoGallery() {
 
             <div className="gallery-grid">
                 {photos.map((img, i) => {
-                    // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는
-                    // 사진을 끼워 스크롤에 숨 쉬는 지점을 만든다.
-                    const isBreakout = photos.length > 8 && (i + 1) % 12 === 0
+                    // 12장마다 한 번씩 그리드를 깨고 화면 폭 전체를 쓰는 사진을
+                    // 끼워 스크롤에 숨 쉬는 지점을 만든다. 마지막 사진도 항상
+                    // 풀와이드로 마무리해서, 총 장수에 따라 마지막 줄이 어중간하게
+                    // 비어 보이는 걸 막는다.
+                    const isBreakout =
+                        photos.length <= 2 ||
+                        (photos.length > 8 && (i + 1) % 12 === 0) ||
+                        i === photos.length - 1
                     return (
                         <button
                             key={img.id}
