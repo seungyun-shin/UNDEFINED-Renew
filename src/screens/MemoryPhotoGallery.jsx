@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import { icoTransition } from '../lib/icoBus'
 
 // 화면 폭에 따른 그리드 열 수 — CSS .gallery-grid의 브레이크포인트(900px)와 반드시 같아야 한다.
@@ -98,7 +98,6 @@ function layoutGallery(count, cols) {
 
 function MemoryPhotoGallery() {
     const location = useLocation()
-    const navigate = useNavigate()
     const countryPoint = location.state?.countryPoint
     const accent = location.state?.accentColor || '#C9A063'
 
@@ -158,13 +157,9 @@ function MemoryPhotoGallery() {
 
     return (
         <div className="memory-gallery" style={{ '--accent': accent }}>
-            {/* 전역 Header가 .overall-Layout(z-index:199)보다 위(200)라, 이 안의
-            버튼은 z-index를 얼마로 두든 헤더 왼쪽 여백 아래 깔려 클릭이 먹지
-            않았다. body로 포탈해서 그 스태킹 컨텍스트를 벗어난다. */}
-            {createPortal(
-                <button className="gallery-back" style={{ '--accent': accent }} onClick={() => navigate('/MemoryScreen')}>← EARTH</button>,
-                document.body
-            )}
+            {/* ← EARTH 뒤로가기는 이제 Header 컴포넌트가 로고 자리를 대체해서
+            보여준다 (화면 크기 무관) — 예전엔 여기서 별도 fixed 버튼을 body로
+            포탈했는데, 로고랑 겹쳐 보이는 문제가 있었다. */}
 
             {/* 카드 없이, 그리드 시작 전 헤더 아래 빈 공간에 타이포그래피만
             — 사이트 전체에서 써온 Romelio로, 별도 배경/테두리 없이. */}
