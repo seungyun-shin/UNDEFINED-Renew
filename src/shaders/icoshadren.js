@@ -96,7 +96,14 @@ void main(){
     vUv = uv;
     vBary = aBary;
     vNormal=normalize(normalMatrix*normal);
-    float noisy = mouse * pow(cnoise(vNormal + time) , 3.);
+    // GLSL ES 스펙상 pow(x,y)는 x<0이면 결과가 정의되지 않는다(undefined).
+    // cnoise()는 -1~1을 오가는 펄린 노이즈라 절반은 음수인데, Chrome/ANGLE은
+    // 그래도 어느 정도 처리해줬지만 Safari(WebKit)의 pow() 구현은
+    // exp(y*log(x)) 방식이라 log(음수)=NaN이 되고, 그 NaN이 정점 위치를
+    // 오염시켜 지오메트리가 조각조각 찢어져 보였다. 세제곱은 그냥 곱셈
+    // 3번으로 풀면 부호가 안전하게 보존되고 pow()보다 빠르기도 하다.
+    float n = cnoise(vNormal + time);
+    float noisy = mouse * (n * n * n);
 
     vec3 newPosition = position + noisy * normal * 1.3;
 

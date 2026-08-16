@@ -104,8 +104,83 @@ function MemoryPhotoGallery() {
     const photos = countryPoint?.imgList || []
     const [lightboxIndex, setLightboxIndex] = useState(null)
     const touchStartX = useRef(null)
+    const tileRefs = useRef([])
+    const scrollRef = useRef(null)
     const cols = useGalleryCols()
     const layout = useMemo(() => layoutGallery(photos.length, cols), [photos.length, cols])
+
+    // 스크롤 방향/속도에 비례해 사진들이 살짝 비스듬해졌다가(skewY) 스크롤이
+    // 잦아들면 스프링처럼 되돌아온다. 전부 똑같이 움직이면 딱딱해 보여서,
+    // 타일마다 같은 목표 각도(targetAngle)를 서로 다른 속도로 따라가게 한다
+    // — 그리드 아래쪽 줄일수록 살짝 느리게 반응해서 물결치는 느낌을 준다.
+    // 방향/세기도 타일마다 랜덤하게 달라서(directionFactors, -1.2~1.2배)
+    // 어떤 사진은 반대로 기울거나 더 크게/작게 기운다 — 매번 리렌더 때마다
+    // 방향이 바뀌면 산만해지므로 layout이 바뀔 때만(사진 목록/열 수 변경)
+    // 한 번 랜덤을 뽑고 그 다음부턴 고정.
+    // 리스너/루프는 여전히 하나뿐이고(타일마다 리스너를 걸지 않음), 매 프레임
+    // 타일 수만큼 곱셈 몇 번 + transform 대입만 늘어나므로 transform 자체의
+    // 저비용(리페인트 없음, GPU 합성만) 특성은 그대로 유지된다. 스크롤 중일
+    // 때만 rAF가 돌고 전체가 0에 수렴하면 스스로 멈춘다.
+    // .memory-gallery는 position:fixed + 자체 overflow-y:auto라 실제
+    // 스크롤은 window가 아니라 이 컨테이너에서 일어난다 — window에 리스너를
+    // 걸면 스크롤 이벤트가 아예 안 잡힌다.
+    useEffect(() => {
+        const el = scrollRef.current
+        if (!el) return
+
+        const easeFactors = layout.map((cell) => Math.max(0.05, 0.22 - (cell.rowStart - 1) * 0.015))
+        const directionFactors = layout.map(() => (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.7))
+        const currentAngles = new Array(layout.length).fill(0)
+
+        let lastY = el.scrollTop
+        let targetAngle = 0
+        let rafId = null
+
+        const MAX_ANGLE = 4.5
+        const IMPULSE = 0.06
+        const DECAY = 0.85
+        const SETTLE_EPS = 0.02
+
+        const tick = () => {
+            let maxAbs = Math.abs(targetAngle)
+
+            for (let i = 0; i < currentAngles.length; i++) {
+                currentAngles[i] += (targetAngle * directionFactors[i] - currentAngles[i]) * easeFactors[i]
+                if (Math.abs(currentAngles[i]) > maxAbs) maxAbs = Math.abs(currentAngles[i])
+                const node = tileRefs.current[i]
+                if (node) node.style.transform = `skewY(${currentAngles[i].toFixed(3)}deg)`
+            }
+
+            targetAngle *= DECAY
+
+            if (maxAbs < SETTLE_EPS) {
+                targetAngle = 0
+                for (let i = 0; i < currentAngles.length; i++) {
+                    currentAngles[i] = 0
+                    const node = tileRefs.current[i]
+                    if (node) node.style.transform = ''
+                }
+                rafId = null
+                return
+            }
+
+            rafId = requestAnimationFrame(tick)
+        }
+
+        const onScroll = () => {
+            const y = el.scrollTop
+            const delta = y - lastY
+            lastY = y
+            targetAngle = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, targetAngle + delta * IMPULSE))
+            if (rafId === null) rafId = requestAnimationFrame(tick)
+        }
+
+        el.addEventListener('scroll', onScroll, { passive: true })
+        return () => {
+            el.removeEventListener('scroll', onScroll)
+            if (rafId !== null) cancelAnimationFrame(rafId)
+        }
+    }, [layout])
 
     // 지구본 화면과 동일하게, 이 화면을 보는 동안 마블 배경 렌더 루프를
     // 멈춘다 — 안 그러면 화면엔 안 보여도 GPU가 계속 마블을 그리고 있었다.
@@ -156,7 +231,7 @@ function MemoryPhotoGallery() {
     }
 
     return (
-        <div className="memory-gallery" style={{ '--accent': accent }}>
+        <div className="memory-gallery" style={{ '--accent': accent }} ref={scrollRef}>
             {/* ← EARTH 뒤로가기는 이제 Header 컴포넌트가 로고 자리를 대체해서
             보여준다 (화면 크기 무관) — 예전엔 여기서 별도 fixed 버튼을 body로
             포탈했는데, 로고랑 겹쳐 보이는 문제가 있었다. */}
@@ -174,6 +249,7 @@ function MemoryPhotoGallery() {
                     return (
                         <button
                             key={img.id}
+                            ref={(el) => { tileRefs.current[i] = el }}
                             className="gallery-tile"
                             style={{
                                 gridColumn: `${cell.colStart} / span ${cell.w}`,

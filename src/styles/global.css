@@ -800,6 +800,10 @@ layoutGallery()가 JS에서 직접 계산해 grid-column/row 인라인 스타일
   overflow: hidden;
   border: none;
   padding: 0;
+  /* 스크롤 틸트 효과(MemoryPhotoGallery.jsx)가 타일마다 transform을 매
+  프레임 건드린다 — will-change로 미리 합성 레이어를 잡아둬서 틸트가
+  시작되는 첫 프레임에 레이어 승격 비용이 튀지 않게 한다. */
+  will-change: transform;
   background: #0a0a0a;
 }
 .gallery-tile img {
