@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 
@@ -5,9 +6,14 @@ import IcoBackground from './components/IcoBackground'
 import Header from './components/Header'
 import PageTransition from './components/PageTransition'
 import MainScreen from './screens/MainScreen'
-import EarthScreen from './screens/EarthScreen'
 import MemoryPhotoGallery from './screens/MemoryPhotoGallery'
 import UpdatingScreen from './screens/UpdatingScreen'
+
+// EarthScreen만 따로 코드 스플리팅한다 — @react-three/fiber, drei, 지구
+// 텍스처들이 여기에만 쓰이는데도 전부 메인 번들에 같이 묶여서, 메인페이지만
+// 봐도 1.4MB+ 짜리 지구본 코드를 다 받고 있었다. fallback은 null — 배경
+// 마블(IcoBackground)이 항상 떠 있어서 로딩 중에도 빈 화면처럼 안 보인다.
+const EarthScreen = lazy(() => import('./screens/EarthScreen'))
 
 function App() {
     const location = useLocation()
@@ -28,7 +34,7 @@ function App() {
                 <AnimatePresence initial={false}>
                     <Routes location={location} key={location.pathname}>
                         <Route path="/" element={<PageTransition><MainScreen /></PageTransition>} />
-                        <Route path="/MemoryScreen" element={<PageTransition><EarthScreen /></PageTransition>} />
+                        <Route path="/MemoryScreen" element={<PageTransition><Suspense fallback={null}><EarthScreen /></Suspense></PageTransition>} />
                         <Route path="/MemoryPhotoGallery" element={<PageTransition><MemoryPhotoGallery /></PageTransition>} />
                         {/* 아직 리뉴얼 전 페이지들은 원본의 UpdatingScreen 문구로 대체 */}
                         <Route path="*" element={<PageTransition><UpdatingScreen /></PageTransition>} />

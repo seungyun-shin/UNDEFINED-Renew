@@ -261,6 +261,16 @@ function Marker({ point, active, color, onEnter, onLeave, onClick, hitScale = 1 
     )
 }
 
+// 큰 반투명 스프라이트 몇 개를 별들 사이 먼 거리에 흩어놓아, 완전히 빈
+// 암흑 대신 아주 옅은 색 안개(성운 느낌)가 깔리게 한다. 사이트 accent
+// 팔레트(브라스/테라코타/버디그리/모브)를 재사용해서 임의의 색이 아니라
+// 이 사이트만의 톤으로 보이게. opacity가 낮아 육안으론 은은한 분위기 정도.
+const NEBULA_SPOTS = [
+    { position: [40, 25, -70], scale: 150, color: '#B5654A', opacity: 0.14 },
+    { position: [-55, -15, -60], scale: 170, color: '#6E8F82', opacity: 0.16 },
+    { position: [10, -40, -80], scale: 130, color: '#93748F', opacity: 0.17 },
+]
+
 function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overlayRef, onPointPick, isMobile, onReady }) {
 
     const navigate = useNavigate()
@@ -379,11 +389,51 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
         countryInfo.current.style.display = 'none'
     }
 
+    const glowMap = useMemo(() => glowDotTexture(), [])
 
     return (
         <>
-            <ambientLight intensity={1} />
-            <Stars radius={300} depth={60} count={20000} factor={7} saturation={0} fade={true} />
+            {/* 배경(#111111)과 같은 색으로 안개를 깔아서, 지구가 허공에 오려붙인
+            스티커처럼 붕 떠 보이던 걸 완화한다 — 가장자리/뒤쪽 면이 배경 쪽으로
+            자연스럽게 스며든다. Stars는 커스텀 셰이더라 fog 영향을 안 받고
+            그대로 보인다(의도한 동작 — 별까지 흐려지면 안 되니까). */}
+            <fog attach="fog" args={['#111111', 3, 22]} />
+            <ambientLight intensity={1.4} />
+            {/* 원본은 radius=300으로 썼는데, 이 씬 스케일(지구 반지름 2, 카메라
+            거리 5)에서는 별이 너무 멀어서 점 크기가 서브픽셀이 되어 사실상 안
+            보였다(far plane을 넉넉히 늘려도 마찬가지 — 거리 자체가 문제였다).
+            반경을 줄이고 factor로 크기를 보정해서 실제로 보이게 맞췄다. */}
+            {/* 별을 하나의 <Stars>가 아니라 speed가 각각 다른 3겹으로 나눈다 —
+            drei Stars 내부 셰이더는 모든 별이 같은 time uniform을 공유해서
+            반짝임이 한 박자로 동기화되는데, 레이어를 나누면 레이어마다 자기
+            time이 따로 흐르니 그룹별로 다른 리듬으로 반짝여 훨씬 생동감
+            있어 보인다(진짜 별 하나하나 독립은 아니지만 커스텀 셰이더 없이
+            기존 컴포넌트 조합만으로 가능). */}
+            {/* speed=1 기준 한 번 깜빡이는 주기가 약 6.3초라 거의 안 느껴졌다
+            (픽셀 diff로는 변화가 잡히는데 육안으론 거의 무감지) — 속도를
+            훨씬 올리고 factor도 살짝 키워서 크기 변화 폭 자체를 키운다. */}
+            <Stars radius={60} depth={40} count={2500} factor={6.5} saturation={0} fade={true} speed={2} />
+            <Stars radius={60} depth={40} count={2000} factor={6.5} saturation={0} fade={true} speed={4} />
+            <Stars radius={60} depth={40} count={1500} factor={6.5} saturation={0} fade={true} speed={6} />
+
+            {/* 완전히 빈 암흑 대신, 아주 옅은 색 안개(성운) 스프라이트 몇 개를
+            멀리 흩어놓아 우주가 밋밋해 보이지 않게 한다. 지도 마커에 쓰는
+            것과 같은 부드러운 원형 글로우 텍스처를 재사용.
+            fog={false} 필수 — 이 스프라이트들은 원점에서 80~90유닛이나
+            떨어져 있어서, 지구용으로 잡은 안개(far=22)에 걸리면 완전히
+            안개색에 파묻혀 안 보이게 된다. */}
+            {NEBULA_SPOTS.map((spot, i) => (
+                <sprite key={i} position={spot.position} scale={[spot.scale, spot.scale, 1]}>
+                    <spriteMaterial
+                        map={glowMap}
+                        color={spot.color}
+                        transparent
+                        opacity={spot.opacity}
+                        depthWrite={false}
+                        fog={false}
+                    />
+                </sprite>
+            ))}
             <OrbitControls
                 ref={controlsRef}
                 enableZoom={true}
@@ -412,7 +462,12 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
             <mesh ref={earthRef} position={[0, 0, 0]}>
                 <sphereGeometry args={[2, 32, 32]} />
                 <meshPhongMaterial specularMap={specularMap} />
-                <meshStandardMaterial map={colorMap} normalMap={normalMap} metalness={0.39} roughness={0.7} />
+                {/* color가 기본 흰색이면 map(NASA 위성사진)이 그대로 나와서
+                선명한 사진처럼 보인다. 살짝 따뜻한 크림색으로 곱해서(map과
+                color는 곱연산) 배경의 빈티지 톤과 어울리게 하되, 처음에
+                #f0e4cc(파랑 채널 -20%)는 바다색을 너무 어둡게 죽였다 —
+                채널 감쇠를 훨씬 약하게 잡아서 밝기는 유지하면서 톤만 살짝. */}
+                <meshStandardMaterial map={colorMap} normalMap={normalMap} metalness={0.25} roughness={0.7} color="#fbf3e2" />
 
                 {countryPoints.map((point) => (
                     <Marker
@@ -430,14 +485,16 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
 
             {/* Project planet — opens its own photo gallery, same as a travel point.
                 Raised from y=2 to clear the (now wider) destination list, which
-                otherwise sits on top of it in the DOM and swallows the click. */}
+                otherwise sits on top of it in the DOM and swallows the click.
+                fog={false} on both meshes — 카메라에서 ~12유닛 떨어져 있어서
+                지구용 안개(far=22)에 걸리면 절반 가까이 검게 죽어버린다. */}
             <mesh
                 position={PROJECT_PLANET_POS}
                 onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: planetGalleries.project } })}
                 ref={projectPlanetCover}
             >
                 <icosahedronGeometry args={[1.35, 1]} />
-                <meshPhongMaterial map={landscape} opacity={0.7} depthWrite={true} transparent={true} side={THREE.DoubleSide} />
+                <meshPhongMaterial map={landscape} opacity={0.7} depthWrite={true} transparent={true} side={THREE.DoubleSide} fog={false} />
             </mesh>
             <mesh
                 position={PROJECT_PLANET_POS}
@@ -447,7 +504,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 onPointerOut={infoShowingDown}
             >
                 <icosahedronGeometry args={[1.3, 1]} />
-                <meshPhongMaterial color={0xffffff} opacity={1} side={THREE.DoubleSide} />
+                <meshPhongMaterial color={0xffffff} opacity={1} side={THREE.DoubleSide} fog={false} />
             </mesh>
 
             {/* Appreciate planet — opens its own photo gallery, same as a travel point */}
@@ -457,7 +514,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 ref={thanksPlanetCover}
             >
                 <tetrahedronGeometry args={[1.5, 3]} />
-                <meshPhongMaterial map={landscape2} opacity={0.7} depthWrite={true} transparent={true} side={THREE.DoubleSide} />
+                <meshPhongMaterial map={landscape2} opacity={0.7} depthWrite={true} transparent={true} side={THREE.DoubleSide} fog={false} />
             </mesh>
             <mesh
                 position={[9, -3, -3]}
@@ -467,7 +524,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 onPointerOut={infoShowingDown}
             >
                 <tetrahedronGeometry args={[1.45, 3]} />
-                <meshPhongMaterial color={0x000000} opacity={1} side={THREE.DoubleSide} />
+                <meshPhongMaterial color={0x000000} opacity={1} side={THREE.DoubleSide} fog={false} />
             </mesh>
         </>
     )
@@ -621,7 +678,11 @@ function EarthScreen() {
                 지구본이 로드되는 순간 바로 픽셀이 그려진다 — CSS 트랜지션이
                 안 걸린 채였어서, 리스트/힌트는 같이 페이드인해도 지구본만
                 "팍" 하고 켜졌다. .earth-ui 안으로 옮겨 같은 페이드를 공유한다. */}
-                <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 5], near: 0.5, far: 40 }}>
+                {/* far:40이면 별(Stars, 아래 EarthModel 참고)이 카메라 far
+                plane 밖이라 완전히 안 보였다. far를 늘려서 별의 거리를
+                감당할 수 있게 한다 — 지구·마커 규모(반경 2 안팎)엔 이 정도
+                near/far 범위로도 깊이 정밀도 영향이 체감되지 않는다. */}
+                <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 5], near: 0.5, far: 200 }}>
                     <Suspense fallback={null}>
                         <EarthModel
                             countryInfo={countryInfo}
