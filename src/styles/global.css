@@ -745,8 +745,11 @@ pointer-events:none이라 겹친 사진도 그대로 클릭된다. */
   padding: 13vh 6% 0.5vh;
   /* line-height:1.6(아래 h1) 때문에 글자 박스 안에 보이지 않는 여백이
   약 2vw 깔려있다 — padding-bottom을 아무리 줄여도 이 안쪽 여백엔
-  영향이 없어서, 음수 마진으로 그만큼 끌어올린다. */
-  margin-bottom: -2vw;
+  영향이 없어서, 음수 마진으로 그만큼 끌어올린다.
+  vw 단위라 노트북(1440px대)에 맞춰 잡았더니, 훨씬 넓은 데스크탑
+  모니터(2560px 등)에서는 이 값이 폭에 비례해 계속 커져서 사진을
+  파고들었다 — clamp로 노트북 기준값 이상은 더 안 세지게 상한을 둔다. */
+  margin-bottom: clamp(-1.8rem, -2vw, -0.5rem);
   pointer-events: none;
   display: flex;
   align-items: baseline;
@@ -759,7 +762,9 @@ background-blend-mode:overlay로 섞어서 "accent색 그레인"이 되게 한�
 바깥쪽 mix-blend-mode:difference는 그대로라 사진 위에서도 계속 섞여든다. */
 .gallery-title h1 {
   font-family: 'Romelio';
-  font-size: 6.5vw;
+  /* 노트북 폭(1440px대)에서 6.5vw≈93.6px였다 — 그보다 넓은 화면에서
+  글자가 계속 커지지 않도록 6rem(96px)에서 상한을 둔다. */
+  font-size: clamp(2.5rem, 6.5vw, 6rem);
   margin: 0;
   line-height: 1.6;
   mix-blend-mode: difference;
