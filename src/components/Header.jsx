@@ -1,7 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { icoTransition } from '../lib/icoBus'
+
+// 갤러리/ABOUT처럼 실제로 세로 스크롤이 있는 페이지에서만: 아래로 스크롤하면
+// 헤더가 위로 슬라이드아웃되고, 위로 스크롤하면 다시 나타난다. 두 화면 다
+// position:fixed + 자체 overflow-y(About은 Lenis)로 스크롤되는 컨테이너라
+// window가 아니라 그 컨테이너에 직접 리스너를 건다. 페이지 맨 위 근처에서는
+// 방향과 무관하게 항상 보이게 해서 "처음엔 살짝 내렸는데 바로 숨는" 어색함을
+// 막는다.
+const SCROLL_HIDE_SELECTORS = {
+    '/MemoryPhotoGallery': '.memory-gallery',
+    '/AboutMe': '.about-screen',
+}
 
 // MEMORY는 EarthScreen이 마운트되면서 자기 hide 트랜지션을 직접 거는데,
 // 여기서 zoomHide까지 같이 쏘면 막 시작된 다이브 애니메이션을 EarthScreen의
@@ -18,6 +29,7 @@ const MENUS = [
 
 function Header() {
     const [click, setClick] = useState(false)
+    const [hidden, setHidden] = useState(false)
     const location = useLocation()
     const isGallery = location.pathname === '/MemoryPhotoGallery'
 
@@ -26,8 +38,34 @@ function Header() {
         if (mode) icoTransition(mode)
     }
 
+    useEffect(() => {
+        const selector = SCROLL_HIDE_SELECTORS[location.pathname]
+        if (!selector) { setHidden(false); return }
+
+        const el = document.querySelector(selector)
+        if (!el) return
+
+        let lastY = el.scrollTop
+        const onScroll = () => {
+            const y = el.scrollTop
+            const delta = y - lastY
+            lastY = y
+            if (y < 80) setHidden(false)
+            else if (delta > 4) setHidden(true)
+            else if (delta < -4) setHidden(false)
+        }
+        el.addEventListener('scroll', onScroll, { passive: true })
+        return () => el.removeEventListener('scroll', onScroll)
+    }, [location.pathname])
+
+    // 메뉴가 열려있는데 헤더가 숨겨지면 메뉴만 화면 위쪽 허공에 뜬 것처럼
+    // 보이므로, 숨겨질 땐 열린 메뉴도 같이 닫는다.
+    useEffect(() => {
+        if (hidden) setClick(false)
+    }, [hidden])
+
     return (
-        <div className="header-wraper">
+        <div className={hidden ? 'header-wraper header-hidden' : 'header-wraper'}>
             <div className="header-container">
                 <nav className="navbar">
                     <div className="logo">

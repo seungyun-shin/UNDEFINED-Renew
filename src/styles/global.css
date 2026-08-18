@@ -72,6 +72,18 @@ a { text-decoration: none; }
   color: white;
   font-size: 1rem;
   z-index: 200;
+  /* 갤러리/ABOUT 스크롤 중에만 Header.jsx가 이 클래스를 토글한다 — 이동 없이
+  opacity+blur로 잔상처럼 천천히 스며들듯 페이드. pointer-events는 꺼서,
+  투명해진 동안 헤더가 그 자리에 그대로 있으면서 아래 콘텐츠의 클릭/호버를
+  가로채지 않게 한다. */
+  opacity: 1;
+  filter: blur(0px);
+  transition: opacity 0.33s ease, filter 0.33s ease;
+}
+.header-wraper.header-hidden {
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
 }
 .header-container {
   display: flex;
@@ -894,4 +906,315 @@ layoutGallery()가 JS에서 직접 계산해 grid-column/row 인라인 스타일
 }
 @media (max-width: 600px) {
   .lightbox-nav { font-size: 2.2rem; padding: 0.4rem 0.6rem; }
+}
+
+/* ── ABOUT ───────────────────────────────────────
+bouayaben.com 레퍼런스에서 가져온 절제된 에디토리얼 톤 — 카드/배경색 없이
+아주 굵은 Romelio 타이포와 번호형 한 줄 리스트, 포인트 컬러는 브라스
+하나만. 갤러리와 같은 이유로 그레인은 애니메이션 없이 정적으로만 깐다
+(Lenis가 매 프레임 스크롤을 갱신하는 페이지라 애니메이션 그레인을 얹으면
+전에 갤러리에서 겪은 스크롤 프레임 드랍이 재현될 수 있다). */
+.about-screen {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  /* earthContainer/memory-gallery와 같은 배경색으로 통일 — 마블
+  clearColor(#111111)와 맞춘 사이트 공통 중성색. */
+  background: #111111;
+  color: #e8e2d6;
+}
+.about-screen::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  /* 갤러리와 같은 세기(0.18) + 애니메이션. 갤러리 때와 달리 여기선 스크롤
+  중 longtask 0건, 최대 프레임 간격 18.4ms(60fps 예산 16.7ms에 근접, 33ms
+  이상 드랍은 0건)로 실측 확인 — Lenis 스크롤엔 이미지 디코딩 부담이
+  없어서 갤러리(사진 51장)와 달리 애니메이션 그레인을 얹어도 안전하다. */
+  opacity: 0.18;
+  animation: grain-flicker 0.5s steps(1) infinite;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.about-wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+/* padding-top을 헤더 높이(.header-container height:9vh)만큼 줘서, 그
+아래 남는 공간 기준으로 가운데 정렬되게 한다 — 안 그러면 justify-content:
+center가 헤더까지 포함한 전체 100vh 기준으로 잡혀서 실제로 보이는 영역
+에서는 위로 치우쳐 보인다. */
+.about-hero { min-height: 100vh; padding-top: 9vh; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.about-eyebrow {
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: #C9A063;
+  margin-bottom: 36px;
+  /* 진입 애니메이션(글자가 아래에서 올라옴)이 라인 밖에서 시작해 마스킹된
+  채 드러나도록 — MainScreen의 .main-title-wraper와 같은 기법. */
+  overflow: hidden;
+}
+.about-hero-title {
+  font-family: 'Romelio', serif;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #f5efe4;
+  max-width: 20ch;
+}
+/* overflow:hidden 마스킹 박스가 line-height 기준으로만 높이를 잡으면
+g/y/p 같은 디센더가 박스 아래로 살짝 삐져나가 잘린다 — padding-bottom으로
+클리핑 경계를 여유 있게 내려준다(padding은 border-box 안쪽이라 overflow
+클리핑 범위에 포함된다). */
+.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); overflow: hidden; padding-bottom: 0.32em; margin-bottom: -0.32em; }
+.about-hero-role {
+  font-size: clamp(2.8rem, 7.4vw, 6.4rem);
+  margin-top: 8px;
+  overflow: hidden;
+  padding-bottom: 0.32em;
+  margin-bottom: -0.32em;
+  color: #C9A063;
+  max-width: none;
+  white-space: nowrap;
+  /* overflow:hidden(진입 마스킹용)이 block 기본폭(부모 너비 100%)을
+  기준으로 nowrap 텍스트를 잘라버리는 걸 막는다 — 박스 자체를 내용
+  너비만큼 키운다. */
+  width: fit-content;
+}
+@media (max-width: 900px) {
+  .about-hero-role { white-space: normal; width: auto; }
+}
+.about-hero-sub {
+  margin-top: 44px;
+  max-width: 560px;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  font-weight: 300;
+  color: #cbc3b4;
+}
+.about-hero-sub-en {
+  margin-top: 14px;
+  max-width: 560px;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  font-weight: 300;
+  font-style: italic;
+  color: #706a5e;
+}
+.about-scroll-cue {
+  margin-top: 80px;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.24em;
+  color: #706a5e;
+}
+/* 깜빡임(breathe)은 안쪽 span에 따로 건다 — 바깥 .about-scroll-cue는
+히어로 캐스케이드 리빌(JS, opacity+y)이 이미 잡고 있어서, 같은 엘리먼트에
+CSS opacity 애니메이션까지 얹으면 둘이 서로의 값을 덮어써 진입 애니메이션이
+끝나는 순간 밝기가 툭 튀는 충돌이 생긴다. */
+.about-scroll-cue-pulse {
+  display: inline-block;
+  animation: scroll-cue-breathe 2.4s ease-in-out infinite;
+}
+@keyframes scroll-cue-breathe {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-scroll-cue-pulse { animation: none; }
+}
+
+.about-section { padding: 160px 0; }
+.about-label {
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #706a5e;
+  margin-bottom: 44px;
+}
+.about-accent { color: #C9A063; }
+
+/* 철학 문구 — 번호/컬럼으로 쪼개지 않고 하나로 흐르는 글. 섹션을 100vh로
+잡고 가운데 정렬해서 히어로처럼 "한 화면" 느낌을 주고, 폭은 읽기 좋은
+선에서 제한해 여백이 곧 레이아웃이 되게 한다. */
+.about-philosophy-section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+.about-philosophy {
+  font-family: 'Romelio', serif;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.3vw, 1.85rem);
+  line-height: 1.8;
+  color: #cbc3b4;
+  max-width: 62ch;
+}
+.about-philosophy .about-accent { color: #C9A063; }
+@media (max-width: 900px) {
+  .about-philosophy-section { min-height: auto; padding: 100px 0; }
+  .about-philosophy { max-width: none; }
+}
+
+/* Career 때 쓰던 "번호 + 큰 제목 + 설명 + 우측 메타" 한 줄 리스트 —
+Recognition(특허/자격증)에서 재사용. */
+.about-row {
+  border-top: 1px solid rgba(232,226,214,0.13);
+  padding: 44px 0;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: baseline;
+  gap: 28px;
+}
+.about-row:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
+.about-row-num { font-family: 'sarrif', sans-serif; font-size: 0.82rem; color: #706a5e; }
+.about-row-main h3 { font-family: 'Romelio', serif; font-weight: 400; font-size: clamp(1.9rem, 4.4vw, 3.1rem); color: #f5efe4; line-height: 1.05; }
+.about-row-main p { margin-top: 14px; font-size: 0.96rem; font-weight: 300; color: #706a5e; max-width: 60ch; }
+.about-row-meta { text-align: right; font-family: 'sarrif', sans-serif; font-size: 0.72rem; letter-spacing: 0.06em; color: #706a5e; white-space: nowrap; }
+.about-row-meta b { display: block; color: #e8e2d6; font-family: 'Roboto', sans-serif; font-weight: 400; font-size: 0.86rem; letter-spacing: 0; margin-bottom: 6px; }
+@media (max-width: 700px) {
+  .about-row { grid-template-columns: 1fr; gap: 10px; }
+  .about-row-meta { text-align: left; }
+}
+
+/* ── About Timeline (single sequential list + sticky year) ──
+세로선 하나가 스크롤 진행률만큼 위에서부터 그려지고, 그 옆에 항목이 순서대로
+나열된다. 왼쪽 sticky 패널은 지금 화면 중앙을 지나는 항목의 연도/직함을
+따라 갱신되고(JS, IntersectionObserver), 항목 뒤로는 그 해의 연도가 아주
+흐리게 큼직한 배경 숫자로 깔린다. */
+.about-timeline-wrap { display: flex; align-items: flex-start; gap: 64px; }
+.about-timeline-sticky {
+  position: sticky;
+  top: 38vh;
+  width: 200px;
+  flex-shrink: 0;
+}
+.about-timeline-sticky-year {
+  font-family: 'Romelio', serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 4.2vw, 3.6rem);
+  color: #C9A063;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.about-timeline-sticky-title {
+  margin-top: 12px;
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: #a8a094;
+  max-width: 200px;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.about-timeline { position: relative; flex: 1; max-width: 640px; }
+.about-timeline-ghost {
+  position: absolute;
+  right: 0;
+  top: -0.2em;
+  font-family: 'Romelio', serif;
+  font-size: clamp(4rem, 8vw, 6.5rem);
+  line-height: 1;
+  color: rgba(232,226,214,0.05);
+  pointer-events: none;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  z-index: -1;
+}
+.about-timeline-track {
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: rgba(232,226,214,0.15);
+}
+.about-timeline-progress {
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  width: 1px;
+  height: 0%;
+  background: #C9A063;
+}
+.about-timeline-item {
+  position: relative;
+  padding: 0 0 56px 48px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.about-timeline-item:last-child { padding-bottom: 0; }
+.about-timeline-item.in { opacity: 1; transform: none; }
+.about-timeline-node {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #C9A063;
+  border: 2px solid #111111;
+}
+.about-timeline-date {
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: #706a5e;
+  margin-bottom: 8px;
+}
+.about-timeline-type {
+  display: inline-block;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: #C9A063;
+  margin-bottom: 10px;
+}
+.about-timeline-item h3 { font-family: 'Romelio', serif; font-weight: 400; font-size: clamp(1.5rem, 3vw, 2.1rem); color: #f5efe4; line-height: 1.15; }
+.about-timeline-item p { margin-top: 10px; font-size: 0.94rem; font-weight: 300; color: #a8a094; max-width: 56ch; }
+@media (max-width: 900px) {
+  .about-timeline-wrap { gap: 0; }
+  .about-timeline-sticky { display: none; }
+  .about-timeline-ghost { display: none; }
+  .about-timeline-item-branch { padding-left: 48px; }
+  .about-timeline-item-branch .about-timeline-node { left: 0; }
+  .about-timeline-branch-line { display: none; }
+}
+
+.about-impact-list { display: flex; flex-direction: column; }
+.about-impact-row {
+  border-top: 1px solid rgba(232,226,214,0.13);
+  padding: 30px 0;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: baseline;
+  gap: 28px;
+}
+.about-impact-row:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
+.about-impact-num { font-family: 'Romelio', serif; font-size: clamp(1.8rem, 3vw, 2.3rem); color: #C9A063; }
+.about-impact-label { font-size: 0.96rem; font-weight: 300; color: #e8e2d6; max-width: 56ch; }
+
+.about-cred-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; }
+.about-cred-grid h4 {
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #C9A063;
+  margin-bottom: 22px;
+}
+.about-cred-grid li { list-style: none; font-size: 0.92rem; font-weight: 300; color: #e8e2d6; margin-bottom: 16px; }
+.about-cred-grid li b { display: block; color: #f5efe4; font-weight: 400; }
+.about-cred-grid li span { color: #706a5e; font-size: 0.8rem; }
+
+.about-footer { padding: 100px 0 140px; }
+.about-sig { font-family: 'Romelio', serif; font-size: clamp(2rem, 5vw, 3.2rem); color: #f5efe4; }
+.about-sig-sub { margin-top: 14px; font-size: 0.82rem; color: #706a5e; }
+
+@media (max-width: 760px) {
+  .about-wrap { padding: 0 24px; }
+  .about-section { padding: 100px 0; }
+  .about-row { grid-template-columns: 1fr; gap: 10px; }
+  .about-row-meta { text-align: left; }
+  .about-impact-row { grid-template-columns: 1fr; gap: 8px; }
+  .about-cred-grid { grid-template-columns: 1fr; gap: 34px; }
 }
