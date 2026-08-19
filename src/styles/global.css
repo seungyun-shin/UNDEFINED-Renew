@@ -708,7 +708,11 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   background: #1c1c1c;
   color: #dfd3c3;
   padding-bottom: 10vh;
+  /* .about-screen과 같은 이유로 Windows에서만 나타나는 스크롤바를 숨긴다. */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+.memory-gallery::-webkit-scrollbar { display: none; }
 /* 메뉴에 쓴 것과 같은 방식의 정적 그레인 — 타일 사이 얇은 틈에 비치는
 정도라 효과는 은은하지만, 배경이 밋밋한 순검정으로 붕 뜨지 않게 한다.
 그리드 스크롤과 무관하게 화면에 고정돼 있도록 position:fixed.
@@ -922,7 +926,13 @@ bouayaben.com 레퍼런스에서 가져온 절제된 에디토리얼 톤 — 카
   clearColor(#111111)와 맞춘 사이트 공통 중성색. */
   background: #111111;
   color: #e8e2d6;
+  /* body와 같은 이유로 스크롤바를 숨긴다 — macOS는 오버레이 스크롤바라
+  기본적으로 안 보이지만, Windows Chrome은 항상 고정폭 스크롤바를 그려서
+  이 처리가 없으면 Windows에서만 오른쪽에 스크롤바가 나타난다. */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+.about-screen::-webkit-scrollbar { display: none; }
 .about-screen::after {
   content: '';
   position: fixed;
@@ -966,13 +976,13 @@ center가 헤더까지 포함한 전체 100vh 기준으로 잡혀서 실제로 �
 g/y/p 같은 디센더가 박스 아래로 살짝 삐져나가 잘린다 — padding-bottom으로
 클리핑 경계를 여유 있게 내려준다(padding은 border-box 안쪽이라 overflow
 클리핑 범위에 포함된다). */
-.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); overflow: hidden; padding-bottom: 0.32em; margin-bottom: -0.32em; }
+.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); overflow: hidden; padding-bottom: 0.45em; margin-bottom: -0.45em; }
 .about-hero-role {
   font-size: clamp(2.8rem, 7.4vw, 6.4rem);
   margin-top: 8px;
   overflow: hidden;
-  padding-bottom: 0.32em;
-  margin-bottom: -0.32em;
+  padding-bottom: 0.45em;
+  margin-bottom: -0.45em;
   color: #C9A063;
   max-width: none;
   white-space: nowrap;
@@ -1217,4 +1227,33 @@ Recognition(특허/자격증)에서 재사용. */
   .about-row-meta { text-align: left; }
   .about-impact-row { grid-template-columns: 1fr; gap: 8px; }
   .about-cred-grid { grid-template-columns: 1fr; gap: 34px; }
+}
+
+/* ── ScrollGauge ──────────────────────────────────
+네이티브 스크롤바를 숨긴 페이지(About, 추후 갤러리에도 재사용 가능)에서
+오른쪽 가장자리에 대신 그리는 커스텀 진행 표시. 타임라인 섹션의 "얇은
+세로선 + 스크롤에 따라 차오르는 골드 라인" 패턴을 그대로 재사용했다. */
+.scroll-gauge {
+  position: fixed;
+  top: 18vh;
+  bottom: 18vh;
+  right: 22px;
+  width: 1px;
+  z-index: 210;
+}
+.scroll-gauge-track {
+  position: absolute;
+  inset: 0;
+  background: rgba(232,226,214,0.15);
+}
+.scroll-gauge-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: #C9A063;
+}
+@media (max-width: 760px) {
+  .scroll-gauge { display: none; }
 }

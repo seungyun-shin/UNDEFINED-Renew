@@ -3,6 +3,7 @@ import Lenis from 'lenis'
 import gsap from 'gsap'
 import { icoTransition } from '../lib/icoBus'
 import MagneticText from '../components/MagneticText'
+import ScrollGauge from '../components/ScrollGauge'
 
 // MagneticText가 만드는 글자 span(.magnetic-char)에 GSAP 진입 애니메이션을
 // 걸고 나면, MagneticText 자신의 마우스 반발 루프가 같은 transform을 매
@@ -250,6 +251,7 @@ function AboutScreen() {
 
     return (
         <div className="about-screen" ref={wrapperRef}>
+            <ScrollGauge containerRef={wrapperRef} />
             <div className="about-content" ref={contentRef}>
                 <div className="about-wrap">
                     <div className="about-hero">
