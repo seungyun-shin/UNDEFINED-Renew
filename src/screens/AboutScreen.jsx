@@ -24,7 +24,7 @@ const PHILOSOPHY_SEGMENTS = [
     { text: 'happiness itself', accent: true },
     { text: ". Independence isn't living alone — it's a state of setting " },
     { text: 'your own standards', accent: true },
-    { text: ', making your own choices, and creating positive impact and value through your own power. Rather than being consumed by technology itself, I want to use it to expand ' },
+    { text: ', making your own choices, and creating positive impact and value through your own agency. Rather than being consumed by technology itself, I want to use it to expand ' },
     { text: "people's choices", accent: true },
     { text: ' and help move life in a better direction.' },
 ]
@@ -43,30 +43,32 @@ const PHILOSOPHY_CHARS = PHILOSOPHY_SEGMENTS.flatMap((seg, si) =>
 // 일단 학교·회사 이력만. 특허/발표 등은 다음 세션에 추가 예정 —
 // 지금은 순수 EDUCATION/CAREER 타임라인으로 단순하게 유지한다.
 const TIMELINE = [
-    { date: '2013.03', type: 'EDUCATION', title: '한국외국어대학교 입학', desc: '글로벌스포츠산업학과, 컴퓨터공학 부전공' },
-    { date: '2019.07', type: 'CAREER', title: '초록소프트 입사', desc: 'AI개발팀 — 열차 수요 예측, 스포츠 자세 분석 모델 개발' },
-    { date: '2022.07', type: 'CAREER', title: '이마트24 입사', desc: '빅데이터/AI팀 — 전국 6,000개 점포 발주 추천 서비스 개발' },
-    { date: '2025.03', type: 'CAREER', title: 'HL홀딩스 입사', desc: 'DT팀 — 해외 수입 자동차 부품 발주량 예측 모델 개발' },
-    { date: '2025.08', type: 'EDUCATION', title: '고려대학교 대학원 입학', desc: '빅데이터융합학과 석사과정' },
-    { date: '2026.01', type: 'CAREER', title: 'GS리테일 입사', desc: '프로모션팀 — Text-to-SQL 멀티 에이전트 설계' },
+    { date: '2013.03 — 2020.08', type: 'EDUCATION', title: 'Hankuk University of Foreign Studies', desc: 'Major in Global Sports Industry, Computer Science' },
+    { date: '2014.03 — 2015.03', type: 'INTERNSHIP', title: 'New York PYD Internship', desc: 'Multinational internship in New York / LA, USA' },
+    { date: '2015.08 — 2017.05', type: 'MILITARY', title: 'Military Service', desc: 'Sergeant, Republic of Korea Army — honorably discharged' },
+    { date: '2018.07 — 2018.09', type: 'INTERNSHIP', title: '2018 Asian Games — Jakarta-Palembang', desc: 'System operations support and interpretation, SsangYong Information & Communications Corp.' },
+    { date: '2019.07 — 2022.06', type: 'CAREER', title: 'Chorok Soft', desc: 'AI Development Team — AI models for KORAIL train demand forecasting and sports posture analysis' },
+    { date: '2022.07 — 2025.03', type: 'CAREER', title: 'emart24', desc: 'Big Data / AI Team — AI-based replenishment recommendation for stores nationwide, large-scale data pipeline optimization' },
+    { date: '2025.03 — 2025.12', type: 'CAREER', title: 'HL Holdings', desc: 'DT Team — AI-based order forecasting model for imported auto parts' },
+    { date: '2025.08 — Present', type: 'EDUCATION', title: 'Korea University Graduate School', desc: 'Big Data Convergence (M.S.)' },
+    { date: '2026.01 — Present', type: 'CAREER', title: 'GS Retail', desc: 'Promotion Team — AI Multi-Agent Development, Workflow Automation, Data Analysis' },
 ]
 
-// 예전 Career에 쓰던 "번호 + 큰 제목 + 설명 + 우측 메타" 레이아웃(.about-row)을
-// 재사용 — 모양만 먼저 보는 용도, 정확한 항목 구성은 다음에 다듬는다.
-const RECOGNITION = [
-    { n: '01', title: '스포츠 자세 비교·교정', desc: '인공신경망 기반 스포츠 자세 비교·교정 특허 공동 발명자 등록.', org: '대한민국특허청', date: '2021.10' },
-    { n: '02', title: '운동 분석·시설 추천', desc: '딥러닝 기반 운동 분석·시설 추천 특허 공동 발명자 등록.', org: '대한민국특허청', date: '2022.04' },
-    { n: '03', title: '암호화폐 분석 서비스', desc: '기계학습 기반 암호화폐 분석 서비스 특허 공동 발명자 등록.', org: '대한민국특허청', date: '2023.06' },
-    { n: '04', title: '데이터분석 준전문가', desc: 'ADsP — 데이터 분석 기초 역량 자격 취득.', org: '데이터산업진흥원', date: '2025.06' },
-    { n: '05', title: 'Machine Learning / Data Viz', desc: 'Stanford ML, Michigan Data Visualization 과정 수료.', org: 'Coursera', date: '2019 — 2020' },
+const PATENTS = [
+    { n: '01', title: 'Apparatus and Method for Comparing and Correcting Sports Posture Using Artificial Neural Network', desc: 'Registered as co-inventor', org: 'Ministry of Intellectual Property', orgKr: '지식재산처', date: '2021.10' },
+    { n: '02', title: 'Method and Apparatus for Providing Deep Learning-Based Exercise Analysis and Sports Facility Recommendation Service', desc: 'Registered as co-inventor', org: 'Ministry of Intellectual Property', orgKr: '지식재산처', date: '2022.04' },
+    { n: '03', title: 'Method and Apparatus for Providing Machine Learning-Based Cryptocurrency Analysis Service for Predicting Price and Trading Volume and Evaluating Value', desc: 'Registered as co-inventor', org: 'Ministry of Intellectual Property', orgKr: '지식재산처', date: '2023.06' },
 ]
 
+// 어느 회사·어떤 시스템이었는지가 아니라, 사업적으로 무슨 일을 만들어냈는지만
+// 한 문장씩 담는다 — 회사명/부서명/기술스택 언급 없이.
 const IMPACT = [
-    { num: '96억', label: '발주량 예측 모델로 확인한 연간 재고·기회 손실 개선 효과' },
-    { num: '80억', label: '경쟁사 분석 기반 손익 개선안 — 제시 후 TF팀 구성으로 이어짐' },
-    { num: '1억 500만', label: '전국 점포 AI 추천 서비스, 11개월 운영 매출 (팀 최초 서비스화 사례)' },
-    { num: '90%↓', label: '일 1억 건 데이터 파이프라인의 처리 시간·클라우드 비용 절감' },
-    { num: '3건', label: '인공신경망·딥러닝·머신러닝 기반 서비스 특허 공동 발명자 등록' },
+    { num: '₩105M', tag: 'Revenue Generated', text: 'Revenue generated within 11 months by an AI-powered recommendation system used by 6,000+ independent store owners nationwide.' },
+    { num: '₩9.6B', tag: 'Annual Savings Identified', text: 'Annual inventory and opportunity-cost savings identified through a demand-forecasting model.' },
+    { num: '30 min', tag: 'Down from 200 Hrs/Month', text: 'A manual review process automated using a free, open-source AI model — cutting 200 hours of monthly work down to 30 minutes at zero added cost.' },
+    { num: '640 hrs', tag: 'Saved per Month', text: 'A single AI system that automated a manual task across 1,200 people and 128 teams nationwide, eliminating around 640 hours of work a month and saving roughly ₩275M a year.' },
+    { num: '90%', tag: 'Cost Reduction', text: 'Processing time and cloud costs cut on a data pipeline handling 100M+ records a day.' },
+    { num: '20+', tag: 'AI Projects Delivered', text: 'Completed 20+ AI and machine learning projects across 4+ industries — from transportation and sports to finance and real estate.' },
 ]
 
 function AboutScreen() {
@@ -96,9 +98,15 @@ function AboutScreen() {
         function update() {
             const rect = section.getBoundingClientRect()
             const vh = window.innerHeight
-            const total = rect.height + vh
-            const progressed = vh - rect.top
-            const pct = Math.max(0, Math.min(1, progressed / total))
+            // sticky 연도가 "뷰포트 정중앙을 지나는 항목"을 기준으로 바뀌므로
+            // (아래 IntersectionObserver, rootMargin -45%/-45%), 게이지도 같은
+            // 기준(뷰포트 정중앙)으로 맞춘다 — 0% = 섹션 맨 위가 정중앙에 닿는
+            // 시점, 100% = 섹션 맨 아래가 정중앙에 닿는 시점(마지막 항목이
+            // sticky에 뜨는 시점). 기준점이 다르면(위/아래 끝 vs 정중앙) 같은
+            // 스크롤량에도 두 게이지가 서로 다른 속도로 채워지는 것처럼 보인다.
+            const pct = rect.height > 0
+                ? Math.max(0, Math.min(1, (vh / 2 - rect.top) / rect.height))
+                : 1
             line.style.height = `${(pct * 100).toFixed(2)}%`
         }
         update()
@@ -168,14 +176,40 @@ function AboutScreen() {
         const titleEl = timelineActiveTitleRef.current
         if (!items || items.length === 0 || !yearEl || !titleEl) return
 
+        // 연도가 바뀔 때 숫자가 기계식 카운터처럼 위로 굴러가며 다음 숫자로
+        // 바뀌는 오도미터 효과. 자리(digit)별로 값이 실제로 달라질 때만
+        // 굴린다 — 예를 들어 2022→2025는 앞 두 자리("20")는 그대로 두고
+        // 뒤 두 자리만 굴러간다.
+        function rollYear(newYear) {
+            const slots = yearEl.querySelectorAll('.about-timeline-sticky-digit')
+            newYear.split('').forEach((newDigit, i) => {
+                const slot = slots[i]
+                const current = slot?.querySelector('.digit-current')
+                if (!current || current.textContent === newDigit) return
+                // 이전 전환이 채 끝나기 전에 빠르게 스크롤해서 다시 호출되면
+                // 남아있는 outgoing 잔상부터 정리해야 숫자가 겹쳐 보이지 않는다.
+                slot.querySelectorAll('.digit-outgoing').forEach((el) => {
+                    gsap.killTweensOf(el)
+                    el.remove()
+                })
+                gsap.killTweensOf(current)
+                const clone = current.cloneNode(true)
+                clone.classList.remove('digit-current')
+                clone.classList.add('digit-outgoing')
+                slot.appendChild(clone)
+                gsap.set(current, { y: '110%' })
+                current.textContent = newDigit
+                gsap.to(clone, { y: '-110%', duration: 0.5, ease: 'power2.inOut', onComplete: () => clone.remove() })
+                gsap.to(current, { y: '0%', duration: 0.5, ease: 'power2.inOut' })
+            })
+        }
+
         function setActive(el) {
-            yearEl.style.opacity = 0
+            rollYear(el.dataset.year)
             titleEl.style.opacity = 0
             requestAnimationFrame(() => {
-                yearEl.textContent = el.dataset.year
                 titleEl.textContent = el.dataset.title
                 requestAnimationFrame(() => {
-                    yearEl.style.opacity = 1
                     titleEl.style.opacity = 1
                 })
             })
@@ -277,33 +311,24 @@ function AboutScreen() {
                         </div>
                     </div>
 
-                    <section className="about-section about-philosophy-section" ref={philosophySectionRef}>
-                        <div className="about-label">Philosophy</div>
-                        <p className="about-philosophy">
-                            {PHILOSOPHY_CHARS.map((c) => (
-                                <span
-                                    key={c.key}
-                                    className={c.accent ? 'philo-char about-accent' : 'philo-char'}
-                                    style={{ display: 'inline-block' }}
-                                >
-                                    {c.ch}
-                                </span>
-                            ))}
-                        </p>
-                    </section>
-
                     <section className="about-section" ref={timelineSectionRef}>
                         <div className="about-label">Timeline</div>
                         <div className="about-timeline-wrap">
                             <div className="about-timeline-sticky">
-                                <div className="about-timeline-sticky-year" ref={timelineActiveYearRef}>{TIMELINE[0].date}</div>
+                                <div className="about-timeline-sticky-year" ref={timelineActiveYearRef}>
+                                    {TIMELINE[0].date.slice(0, 4).split('').map((d, i) => (
+                                        <span className="about-timeline-sticky-digit" key={i}>
+                                            <span className="digit-current">{d}</span>
+                                        </span>
+                                    ))}
+                                </div>
                                 <div className="about-timeline-sticky-title" ref={timelineActiveTitleRef}>{TIMELINE[0].title}</div>
                             </div>
                             <div className="about-timeline">
                                 <div className="about-timeline-track" />
                                 <div className="about-timeline-progress" ref={timelineLineRef} />
                                 {TIMELINE.map((t, i) => (
-                                    <div className="about-timeline-item" key={i} data-year={t.date} data-title={t.title}>
+                                    <div className="about-timeline-item" key={i} data-year={t.date.slice(0, 4)} data-title={t.title}>
                                         <span className="about-timeline-ghost" aria-hidden="true">{t.date.slice(0, 4)}</span>
                                         <div className="about-timeline-node" />
                                         <div className="about-timeline-date">{t.date}</div>
@@ -317,60 +342,58 @@ function AboutScreen() {
                     </section>
 
                     <section className="about-section">
-                        <div className="about-label">Recognition</div>
-                        {RECOGNITION.map((r) => (
-                            <div className="about-row" key={r.n}>
-                                <div className="about-row-num">{r.n}</div>
+                        <div className="about-label">Patents</div>
+                        {PATENTS.map((p) => (
+                            <div className="about-row" key={p.n}>
+                                <div className="about-row-num">{p.n}</div>
                                 <div className="about-row-main">
-                                    <h3>{r.title}</h3>
-                                    <p>{r.desc}</p>
+                                    <div className="about-row-tag">Patent</div>
+                                    <h3>{p.title}</h3>
+                                    <p>{p.desc}</p>
                                 </div>
                                 <div className="about-row-meta">
-                                    <b>{r.org}</b>{r.date}
+                                    <b>{p.org}</b>
+                                    <span className="about-row-meta-kr">{p.orgKr}</span>
+                                    {p.date}
                                 </div>
                             </div>
                         ))}
                     </section>
 
                     <section className="about-section">
-                        <div className="about-label">Impact</div>
+                        <div className="about-label">Footprint</div>
                         <div className="about-impact-list">
-                            {IMPACT.map((it) => (
-                                <div className="about-impact-row" key={it.num}>
-                                    <div className="about-impact-num">{it.num}</div>
-                                    <div className="about-impact-label">{it.label}</div>
+                            {IMPACT.map((it, i) => (
+                                <div className="about-impact-line" key={i}>
+                                    <div className="about-impact-line-figure">
+                                        <div className="about-impact-line-num">{it.num}</div>
+                                        <div className="about-impact-line-tag">{it.tag}</div>
+                                    </div>
+                                    <p>{it.text}</p>
                                 </div>
                             ))}
                         </div>
                     </section>
 
-                    <section className="about-section">
-                        <div className="about-label">Credentials</div>
-                        <div className="about-cred-grid">
-                            <div>
-                                <h4>Education</h4>
-                                <ul>
-                                    <li><b>고려대학교 대학원</b><span>빅데이터융합학과 석사 · 재학중</span></li>
-                                    <li><b>한국외국어대학교</b><span>글로벌스포츠산업 / 컴퓨터공학</span></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4>Patents</h4>
-                                <ul>
-                                    <li><b>스포츠 자세 비교·교정</b><span>대한민국특허청 · 2021.10</span></li>
-                                    <li><b>운동 분석·시설 추천</b><span>대한민국특허청 · 2022.04</span></li>
-                                    <li><b>암호화폐 분석 서비스</b><span>대한민국특허청 · 2023.06</span></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4>Certification</h4>
-                                <ul>
-                                    <li><b>데이터분석 준전문가(ADsP)</b><span>2025.06</span></li>
-                                    <li><b>Stanford ML / Michigan Data Viz</b><span>Coursera</span></li>
-                                    <li><b>뉴욕·LA 어학연수 및 다국적 인턴십</b><span>PYD · 2014 — 2015</span></li>
-                                </ul>
-                            </div>
-                        </div>
+                    <section className="about-section about-philosophy-section" ref={philosophySectionRef}>
+                        <div className="about-label">Compass</div>
+                        <p className="about-philosophy">
+                            {PHILOSOPHY_CHARS.map((c) => (
+                                <span
+                                    key={c.key}
+                                    className={c.accent ? 'philo-char about-accent' : 'philo-char'}
+                                    style={{ display: 'inline-block' }}
+                                >
+                                    {c.ch}
+                                </span>
+                            ))}
+                        </p>
+                    </section>
+
+                    <section className="about-section about-contact-section">
+                        <div className="about-label">Contact</div>
+                        <p className="about-contact-line">Feel free to reach out to me.</p>
+                        <a className="about-contact-email" href="mailto:seungyun-shin@gmail.com">seungyun-shin@gmail.com</a>
                     </section>
 
                     <footer className="about-footer">

@@ -1063,27 +1063,6 @@ CSS opacity 애니메이션까지 얹으면 둘이 서로의 값을 덮어써 �
   .about-philosophy { max-width: none; }
 }
 
-/* Career 때 쓰던 "번호 + 큰 제목 + 설명 + 우측 메타" 한 줄 리스트 —
-Recognition(특허/자격증)에서 재사용. */
-.about-row {
-  border-top: 1px solid rgba(232,226,214,0.13);
-  padding: 44px 0;
-  display: grid;
-  grid-template-columns: 56px 1fr auto;
-  align-items: baseline;
-  gap: 28px;
-}
-.about-row:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
-.about-row-num { font-family: 'sarrif', sans-serif; font-size: 0.82rem; color: #706a5e; }
-.about-row-main h3 { font-family: 'Romelio', serif; font-weight: 400; font-size: clamp(1.9rem, 4.4vw, 3.1rem); color: #f5efe4; line-height: 1.05; }
-.about-row-main p { margin-top: 14px; font-size: 0.96rem; font-weight: 300; color: #706a5e; max-width: 60ch; }
-.about-row-meta { text-align: right; font-family: 'sarrif', sans-serif; font-size: 0.72rem; letter-spacing: 0.06em; color: #706a5e; white-space: nowrap; }
-.about-row-meta b { display: block; color: #e8e2d6; font-family: 'Roboto', sans-serif; font-weight: 400; font-size: 0.86rem; letter-spacing: 0; margin-bottom: 6px; }
-@media (max-width: 700px) {
-  .about-row { grid-template-columns: 1fr; gap: 10px; }
-  .about-row-meta { text-align: left; }
-}
-
 /* ── About Timeline (single sequential list + sticky year) ──
 세로선 하나가 스크롤 진행률만큼 위에서부터 그려지고, 그 옆에 항목이 순서대로
 나열된다. 왼쪽 sticky 패널은 지금 화면 중앙을 지나는 항목의 연도/직함을
@@ -1097,14 +1076,33 @@ Recognition(특허/자격증)에서 재사용. */
   flex-shrink: 0;
 }
 .about-timeline-sticky-year {
+  display: flex;
   font-family: 'Romelio', serif;
   font-weight: 400;
   font-size: clamp(2.6rem, 4.2vw, 3.6rem);
   color: #C9A063;
-  line-height: 1;
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
-  opacity: 1;
-  transition: opacity 0.25s ease;
+}
+/* 오도미터 롤 — 자리(digit)마다 자기 높이만큼만 보이는 창을 만들고, 그
+안에서 이전 숫자는 위로 빠지고 새 숫자는 아래에서 올라와 자리를 채운다
+(JS가 매 전환마다 .digit-outgoing을 만들어 애니메이션 후 제거). 높이를
+정확히 1em으로 주면 Romelio의 실제 글자 높이가 그보다 커서 위쪽이
+잘렸다 — line-height와 맞춘 1.3em으로 여유를 준다. */
+.about-timeline-sticky-digit {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  height: 1.3em;
+}
+.about-timeline-sticky-digit .digit-current,
+.about-timeline-sticky-digit .digit-outgoing {
+  display: block;
+}
+.about-timeline-sticky-digit .digit-outgoing {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .about-timeline-sticky-title {
   margin-top: 12px;
@@ -1185,48 +1183,115 @@ Recognition(특허/자격증)에서 재사용. */
   .about-timeline-wrap { gap: 0; }
   .about-timeline-sticky { display: none; }
   .about-timeline-ghost { display: none; }
-  .about-timeline-item-branch { padding-left: 48px; }
-  .about-timeline-item-branch .about-timeline-node { left: 0; }
-  .about-timeline-branch-line { display: none; }
 }
 
+/* Impact — 회사명·부서명·기술스택 없이, 사업적으로 만들어낸 결과만 나열한다.
+숫자를 왼쪽에 크게 빼서 먼저 눈에 들어오게 하고, 문장은 그걸 설명하는
+보조 역할로 오른쪽에 작고 읽기 편한 폰트로 둔다(긴 문장에 디스플레이용
+세리프를 그대로 쓰면 가독성이 떨어져서 본문용 폰트로 분리). */
 .about-impact-list { display: flex; flex-direction: column; }
-.about-impact-row {
-  border-top: 1px solid rgba(232,226,214,0.13);
-  padding: 30px 0;
+.about-impact-line {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 190px 1fr;
+  align-items: start;
+  gap: 40px;
+  padding: 34px 0;
+  border-top: 1px solid rgba(232,226,214,0.13);
+}
+.about-impact-line:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
+.about-impact-line-num {
+  font-family: 'Romelio', serif;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  color: #C9A063;
+  line-height: 1.15;
+}
+/* Patents의 "PATENT" 태그와 같은 문법 — 큰 숫자는 최대한 깔끔하게 남기고,
+단위·맥락은 작은 골드 캡스 라벨로 분리해서 압축 표기(₩, M/B, hrs/mo
+등이 뒤섞이는) 없이도 읽히게 한다. */
+.about-impact-line-tag {
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #706a5e;
+  margin-top: 8px;
+}
+.about-impact-line p { font-size: 0.98rem; font-weight: 300; color: #a8a094; line-height: 1.7; max-width: 74ch; }
+@media (max-width: 700px) {
+  .about-impact-line { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* Timeline과 같은 이유로 겹쳐있던 Recognition/Credentials를 Patents
+하나로 정리하면서, 예전 Career 로우 스타일(.about-row)을 다시 가져왔다 —
+3열 그리드 리스트는 항목이 3개뿐이라 빈 칸이 두드러져 보였다. */
+.about-row {
+  position: relative;
+  border-top: 1px solid rgba(232,226,214,0.13);
+  padding: 44px 0 44px 24px;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
   align-items: baseline;
   gap: 28px;
+  transition: padding-left 0.4s ease;
 }
-.about-impact-row:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
-.about-impact-num { font-family: 'Romelio', serif; font-size: clamp(1.8rem, 3vw, 2.3rem); color: #C9A063; }
-.about-impact-label { font-size: 0.96rem; font-weight: 300; color: #e8e2d6; max-width: 56ch; }
-
-.about-cred-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; }
-.about-cred-grid h4 {
+.about-row:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
+/* 왼쪽 얇은 골드 세로선 — Timeline의 트랙/노드와 같은 브라스 포인트를
+Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤이 끊기던
+문제를 해결한다. 호버 시 살짝 벌어지며 은은한 인터랙션을 준다. */
+.about-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 44px;
+  bottom: 44px;
+  width: 2px;
+  background: #C9A063;
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+}
+.about-row:hover { padding-left: 32px; }
+.about-row:hover::before { opacity: 1; }
+.about-row-num { font-family: 'sarrif', sans-serif; font-size: 0.82rem; color: #C9A063; }
+.about-row-tag {
   font-family: 'sarrif', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #C9A063;
-  margin-bottom: 22px;
+  margin-bottom: 12px;
 }
-.about-cred-grid li { list-style: none; font-size: 0.92rem; font-weight: 300; color: #e8e2d6; margin-bottom: 16px; }
-.about-cred-grid li b { display: block; color: #f5efe4; font-weight: 400; }
-.about-cred-grid li span { color: #706a5e; font-size: 0.8rem; }
+.about-row-main h3 { font-family: 'Romelio', serif; font-weight: 400; font-size: clamp(1.05rem, 1.7vw, 1.4rem); color: #f5efe4; line-height: 1.3; }
+.about-row-main p { margin-top: 14px; font-size: 0.96rem; font-weight: 300; color: #706a5e; max-width: 60ch; }
+.about-row-meta { text-align: right; font-family: 'sarrif', sans-serif; font-size: 0.72rem; letter-spacing: 0.06em; color: #706a5e; white-space: nowrap; }
+.about-row-meta b { display: block; color: #e8e2d6; font-family: 'Roboto', sans-serif; font-weight: 400; font-size: 0.86rem; letter-spacing: 0; margin-bottom: 4px; }
+.about-row-meta-kr { display: block; font-family: 'sarrif', sans-serif; font-size: 0.7rem; color: #706a5e; margin-bottom: 12px; }
+@media (max-width: 700px) {
+  .about-row { grid-template-columns: 1fr; gap: 10px; padding-left: 20px; }
+  .about-row-meta { text-align: left; }
+}
 
 .about-footer { padding: 100px 0 140px; }
 .about-sig { font-family: 'Romelio', serif; font-size: clamp(2rem, 5vw, 3.2rem); color: #f5efe4; }
 .about-sig-sub { margin-top: 14px; font-size: 0.82rem; color: #706a5e; }
 
+.about-contact-section { padding-bottom: 60px; }
+.about-contact-line { font-size: 1rem; font-weight: 300; color: #a8a094; margin-bottom: 10px; }
+.about-contact-email {
+  display: inline-block;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #e8e2d6;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 226, 214, 0.25);
+  padding-bottom: 2px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.about-contact-email:hover { color: #C9A063; border-color: #C9A063; }
+
 @media (max-width: 760px) {
   .about-wrap { padding: 0 24px; }
   .about-section { padding: 100px 0; }
-  .about-row { grid-template-columns: 1fr; gap: 10px; }
-  .about-row-meta { text-align: left; }
-  .about-impact-row { grid-template-columns: 1fr; gap: 8px; }
-  .about-cred-grid { grid-template-columns: 1fr; gap: 34px; }
 }
 
 /* ── ScrollGauge ──────────────────────────────────
