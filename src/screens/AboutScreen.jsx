@@ -392,14 +392,15 @@ function AboutScreen() {
 
                     <section className="about-section about-contact-section">
                         <div className="about-label">Contact</div>
-                        <p className="about-contact-line">Feel free to reach out to me.</p>
-                        <a className="about-contact-email" href="mailto:seungyun-shin@gmail.com">seungyun-shin@gmail.com</a>
+                        <footer className="about-contact-composition">
+                            <p className="about-contact-lead">Feel free to reach out.</p>
+                            <div className="about-sig">Shin SeungYun</div>
+                            <div className="about-sig-sub">Data Scientist · AI Engineer — Seoul, Korea</div>
+                            <a className="about-contact-email-link" href="mailto:seungyun-shin@gmail.com">
+                                <span className="about-contact-email">seungyun-shin@gmail.com</span>
+                            </a>
+                        </footer>
                     </section>
-
-                    <footer className="about-footer">
-                        <div className="about-sig">Shin SeungYun</div>
-                        <div className="about-sig-sub">Data Scientist · AI Engineer — Seoul, Korea</div>
-                    </footer>
                 </div>
             </div>
         </div>

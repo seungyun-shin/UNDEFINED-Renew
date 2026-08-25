@@ -1271,23 +1271,50 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
   .about-row-meta { text-align: left; }
 }
 
-.about-footer { padding: 100px 0 140px; }
 .about-sig { font-family: 'Romelio', serif; font-size: clamp(2rem, 5vw, 3.2rem); color: #f5efe4; }
 .about-sig-sub { margin-top: 14px; font-size: 0.82rem; color: #706a5e; }
 
-.about-contact-section { padding-bottom: 60px; }
-.about-contact-line { font-size: 1rem; font-weight: 300; color: #a8a094; margin-bottom: 10px; }
-.about-contact-email {
+/* Contact도 Hero처럼 100vh 센터 정렬 화면으로 열고 닫는 구조를
+대칭시키되, 내부 구성은 페이지 전체가 지키는 좌측 정렬 단일 컬럼
+규칙을 그대로 따른다 — 이 페이지에서 유일하게 우측 비대칭이었던
+이전 버전이 계속 겉돌던 문제를 여기서 바로잡는다. 위계도 이름이
+가장 크게 — "서명"이니까 이름이 클라이맥스여야 한다. */
+.about-contact-section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0; }
+.about-contact-composition {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-top: 1px solid rgba(232, 226, 214, 0.13);
+  padding-top: 48px;
+}
+.about-contact-composition::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 2px;
+  background: #C9A063;
+}
+.about-contact-lead { font-size: 1rem; font-weight: 300; color: #a8a094; margin-bottom: 28px; }
+.about-contact-composition .about-sig { margin-top: 0; }
+.about-contact-composition .about-sig-sub { margin-bottom: 36px; }
+.about-contact-email-link {
   display: inline-block;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 226, 214, 0.3);
+  padding-bottom: 4px;
+  transition: border-color 0.3s ease;
+}
+.about-contact-email {
   font-family: 'Roboto', sans-serif;
   font-size: 1rem;
-  color: #e8e2d6;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(232, 226, 214, 0.25);
-  padding-bottom: 2px;
-  transition: color 0.3s ease, border-color 0.3s ease;
+  color: #a8a094;
+  transition: color 0.3s ease;
 }
-.about-contact-email:hover { color: #C9A063; border-color: #C9A063; }
+.about-contact-email-link:hover { border-color: #C9A063; }
+.about-contact-email-link:hover .about-contact-email { color: #C9A063; }
 
 @media (max-width: 760px) {
   .about-wrap { padding: 0 24px; }
