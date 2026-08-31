@@ -8,8 +8,8 @@ export function splitChars(text) {
     return text.split('').map((ch, i) => (
         <span className="magnetic-char" key={i} style={{ display: 'inline-block' }}>
             {/* inline-block 안에 스페이스 하나만 있으면 "줄 시작/끝 공백"으로
-            취급돼 폭이 0으로 접힌다 — 줄바꿈 없는 공백( )을 써서 폭을 보존. */}
-            {ch === ' ' ? ' ' : ch}
+            취급돼 폭이 0으로 접힌다 — 줄바꿈 없는 공백( )을 써서 폭을 보존. */}
+            {ch === ' ' ? ' ' : ch}
         </span>
     ))
 }
@@ -25,8 +25,11 @@ export default function MagneticText({ text, className, radius = 160, strength =
     useEffect(() => {
         const container = containerRef.current
         if (!container) return
-        // 터치 기기(호버 없음)나 모션 최소화 설정에서는 그냥 정지 텍스트로 둔다.
-        if (window.matchMedia('(prefers-reduced-motion: reduce), (hover: none)').matches) return
+        // 모션을 최소화하고 싶어하는 사용자 설정만 존중한다 — 터치 기기라고
+        // 완전히 꺼버리지 않고, 아래에서 touchmove로 대응한다.
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+        const isTouch = window.matchMedia('(hover: none)').matches
 
         const chars = Array.from(container.querySelectorAll('.magnetic-char'))
         const state = chars.map(() => ({ x: 0, y: 0, tx: 0, ty: 0 }))
@@ -57,6 +60,12 @@ export default function MagneticText({ text, className, radius = 160, strength =
             mouseX = -9999
             mouseY = -9999
         }
+        function onTouchMove(e) {
+            const t = e.touches[0]
+            if (!t) return
+            mouseX = t.clientX
+            mouseY = t.clientY
+        }
 
         function tick() {
             for (let i = 0; i < chars.length; i++) {
@@ -80,13 +89,45 @@ export default function MagneticText({ text, className, radius = 160, strength =
             rafId = requestAnimationFrame(tick)
         }
 
+        // 터치 기기는 호버가 없어서 이 효과가 존재한다는 걸 알 방법이 없다.
+        // 활성화 직후 가짜 포인터가 글자 위를 한 번 훑고 지나가게 해서
+        // "만지면 반응하는 글자"라는 걸 슬쩍 보여준 뒤 스스로 손을 뗀다.
+        function autoSweep() {
+            const rect = container.getBoundingClientRect()
+            const startX = rect.left - 40
+            const endX = rect.right + 40
+            const y = rect.top + rect.height / 2
+            const duration = 900
+            const start = performance.now()
+            function step(now) {
+                if (cancelled) return
+                const t = Math.min(1, (now - start) / duration)
+                const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+                mouseX = startX + (endX - startX) * eased
+                mouseY = y
+                if (t < 1) requestAnimationFrame(step)
+                else {
+                    mouseX = -9999
+                    mouseY = -9999
+                }
+            }
+            requestAnimationFrame(step)
+        }
+
         function activate() {
             if (cancelled) return
             measure()
             tick()
-            window.addEventListener('mousemove', onMove, { passive: true })
+            if (isTouch) {
+                window.addEventListener('touchmove', onTouchMove, { passive: true })
+                window.addEventListener('touchend', onLeave)
+                window.addEventListener('touchcancel', onLeave)
+                autoSweep()
+            } else {
+                window.addEventListener('mousemove', onMove, { passive: true })
+                container.addEventListener('mouseleave', onLeave)
+            }
             window.addEventListener('resize', measure)
-            container.addEventListener('mouseleave', onLeave)
         }
 
         if (activateDelay > 0) activateTimer = setTimeout(activate, activateDelay)
@@ -97,6 +138,9 @@ export default function MagneticText({ text, className, radius = 160, strength =
             if (rafId) cancelAnimationFrame(rafId)
             if (activateTimer) clearTimeout(activateTimer)
             window.removeEventListener('mousemove', onMove)
+            window.removeEventListener('touchmove', onTouchMove)
+            window.removeEventListener('touchend', onLeave)
+            window.removeEventListener('touchcancel', onLeave)
             window.removeEventListener('resize', measure)
             container.removeEventListener('mouseleave', onLeave)
         }
