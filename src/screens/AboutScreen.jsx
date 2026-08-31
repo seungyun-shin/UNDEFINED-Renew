@@ -79,6 +79,9 @@ function AboutScreen() {
     const timelineLineRef = useRef(null)
     const timelineActiveYearRef = useRef(null)
     const timelineActiveTitleRef = useRef(null)
+    const patentsSectionRef = useRef(null)
+    const footprintSectionRef = useRef(null)
+    const contactSectionRef = useRef(null)
 
     // 지구본/갤러리와 동일하게, 이 화면을 보는 동안 마블 배경 렌더 루프를 멈춘다.
     useEffect(() => {
@@ -162,6 +165,27 @@ function AboutScreen() {
             { threshold: 0.3, rootMargin: '0px 0px -10% 0px' }
         )
         items.forEach((el) => io.observe(el))
+        return () => io.disconnect()
+    }, [])
+
+    // Patents/Footprint/Contact도 Timeline 항목과 같은 방식으로 — 로우/블록
+    // 단위로 스크롤에 걸릴 때마다 하나씩 떠오르며 나타난다(글자 단위인
+    // Compass와 달리 이쪽은 항목 단위 캐스케이드).
+    useEffect(() => {
+        const groups = [
+            patentsSectionRef.current?.querySelectorAll('.about-row'),
+            footprintSectionRef.current?.querySelectorAll('.about-impact-line'),
+            contactSectionRef.current?.querySelectorAll('.about-card-lead, .about-card-info'),
+        ]
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) entry.target.classList.add('in')
+                })
+            },
+            { threshold: 0.3, rootMargin: '0px 0px -10% 0px' }
+        )
+        groups.forEach((items) => items?.forEach((el) => io.observe(el)))
         return () => io.disconnect()
     }, [])
 
@@ -341,7 +365,7 @@ function AboutScreen() {
                         </div>
                     </section>
 
-                    <section className="about-section">
+                    <section className="about-section" ref={patentsSectionRef}>
                         <div className="about-label">Patents</div>
                         {PATENTS.map((p) => (
                             <div className="about-row" key={p.n}>
@@ -360,7 +384,7 @@ function AboutScreen() {
                         ))}
                     </section>
 
-                    <section className="about-section">
+                    <section className="about-section" ref={footprintSectionRef}>
                         <div className="about-label">Footprint</div>
                         <div className="about-impact-list">
                             {IMPACT.map((it, i) => (
@@ -390,15 +414,17 @@ function AboutScreen() {
                         </p>
                     </section>
 
-                    <section className="about-section about-contact-section">
+                    <section className="about-section about-contact-section" ref={contactSectionRef}>
                         <div className="about-label">Contact</div>
-                        <footer className="about-contact-composition">
-                            <p className="about-contact-lead">Feel free to reach out.</p>
-                            <div className="about-sig">Shin SeungYun</div>
-                            <div className="about-sig-sub">Data Scientist · AI Engineer — Seoul, Korea</div>
-                            <a className="about-contact-email-link" href="mailto:seungyun-shin@gmail.com">
-                                <span className="about-contact-email">seungyun-shin@gmail.com</span>
-                            </a>
+                        <footer className="about-card">
+                            <p className="about-card-lead">Feel free<br />to reach out.</p>
+                            <div className="about-card-info">
+                                <div className="about-sig">SeungYun Shin</div>
+                                <div className="about-sig-sub">Independence Builder — Seoul, Korea</div>
+                                <a className="about-contact-email-link" href="mailto:seungyun-shin@gmail.com">
+                                    <span className="about-contact-email">seungyun-shin@gmail.com</span>
+                                </a>
+                            </div>
                         </footer>
                     </section>
                 </div>

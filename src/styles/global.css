@@ -972,27 +972,22 @@ center가 헤더까지 포함한 전체 100vh 기준으로 잡혀서 실제로 �
   color: #f5efe4;
   max-width: 20ch;
 }
-/* overflow:hidden 마스킹 박스가 line-height 기준으로만 높이를 잡으면
-g/y/p 같은 디센더가 박스 아래로 살짝 삐져나가 잘린다 — padding-bottom으로
-클리핑 경계를 여유 있게 내려준다(padding은 border-box 안쪽이라 overflow
-클리핑 범위에 포함된다). */
-.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); overflow: hidden; padding-bottom: 0.45em; margin-bottom: -0.45em; }
+/* 이전엔 overflow:hidden으로 진입 시 아래에서 위로 "닦여 나오는"
+마스크 리빌을 썼는데, 소문자 g의 둥근 디센더가 마스크 경계선을
+가로지를 때 "잘렸다가 다시 나타나는" 것처럼 보이는 부작용이 있었다
+(모바일처럼 렌더링이 느린 기기에서 특히 눈에 띔). 마스크를 없애고
+opacity+y 이동만 남겨 부드럽게 떠오르며 페이드인하는 방식으로 바꿔
+해결했다 — 이동 거리/속도/스태거는 그대로라 리듬은 동일하다. */
+.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); }
 .about-hero-role {
   font-size: clamp(2.8rem, 7.4vw, 6.4rem);
   margin-top: 8px;
-  overflow: hidden;
-  padding-bottom: 0.45em;
-  margin-bottom: -0.45em;
   color: #C9A063;
   max-width: none;
   white-space: nowrap;
-  /* overflow:hidden(진입 마스킹용)이 block 기본폭(부모 너비 100%)을
-  기준으로 nowrap 텍스트를 잘라버리는 걸 막는다 — 박스 자체를 내용
-  너비만큼 키운다. */
-  width: fit-content;
 }
 @media (max-width: 900px) {
-  .about-hero-role { white-space: normal; width: auto; }
+  .about-hero-role { white-space: normal; }
 }
 .about-hero-sub {
   margin-top: 44px;
@@ -1197,7 +1192,11 @@ CSS opacity 애니메이션까지 얹으면 둘이 서로의 값을 덮어써 �
   gap: 40px;
   padding: 34px 0;
   border-top: 1px solid rgba(232,226,214,0.13);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
+.about-impact-line.in { opacity: 1; transform: none; }
 .about-impact-line:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
 .about-impact-line-num {
   font-family: 'Romelio', serif;
@@ -1233,8 +1232,11 @@ CSS opacity 애니메이션까지 얹으면 둘이 서로의 값을 덮어써 �
   grid-template-columns: 40px 1fr auto;
   align-items: baseline;
   gap: 28px;
-  transition: padding-left 0.4s ease;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease, padding-left 0.4s ease;
 }
+.about-row.in { opacity: 1; transform: none; }
 .about-row:last-child { border-bottom: 1px solid rgba(232,226,214,0.13); }
 /* 왼쪽 얇은 골드 세로선 — Timeline의 트랙/노드와 같은 브라스 포인트를
 Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤이 끊기던
@@ -1275,35 +1277,53 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
 .about-sig-sub { margin-top: 14px; font-size: 0.82rem; color: #706a5e; }
 
 /* Contact도 Hero처럼 100vh 센터 정렬 화면으로 열고 닫는 구조를
-대칭시키되, 내부 구성은 페이지 전체가 지키는 좌측 정렬 단일 컬럼
-규칙을 그대로 따른다 — 이 페이지에서 유일하게 우측 비대칭이었던
-이전 버전이 계속 겉돌던 문제를 여기서 바로잡는다. 위계도 이름이
-가장 크게 — "서명"이니까 이름이 클라이맥스여야 한다. */
+대칭시킨다. "명함"처럼 얇은 테두리로 감싸고, 실제 명함들이 흔히 쓰는
+대각선 구도(좌상단 큰 문구 ↔ 우하단 이름/직함/연락처)를 안쪽에 넣었다.
+전체 페이지는 좌측 정렬을 지키지만, 이 대각선 배치는 카드라는 뚜렷한
+경계 안에서 일어나는 것이라 "붕 뜬" 느낌 없이 카드 자신의 구도로
+읽힌다. */
 .about-contact-section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0; }
-.about-contact-composition {
-  position: relative;
-  display: inline-flex;
+.about-card {
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  border-top: 1px solid rgba(232, 226, 214, 0.13);
-  padding-top: 48px;
+  width: 100%;
+  box-sizing: border-box;
 }
-.about-contact-composition::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 64px;
-  height: 2px;
-  background: #C9A063;
+.about-card-lead {
+  align-self: flex-start;
+  font-family: 'Romelio', serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  color: #cbc3b4;
+  line-height: 1.24;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
-.about-contact-lead { font-size: 1rem; font-weight: 300; color: #a8a094; margin-bottom: 28px; }
-.about-contact-composition .about-sig { margin-top: 0; }
-.about-contact-composition .about-sig-sub { margin-bottom: 36px; }
+.about-card-lead.in { opacity: 1; transform: none; }
+.about-card-info {
+  align-self: flex-end;
+  margin-top: clamp(60px, 14vw, 140px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.about-card-info.in { opacity: 1; transform: none; }
+.about-card-info .about-sig { font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 1.1; margin-top: 0; color: #f5efe4; }
+.about-card-info .about-sig-sub { margin-top: 6px; font-size: 1.05rem; color: #C9A063; }
+.about-card-info .about-contact-email-link { margin-top: 18px; }
+.about-card-info .about-contact-email { font-size: 1.05rem; }
+@media (max-width: 700px) {
+  .about-card-info { align-self: flex-start; align-items: flex-start; text-align: left; }
+}
 .about-contact-email-link {
   display: inline-block;
   text-decoration: none;
-  border-bottom: 1px solid rgba(232, 226, 214, 0.3);
+  border-bottom: 1px solid transparent;
   padding-bottom: 4px;
   transition: border-color 0.3s ease;
 }
@@ -1319,6 +1339,8 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
 @media (max-width: 760px) {
   .about-wrap { padding: 0 24px; }
   .about-section { padding: 100px 0; }
+  .about-card { padding: 36px 28px; }
+  .about-card-info { margin-top: 56px; }
 }
 
 /* ── ScrollGauge ──────────────────────────────────
