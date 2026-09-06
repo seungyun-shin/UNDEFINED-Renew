@@ -17,9 +17,18 @@ const variants = {
 // 화면 밖 아래에 있다 올라오는" 버그의 원인이었다. absolute로 겹치게 한다.
 const wrapperStyle = { position: 'absolute', top: 0, left: 0, width: '100%' }
 
-function PageTransition({ children }) {
+// fast: WORK 목록↔상세처럼 공유 레이아웃(layoutId) 전환이 있는 라우트용.
+// 기본 1.1초 페이드는 그 위에서 날아가는 제목을 가려버려서, 페이지 자체는
+// 빠르게 켜고 제목 이동이 주인공이 되게 한다.
+const fastVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+    exit: { opacity: 0, transition: { duration: 0.35, ease: [0.65, 0, 0.35, 1] } },
+}
+
+function PageTransition({ children, fast = false }) {
     return (
-        <motion.div style={wrapperStyle} variants={variants} initial="initial" animate="animate" exit="exit">
+        <motion.div style={wrapperStyle} variants={fast ? fastVariants : variants} initial="initial" animate="animate" exit="exit">
             {children}
         </motion.div>
     )

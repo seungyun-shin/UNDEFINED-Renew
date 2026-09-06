@@ -8,6 +8,8 @@ import PageTransition from './components/PageTransition'
 import MainScreen from './screens/MainScreen'
 import MemoryPhotoGallery from './screens/MemoryPhotoGallery'
 import AboutScreen from './screens/AboutScreen'
+import WorkScreen from './screens/WorkScreen'
+import WorkDetailScreen from './screens/WorkDetailScreen'
 import UpdatingScreen from './screens/UpdatingScreen'
 
 // EarthScreen만 따로 코드 스플리팅한다 — @react-three/fiber, drei, 지구
@@ -38,6 +40,8 @@ function App() {
                         <Route path="/MemoryScreen" element={<PageTransition><Suspense fallback={null}><EarthScreen /></Suspense></PageTransition>} />
                         <Route path="/MemoryPhotoGallery" element={<PageTransition><MemoryPhotoGallery /></PageTransition>} />
                         <Route path="/AboutMe" element={<PageTransition><AboutScreen /></PageTransition>} />
+                        <Route path="/WorkScreen" element={<PageTransition fast><WorkScreen /></PageTransition>} />
+                        <Route path="/WorkScreen/:id" element={<PageTransition fast><WorkDetailScreen /></PageTransition>} />
                         {/* 아직 리뉴얼 전 페이지들은 원본의 UpdatingScreen 문구로 대체 */}
                         <Route path="*" element={<PageTransition><UpdatingScreen /></PageTransition>} />
                     </Routes>

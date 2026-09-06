@@ -12,6 +12,7 @@ import { icoTransition } from '../lib/icoBus'
 const SCROLL_HIDE_SELECTORS = {
     '/MemoryPhotoGallery': '.memory-gallery',
     '/AboutMe': '.about-screen',
+    '/WorkScreen': '.about-screen',
 }
 
 // MEMORY는 EarthScreen이 마운트되면서 자기 hide 트랜지션을 직접 거는데,
@@ -19,7 +20,7 @@ const SCROLL_HIDE_SELECTORS = {
 // hide가 곧바로 덮어써버려 두 트랜지션이 충돌했다. mode를 비워서 EarthScreen
 // 쪽 트랜지션 하나만 걸리게 한다.
 const MENUS = [
-    { label: 'WORK', to: '/WorkScreen', mode: 'zoom' },
+    { label: 'WORK', to: '/WorkScreen', mode: 'zoomHide' },
     { label: 'SHOP', to: '/ShopScreen', mode: 'zoom' },
     { label: 'RECORD', to: '/RecordScreen', mode: 'zoom' },
     { label: 'MEMORY', to: '/MemoryScreen', mode: null },
@@ -39,11 +40,15 @@ function Header() {
     }
 
     useEffect(() => {
-        const selector = SCROLL_HIDE_SELECTORS[location.pathname]
+        // /WorkScreen/:id 같은 하위 경로도 같은 컨테이너를 쓰므로 접두어로 찾는다.
+        const key = Object.keys(SCROLL_HIDE_SELECTORS).find(
+            (k) => location.pathname === k || location.pathname.startsWith(k + '/')
+        )
+        const selector = key ? SCROLL_HIDE_SELECTORS[key] : undefined
         if (!selector) { setHidden(false); return }
 
         const el = document.querySelector(selector)
-        if (!el) return
+        if (!el) { setHidden(false); return }
 
         let lastY = el.scrollTop
         const onScroll = () => {

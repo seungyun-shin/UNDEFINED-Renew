@@ -1371,3 +1371,413 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
 @media (max-width: 760px) {
   .scroll-gauge { display: none; }
 }
+
+/* ── WORK 인덱스 (2열 카드 그리드) ─────────────────
+카드마다 그 프로젝트의 도식이 주인공이고 제목·지표는 아래로 물러난다.
+카드 크기는 전부 동일하다 — 큰 카드를 섞어봤더니 오히려 어수선했다.
+호버에 기대지 않으므로 모바일에선 그대로 1열로만 떨어지면 된다.
+도식은 카드가 뷰포트에 들어올 때(.in) 그려지기 시작한다. */
+.work-screen { background: #111111; }
+/* 섹션 라벨은 뺐다 — 상단 내비에 이미 WORK가 있어 같은 단어가 두 번 찍히고,
+   섹션이 하나뿐이라 구분할 대상도 없었다. 그만큼 위 여백만 남긴다. */
+.work-wrap { max-width: 1240px; margin: 0 auto; padding: clamp(140px, 17vh, 210px) 40px 0; }
+
+/* 상단 필터 — 종류별로 좁혀 본다. 카운트를 같이 보여줘서 각 분류에 몇 개가
+   있는지 누르기 전에 알 수 있게 했다. */
+.work-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: clamp(20px, 3vh, 34px);
+}
+.wfilter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid rgba(232,226,214,0.11);
+  color: #a8a094;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.35s ease, color 0.35s ease, background 0.35s ease;
+}
+.wfilter:hover { border-color: rgba(201,160,99,0.4); color: #e8e2d6; }
+.wfilter.is-on { border-color: rgba(201,160,99,0.75); color: #f5efe4; background: rgba(201,160,99,0.07); }
+.wfilter-n { font-family: 'Romelio', serif; font-size: 0.66rem; letter-spacing: 0; color: #706a5e; }
+.wfilter.is-on .wfilter-n { color: #C9A063; }
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  padding-bottom: clamp(40px, 6vh, 80px);
+}
+.wcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(232,226,214,0.022);
+  border: 1px solid rgba(232,226,214,0.09);
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.75s ease, transform 0.75s ease, border-color 0.45s ease, background 0.45s ease;
+}
+.wcard.in { opacity: 1; transform: none; }
+/* 첫 화면에 함께 들어오는 카드들은 살짝 시차를 두고 떠오른다 */
+.wcard:nth-child(2) { transition-delay: 0.08s; }
+.wcard:nth-child(3) { transition-delay: 0.16s; }
+.wcard:nth-child(4) { transition-delay: 0.24s; }
+.wcard.in:hover { border-color: rgba(201,160,99,0.42); background: rgba(232,226,214,0.034); }
+
+/* 도식 높이를 화면 높이에서 역산한다 — 첫 화면에 2행(카드 4개)이 들어와야
+   들어오자마자 썰렁하지 않다. 위 여백·카드 메타(약 110px)·행 간격을 빼고 2로 나눈 값. */
+.wcard-viz { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; }
+.wcard-viz svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 카드가 화면에 들어오기 전엔 도식 애니메이션을 멈춰둔다 */
+.wcard:not(.in) .wcard-viz svg { visibility: hidden; }
+
+.wcard-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 18px 20px 20px;
+  border-top: 1px solid rgba(232,226,214,0.07);
+}
+.wcard-l { display: flex; flex-direction: column; min-width: 0; }
+.wcard-tag { font-family: 'sarrif', sans-serif; font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase; color: #C9A063; }
+.wcard-title { margin-top: 9px; font-family: 'Romelio', serif; font-size: 1.05rem; color: #f5efe4; line-height: 1.22; }
+.wcard-brief { margin-top: 9px; font-size: 0.8rem; font-weight: 300; color: #a8a094; line-height: 1.55; max-width: 52ch; }
+.wcard-r { text-align: right; white-space: nowrap; }
+.wcard-num { display: block; font-family: 'Romelio', serif; font-size: 1.25rem; color: #C9A063; line-height: 1; }
+.wcard-num.is-status { font-style: italic; font-size: 1rem; color: #a8a094; }
+.wcard-cap { display: block; margin-top: 7px; font-family: 'sarrif', sans-serif; font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: #706a5e; white-space: normal; max-width: 16ch; margin-left: auto; }
+.wcard-idx {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.18em;
+  color: rgba(201,160,99,0.55);
+}
+
+/* 페이지를 닫는 줄 — About의 서명과 같은 역할 */
+.work-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 24px;
+  padding: 26px 0 clamp(60px, 10vh, 120px);
+  border-top: 1px solid rgba(232,226,214,0.09);
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #706a5e;
+}
+.work-foot a { color: #706a5e; text-decoration: none; transition: color 0.3s ease; }
+.work-foot a:hover { color: #C9A063; }
+
+/* 도식 공통 스타일 */
+.work-screen .g { stroke: rgba(232,226,214,0.08); }
+.work-screen .ln { fill: none; stroke: #C9A063; stroke-width: 1.6; }
+.work-screen .ln-d { fill: none; stroke: #C9A063; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.work-screen .ln-m { fill: none; stroke: rgba(232,226,214,0.28); stroke-width: 1.4; }
+.work-screen .dot { fill: #C9A063; }
+.work-screen .dot-m { fill: rgba(232,226,214,0.3); }
+.work-screen .bx { fill: none; stroke: rgba(201,160,99,0.45); stroke-width: 1; }
+.work-screen .tx { font-family: 'sarrif', sans-serif; font-size: 8px; letter-spacing: 0.14em; fill: #706a5e; text-transform: uppercase; }
+.work-screen .tx-g { fill: #C9A063; }
+.wcard.in .draw { stroke-dasharray: var(--len, 300); stroke-dashoffset: var(--len, 300); animation: viz-draw 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+@keyframes viz-draw { to { stroke-dashoffset: 0; } }
+.wcard.in .pulse { animation: viz-pulse 2.6s ease-in-out infinite; }
+@keyframes viz-pulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+.wcard.in .flow { stroke-dasharray: 3 6; animation: viz-flow 2.4s linear infinite; }
+@keyframes viz-flow { to { stroke-dashoffset: -36; } }
+
+@media (max-width: 900px) {
+  .work-wrap { padding: clamp(128px, 16vh, 170px) 24px 0; }
+  .work-filter { gap: 6px; margin-bottom: 18px; }
+  .wfilter { padding: 7px 11px; font-size: 0.54rem; }
+  .work-grid { grid-template-columns: 1fr; gap: 16px; }
+  .wcard-viz { aspect-ratio: 16 / 11; }
+  .wcard:nth-child(n) { transition-delay: 0s; }
+  .wcard-meta { flex-direction: column; align-items: flex-start; gap: 14px; padding: 16px 18px 18px; }
+  .wcard-r { text-align: left; }
+  .wcard-cap { margin-left: 0; }
+}
+
+/* WORK 상세에서만 쓰는 잔여 로우 스타일 (인덱스는 .wx/.wc로 대체됨) */
+.work-row-idx { font-family: 'sarrif', sans-serif; font-size: 0.8rem; color: #C9A063; letter-spacing: 0.06em; }
+.work-row-tag { font-family: 'sarrif', sans-serif; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #C9A063; margin-bottom: 8px; }
+.work-row-period { font-family: 'sarrif', sans-serif; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #706a5e; }
+
+/* ── WORK 상세 ── */
+.work-detail { padding-top: 18vh; }
+.work-back {
+  display: inline-block;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #706a5e;
+  text-decoration: none;
+  margin-bottom: 56px;
+  transition: color 0.3s ease;
+}
+.work-back:hover { color: #C9A063; }
+.work-detail-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 40px; }
+.work-detail-head .work-row-period { margin-top: 0; }
+.work-detail-metrics { display: flex; gap: 48px; flex-wrap: wrap; margin-bottom: 44px; }
+.work-detail-num { font-family: 'Romelio', serif; font-size: clamp(2.4rem, 5vw, 4rem); color: #C9A063; line-height: 1; }
+.work-detail-num--long { font-size: clamp(1.9rem, 3.8vw, 3rem); padding-top: 0.25em; }
+.work-detail-num-cap { margin-top: 10px; font-family: 'sarrif', sans-serif; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: #706a5e; max-width: 20ch; line-height: 1.5; }
+.work-detail-status { font-family: 'Romelio', serif; font-style: italic; font-size: clamp(1.8rem, 3.6vw, 2.8rem); color: #a8a094; line-height: 1; }
+.work-detail-title { margin-top: 14px; font-family: 'Romelio', serif; font-weight: 400; font-size: clamp(2rem, 4.2vw, 3.4rem); color: #f5efe4; line-height: 1.15; max-width: 22ch; }
+.work-detail-brief { margin-top: 18px; font-size: 0.98rem; font-weight: 300; color: #a8a094; max-width: 64ch; line-height: 1.6; }
+/* 서비스 흐름 도식(채팅 화면) 전용 스타일 — 말풍선·아바타·타이핑 */
+.tx-q { font-family: 'Roboto', sans-serif; font-size: 14px; fill: #f5efe4; }
+.tx-a { font-family: 'Roboto', sans-serif; font-size: 13px; fill: #e8e2d6; }
+.tx-a-hi { fill: #C9A063; }
+.tx-sql { font-family: 'Menlo', 'Consolas', monospace; font-size: 11.5px; fill: #C9A063; letter-spacing: 0.02em; }
+.tx-av { font-family: 'sarrif', sans-serif; font-size: 7px; letter-spacing: 0.1em; fill: #a8a094; }
+.bub-u, .bub-a { stroke-linejoin: round; }
+.tx-av-g { fill: #C9A063; }
+.av { fill: none; stroke-width: 1; }
+.av-u { stroke: rgba(232,226,214,0.35); }
+.av-a { stroke: rgba(201,160,99,0.6); }
+.bub { stroke-width: 1; }
+.bub-u { fill: rgba(232,226,214,0.045); stroke: rgba(232,226,214,0.16); }
+.bub-a { fill: rgba(201,160,99,0.05); stroke: rgba(201,160,99,0.32); }
+
+/* 말풍선은 각자 자기 등장 시점을 keyframes 안에 갖는다 — 음수 delay로
+   시차를 주면 오히려 앞당겨져 한꺼번에 뜬다. 루프 12초. */
+.ch { opacity: 0; }
+.ch-user { animation: ch-user 12s linear infinite; }
+.ch-think { animation: ch-think 12s linear infinite; }
+.ch-ai1 { animation: ch-ai1 12s linear infinite; }
+.ch-sql { animation: ch-sql 12s linear infinite; }
+.ch-ans { animation: ch-ans 12s linear infinite; }
+@keyframes ch-user {
+  0%, 2% { opacity: 0; }
+  6%, 94% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes ch-think {
+  0%, 18% { opacity: 0; }
+  22%, 28% { opacity: 1; }
+  31%, 100% { opacity: 0; }
+}
+/* AI 아바타·꼬리는 "..."이 뜰 때 함께 나타나 SQL·답변 동안 계속 남는다 */
+@keyframes ch-ai1 {
+  0%, 18% { opacity: 0; }
+  22%, 94% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes ch-sql {
+  0%, 28% { opacity: 0; }
+  31%, 94% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes ch-ans {
+  0%, 56% { opacity: 0; }
+  60%, 94% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+/* 점포 추천 도식 루프(10초) — 유사도 선이 뻗고 → 상위 점포가 켜지고 →
+   추천 상품이 위에서부터 차례로 채워진다. */
+.sim-edges line {
+  stroke: rgba(201,160,99,0.42);
+  stroke-width: 1;
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: sim-edge 10s ease-in-out infinite;
+}
+.sim-edges line:nth-child(2) { animation-delay: 0.1s; }
+.sim-edges line:nth-child(3) { animation-delay: 0.2s; }
+.sim-edges line:nth-child(4) { animation-delay: 0.3s; }
+.sim-edges line:nth-child(5) { animation-delay: 0.4s; }
+.sim-edges line:nth-child(6) { animation-delay: 0.5s; }
+.sim-edges line:nth-child(7) { animation-delay: 0.6s; }
+.sim-edges line:nth-child(8) { animation-delay: 0.7s; }
+@keyframes sim-edge {
+  0%, 3% { stroke-dashoffset: 160; }
+  22%, 90% { stroke-dashoffset: 0; }
+  96%, 100% { stroke-dashoffset: 160; }
+}
+.sim-far circle { fill: rgba(232,226,214,0.3); opacity: 0; animation: sim-node 10s ease-in-out infinite; }
+.sim-near circle { fill: #C9A063; opacity: 0; animation: sim-top 10s ease-in-out infinite; }
+@keyframes sim-node { 0%, 16% { opacity: 0; } 24%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes sim-top { 0%, 26% { opacity: 0; transform: scale(0.6); } 34%, 90% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; transform: scale(0.6); } }
+.sim-near circle { transform-box: fill-box; transform-origin: center; }
+
+.rec-arrow { opacity: 0; animation: rec-arrow 10s ease-in-out infinite; }
+@keyframes rec-arrow { 0%, 34% { opacity: 0; } 42%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+.rec-row { opacity: 0; }
+.rec-row rect { fill: rgba(201,160,99,0.55); transform-box: fill-box; transform-origin: left center; }
+.rec-1 { animation: rec-row 10s ease-in-out infinite; }
+.rec-2 { animation: rec-row2 10s ease-in-out infinite; }
+.rec-3 { animation: rec-row3 10s ease-in-out infinite; }
+.rec-4 { animation: rec-row4 10s ease-in-out infinite; }
+@keyframes rec-row  { 0%, 44% { opacity: 0; } 52%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes rec-row2 { 0%, 49% { opacity: 0; } 57%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes rec-row3 { 0%, 54% { opacity: 0; } 62%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes rec-row4 { 0%, 59% { opacity: 0; } 67%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.tx-item { font-family: 'Roboto', sans-serif; font-size: 11.5px; fill: #e8e2d6; }
+.tx-num { font-family: 'Romelio', serif; font-size: 15px; fill: #C9A063; }
+.tx-unit { font-family: 'sarrif', sans-serif; font-size: 8px; letter-spacing: 0.12em; fill: #706a5e; }
+.rec-head { fill: #C9A063; stroke: none; }
+
+/* 예측 차트 루프(10초) — 실적선이 그려지고, 모델선이 뒤따르고, 예측·신뢰구간이
+   나타나 잠시 머문 뒤 사라지고 다시 시작한다. 각 요소가 자기 시점을 keyframes에
+   갖는다(딜레이로 시차를 주면 첫 바퀴가 어긋난다). */
+.c-actual, .c-model { stroke-dasharray: var(--len, 1000); }
+.c-actual { animation: c-actual 10s ease-in-out infinite; }
+.c-model { animation: c-model 10s ease-in-out infinite; }
+.c-fore { opacity: 0; animation: c-fore 10s ease-in-out infinite; }
+.c-band { opacity: 0; animation: c-band 10s ease-in-out infinite; }
+.c-mark { opacity: 0; animation: c-mark 10s ease-in-out infinite; }
+@keyframes c-actual {
+  0%, 2% { stroke-dashoffset: var(--len, 1000); opacity: 1; }
+  24%, 90% { stroke-dashoffset: 0; opacity: 1; }
+  96%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes c-model {
+  0%, 16% { stroke-dashoffset: var(--len, 1000); opacity: 1; }
+  38%, 90% { stroke-dashoffset: 0; opacity: 1; }
+  96%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes c-fore { 0%, 42% { opacity: 0; } 50%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes c-band { 0%, 46% { opacity: 0; } 54%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes c-mark { 0%, 56% { opacity: 0; } 63%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+/* 점선을 유지해야 하는 선의 등장 — draw(대시 기반)를 쓸 수 없을 때 */
+.fade-in { opacity: 0; animation: viz-fade 0.9s ease forwards; }
+@keyframes viz-fade { to { opacity: 1; } }
+
+/* 차트 공통 — 신뢰구간 면 / 기준축 / 경계선 / 스파이크 마커 / 축 라벨 */
+.band { fill: rgba(201,160,99,0.1); stroke: none; }
+.axis { stroke: rgba(232,226,214,0.22); stroke-width: 1; }
+.split { stroke: rgba(232,226,214,0.2); stroke-width: 1; stroke-dasharray: 3 4; }
+.spike { fill: none; stroke: rgba(232,226,214,0.5); stroke-width: 1.2; }
+.tx-ax { font-family: 'sarrif', sans-serif; font-size: 7px; letter-spacing: 0.12em; fill: #706a5e; text-transform: uppercase; }
+
+/* 타이핑 — 클립 사각형을 왼쪽 기준으로 가로로 펼친다 */
+.type-q { transform-origin: 98px 0; transform: scaleX(0); animation: type-q 12s linear infinite; }
+.type-sql { transform-origin: 182px 0; transform: scaleX(0); animation: type-sql 12s linear infinite; }
+@keyframes type-q {
+  0%, 4% { transform: scaleX(0); }
+  17%, 94% { transform: scaleX(1); }
+  97%, 100% { transform: scaleX(0); }
+}
+@keyframes type-sql {
+  0%, 32% { transform: scaleX(0); }
+  46%, 94% { transform: scaleX(1); }
+  97%, 100% { transform: scaleX(0); }
+}
+
+.think { fill: #C9A063; animation: viz-think 1.1s ease-in-out infinite; }
+@keyframes viz-think { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+.bars { opacity: 0; animation: ch-bars 12s ease-in-out infinite; }
+@keyframes ch-bars { 0%, 62% { opacity: 0; } 68%, 94% { opacity: 1; } 98%, 100% { opacity: 0; } }
+
+/* 상세의 도식 — 카드보다 확실히 크게(가로 전체, 높이 2배 수준) 그려서
+   같은 그림의 반복이 아니라 "자세히 보라"는 신호가 되게 한다. */
+.work-detail-viz {
+  position: relative;
+  margin-top: 44px;
+  /* 도식 viewBox(640x400 = 16:10)와 같은 비율이어야 좌우에 빈 띠가 안 생긴다 */
+  aspect-ratio: 16 / 10;
+  max-height: 66vh;
+  background: rgba(232,226,214,0.02);
+  border: 1px solid rgba(232,226,214,0.08);
+}
+.work-detail-viz svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* 도식이 둘일 때는 좌우 2개 카드로 — 테두리는 각 카드가 갖는다 */
+.work-detail-viz.is-pair {
+  aspect-ratio: auto;
+  max-height: none;
+  background: none;
+  border: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.wdv { margin: 0; display: flex; flex-direction: column; }
+.wdv-frame {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: rgba(232,226,214,0.02);
+  border: 1px solid rgba(232,226,214,0.08);
+}
+.wdv-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wdv-cap {
+  margin-top: 12px;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #706a5e;
+}
+/* 도식 클래스는 WORK 인덱스와 같은 규칙을 쓴다 */
+.work-detail .g { stroke: rgba(232,226,214,0.08); }
+.work-detail .ln { fill: none; stroke: #C9A063; stroke-width: 1.6; }
+.work-detail .ln-d { fill: none; stroke: #C9A063; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.work-detail .ln-m { fill: none; stroke: rgba(232,226,214,0.28); stroke-width: 1.4; }
+.work-detail .dot { fill: #C9A063; }
+.work-detail .dot-m { fill: rgba(232,226,214,0.3); }
+.work-detail .bx { fill: none; stroke: rgba(201,160,99,0.45); stroke-width: 1; }
+.work-detail .tx { font-family: 'sarrif', sans-serif; font-size: 8px; letter-spacing: 0.14em; fill: #706a5e; text-transform: uppercase; }
+.work-detail .tx-g { fill: #C9A063; }
+.work-detail .draw { stroke-dasharray: var(--len, 300); stroke-dashoffset: var(--len, 300); animation: viz-draw 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards; }
+.work-detail .pulse { animation: viz-pulse 2.6s ease-in-out infinite; }
+.work-detail .flow { stroke-dasharray: 3 6; animation: viz-flow 2.4s linear infinite; }
+
+.work-detail-cols {
+  margin-top: 56px;
+  padding-top: 48px;
+  border-top: 1px solid rgba(232,226,214,0.13);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+}
+.work-sub-label { font-family: 'sarrif', sans-serif; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: #C9A063; margin-bottom: 16px; }
+.work-list { list-style: none; }
+.work-list li { position: relative; padding-left: 18px; font-size: 0.96rem; font-weight: 300; color: #a8a094; line-height: 1.75; margin-bottom: 12px; }
+.work-list li::before { content: ''; position: absolute; left: 0; top: 0.78em; width: 4px; height: 4px; border-radius: 50%; background: #706a5e; }
+.work-list li:last-child { margin-bottom: 0; }
+.work-list li strong { color: #e8e2d6; font-weight: 400; }
+.work-detail-nav {
+  margin-top: 96px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(232,226,214,0.13);
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+}
+.work-detail-nav-link { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #a8a094; max-width: 40%; font-family: 'Romelio', serif; font-size: 1.05rem; line-height: 1.3; transition: color 0.3s ease; }
+.work-detail-nav-link--next { text-align: right; align-items: flex-end; }
+.work-detail-nav-link:hover { color: #f5efe4; }
+.work-detail-nav-cap { font-family: 'sarrif', sans-serif; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: #706a5e; }
+
+@media (max-width: 900px) {
+  .work-section, .work-detail { padding-top: 16vh; }
+  .work-row { grid-template-columns: 1fr; gap: 12px; padding-left: 20px; }
+  .work-row-idx { display: none; }
+  .work-row-meta { flex-direction: row; align-items: baseline; text-align: left; gap: 16px; }
+  .work-row-period { margin-top: 0; }
+  .work-row-arrow { display: none; }
+  .work-detail-viz { aspect-ratio: 16 / 10; margin-top: 32px; }
+  .work-detail-viz.is-pair { grid-template-columns: 1fr; gap: 26px; }
+  .work-detail-cols { grid-template-columns: 1fr; gap: 40px; }
+  .work-detail-nav-link { max-width: 48%; }
+}
