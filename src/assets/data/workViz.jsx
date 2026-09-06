@@ -370,13 +370,125 @@ export const WORK_VIZ = {
           <text className="tx" x="34" y="214">sentiment distribution over corpus</text>
         </svg>
     ),
+    // 열차 좌석 점유 히트맵(칸=열차, 행=좌석 등급, 농도=예약률)과 그 아래
+    // 예측 오차 비교 — 기존 통계 모델 대비 딥러닝 모델의 오차가 짧아지는 것이
+    // "+9% 정확도"의 근거로 눈에 보인다. 10초 루프.
+    // 왼쪽: 열차 측면도 — 객차별 예측 점유율이 아래에서 차오르고, 가장 붐빌
+    // 객차가 골드 테두리로 선택된다. 오른쪽: 그 객차의 좌석 배치도 —
+    // 이미 예약된 좌석(채움)과 모델이 출발까지 팔릴 것으로 본 좌석(점선)을
+    // 구분해 "예측"이라는 성격이 드러난다. 10초 루프.
     'korail-demand': (
-        <svg viewBox="0 0 460 260" preserveAspectRatio="none">
-          <g className="g" strokeWidth="1"><line x1="0" y1="70" x2="460" y2="70"/><line x1="0" y1="120" x2="460" y2="120"/><line x1="0" y1="170" x2="460" y2="170"/></g>
-          <path className="ln-m draw" style={{ '--len': '540' }} d="M18 168 L72 142 L126 158 L180 118 L234 132 L288 96 L342 112 L396 78 L442 92"/>
-          <path className="ln draw" style={{ '--len': '540', animationDelay: '.3s' }} d="M18 174 L72 136 L126 152 L180 112 L234 124 L288 90 L342 104 L396 72 L442 84"/>
-          <text className="tx" x="18" y="222">statistical baseline</text>
-          <text className="tx tx-g" x="442" y="222" textAnchor="end">deep model · +9% accuracy</text>
+        <svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet">
+            {/* ── 왼쪽: KTX 측면도 (뾰족한 앞머리 · 창문 띠 · 대차) ── */}
+            <text className="tx tx-g" x="40" y="84">predicted occupancy by car</text>
+            <text className="tx" x="40" y="106">departure in 3 days</text>
+
+            {/* 선로 */}
+            <line className="rail" x1="34" y1="204" x2="308" y2="204" />
+
+            {/* 동력차 앞머리 — 길게 빠진 노즈 */}
+            <path className="ktx-nose" d="M40 196 L40 186 C48 166 66 152 92 150 L92 196 Z" />
+            <rect className="ktx-win" x="66" y="160" width="20" height="8" rx="1.5" />
+
+            <g className="cars">
+                <rect className="ktx-fill" x="92" y="153.7" width="32" height="42.3" style={{ animationDelay: '0.00s' }} />
+                <rect className="ktx-win" x="96" y="159" width="24" height="9" rx="1.5" />
+                <rect className="ktx-car" x="92" y="150" width="32" height="46" rx="2" />
+                <text className="tx-car" x="108" y="226" textAnchor="middle">1</text>
+                <rect className="ktx-fill" x="127" y="160.1" width="32" height="35.9" style={{ animationDelay: '0.10s' }} />
+                <rect className="ktx-win" x="131" y="159" width="24" height="9" rx="1.5" />
+                <rect className="ktx-car" x="127" y="150" width="32" height="46" rx="2" />
+                <text className="tx-car" x="143" y="226" textAnchor="middle">2</text>
+                <rect className="ktx-fill" x="162" y="167.5" width="32" height="28.5" style={{ animationDelay: '0.20s' }} />
+                <rect className="ktx-win" x="166" y="159" width="24" height="9" rx="1.5" />
+                <rect className="ktx-car" x="162" y="150" width="32" height="46" rx="2" />
+                <text className="tx-car" x="178" y="226" textAnchor="middle">3</text>
+                <rect className="ktx-fill" x="197" y="152.3" width="32" height="43.7" style={{ animationDelay: '0.30s' }} />
+                <rect className="ktx-win" x="201" y="159" width="24" height="9" rx="1.5" />
+                <rect className="ktx-car is-sel" x="197" y="150" width="32" height="46" rx="2" />
+                <text className="tx-car" x="213" y="226" textAnchor="middle">4</text>
+                <rect className="ktx-fill" x="232" y="175.8" width="32" height="20.2" style={{ animationDelay: '0.40s' }} />
+                <rect className="ktx-win" x="236" y="159" width="24" height="9" rx="1.5" />
+                <rect className="ktx-car" x="232" y="150" width="32" height="46" rx="2" />
+                <text className="tx-car" x="248" y="226" textAnchor="middle">5</text>
+                <rect className="ktx-fill" x="267" y="182.2" width="32" height="13.8" style={{ animationDelay: '0.50s' }} />
+                <rect className="ktx-win" x="271" y="159" width="24" height="9" rx="1.5" />
+                <rect className="ktx-car" x="267" y="150" width="32" height="46" rx="2" />
+                <text className="tx-car" x="283" y="226" textAnchor="middle">6</text>
+            </g>
+
+            {/* 대차 */}
+            <g>
+                <rect className="ktx-bogie" x="52" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="86" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="121" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="156" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="191" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="226" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="261" y="196" width="14" height="6" rx="2.5" />
+                <rect className="ktx-bogie" x="285" y="196" width="14" height="6" rx="2.5" />
+            </g>
+
+            {/* ── 왼쪽 아래: 노선 구간별 혼잡도 (굵기·농도 = 혼잡도) ── */}
+            <text className="tx tx-g" x="40" y="270">demand by segment</text>
+            <g className="route">
+                <line className="route-seg" x1="52" y1="300" x2="134" y2="300" strokeWidth="8.2" stroke="rgba(201,160,99,0.73)" style={{ animationDelay: '0.00s' }} />
+                <line className="route-seg" x1="134" y1="300" x2="216" y2="300" strokeWidth="6.3" stroke="rgba(201,160,99,0.59)" style={{ animationDelay: '0.18s' }} />
+                <line className="route-seg" x1="216" y1="300" x2="298" y2="300" strokeWidth="4.4" stroke="rgba(201,160,99,0.44)" style={{ animationDelay: '0.36s' }} />
+                <circle className="route-dot" cx="52" cy="300" r="4" style={{ animationDelay: '0.00s' }} />
+                <text className="tx-st" x="52" y="322" textAnchor="start">Seoul</text>
+                <circle className="route-dot" cx="134" cy="300" r="4" style={{ animationDelay: '0.18s' }} />
+                <text className="tx-st" x="134" y="322" textAnchor="middle">Daejeon</text>
+                <circle className="route-dot" cx="216" cy="300" r="4" style={{ animationDelay: '0.36s' }} />
+                <text className="tx-st" x="216" y="322" textAnchor="middle">Dongdaegu</text>
+                <circle className="route-dot" cx="298" cy="300" r="4" style={{ animationDelay: '0.54s' }} />
+                <text className="tx-st" x="298" y="322" textAnchor="end">Busan</text>
+            </g>
+            <text className="tx" x="40" y="366">thicker = busier segment</text>
+
+            {/* 선택 표시 → 오른쪽으로 */}
+            <path className="ln-d rec-arrow" d="M312 172 H336" />
+            <path className="rec-head rec-arrow" d="M338 166 L352 172 L338 178 Z" />
+
+            {/* ── 오른쪽: 선택 객차 좌석 배치도 ── */}
+            <text className="tx tx-g" x="380" y="84">car 4 · seat map</text>
+            <rect className="car-shell" x="380" y="100" width="180" height="200" rx="10" />
+            <line className="aisle" x1="470" y1="112" x2="470" y2="288" />
+            <g className="seatmap">
+                <rect className="seat seat-p" x="402" y="126" width="24" height="18" rx="2" style={{ animationDelay: '0.00s' }} />
+                <rect className="seat seat-b" x="434" y="126" width="24" height="18" rx="2" style={{ animationDelay: '0.03s' }} />
+                <rect className="seat seat-b" x="482" y="126" width="24" height="18" rx="2" style={{ animationDelay: '0.06s' }} />
+                <rect className="seat seat-b" x="514" y="126" width="24" height="18" rx="2" style={{ animationDelay: '0.09s' }} />
+                <rect className="seat seat-p" x="402" y="152" width="24" height="18" rx="2" style={{ animationDelay: '0.16s' }} />
+                <rect className="seat seat-b" x="434" y="152" width="24" height="18" rx="2" style={{ animationDelay: '0.15s' }} />
+                <rect className="seat seat-b" x="482" y="152" width="24" height="18" rx="2" style={{ animationDelay: '0.18s' }} />
+                <rect className="seat seat-p" x="514" y="152" width="24" height="18" rx="2" style={{ animationDelay: '0.28s' }} />
+                <rect className="seat seat-e" x="402" y="178" width="24" height="18" rx="2" />
+                <rect className="seat seat-b" x="434" y="178" width="24" height="18" rx="2" style={{ animationDelay: '0.27s' }} />
+                <rect className="seat seat-b" x="482" y="178" width="24" height="18" rx="2" style={{ animationDelay: '0.30s' }} />
+                <rect className="seat seat-p" x="514" y="178" width="24" height="18" rx="2" style={{ animationDelay: '0.44s' }} />
+                <rect className="seat seat-p" x="402" y="204" width="24" height="18" rx="2" style={{ animationDelay: '0.48s' }} />
+                <rect className="seat seat-b" x="434" y="204" width="24" height="18" rx="2" style={{ animationDelay: '0.39s' }} />
+                <rect className="seat seat-b" x="482" y="204" width="24" height="18" rx="2" style={{ animationDelay: '0.42s' }} />
+                <rect className="seat seat-e" x="514" y="204" width="24" height="18" rx="2" />
+                <rect className="seat seat-p" x="402" y="230" width="24" height="18" rx="2" style={{ animationDelay: '0.64s' }} />
+                <rect className="seat seat-b" x="434" y="230" width="24" height="18" rx="2" style={{ animationDelay: '0.51s' }} />
+                <rect className="seat seat-b" x="482" y="230" width="24" height="18" rx="2" style={{ animationDelay: '0.54s' }} />
+                <rect className="seat seat-p" x="514" y="230" width="24" height="18" rx="2" style={{ animationDelay: '0.76s' }} />
+                <rect className="seat seat-b" x="402" y="256" width="24" height="18" rx="2" style={{ animationDelay: '0.60s' }} />
+                <rect className="seat seat-p" x="434" y="256" width="24" height="18" rx="2" style={{ animationDelay: '0.84s' }} />
+                <rect className="seat seat-b" x="482" y="256" width="24" height="18" rx="2" style={{ animationDelay: '0.66s' }} />
+                <rect className="seat seat-b" x="514" y="256" width="24" height="18" rx="2" style={{ animationDelay: '0.69s' }} />
+            </g>
+
+            {/* 범례 + 요약 */}
+            <g>
+                <rect className="seat seat-b lg" x="380" y="322" width="16" height="12" rx="2" />
+                <text className="tx" x="404" y="332">booked</text>
+                <rect className="seat seat-p lg" x="470" y="322" width="16" height="12" rx="2" />
+                <text className="tx" x="494" y="332">predicted</text>
+            </g>
+            <text className="tx-sum" x="380" y="366">42<tspan className="tx-unit"> booked</tspan>  →  <tspan className="tx-hi">68</tspan><tspan className="tx-unit"> at departure</tspan></text>
         </svg>
     ),
     'early-projects': (
