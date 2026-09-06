@@ -47,20 +47,31 @@ function Header() {
         const selector = key ? SCROLL_HIDE_SELECTORS[key] : undefined
         if (!selector) { setHidden(false); return }
 
-        const el = document.querySelector(selector)
-        if (!el) { setHidden(false); return }
-
-        let lastY = el.scrollTop
-        const onScroll = () => {
+        // 컨테이너를 직접 찾아 붙이면 안 된다 — WORK 인덱스/WORK 상세/ABOUT이
+        // 전부 .about-screen 이라, 페이지 전환 중 나가는 페이지와 들어오는
+        // 페이지가 잠깐 같이 떠 있는 동안 querySelector가 "나가는 쪽"을 집어서
+        // 곧 사라질 노드에 리스너를 붙였다(ABOUT→WORK, WORK→상세 등에서 헤더가
+        // 안 숨던 원인). scroll은 버블링은 안 되지만 캡처 단계에선 잡히므로,
+        // document에 한 번 걸고 이벤트를 쏜 쪽이 이 페이지 컨테이너인지만 본다.
+        setHidden(false)
+        // 전환 중엔 나가는 컨테이너도 잠깐 스크롤 이벤트를 쏘므로, 직전 위치는
+        // 컨테이너별로 따로 기억한다. 하나의 lastY를 공유하면 두 컨테이너의
+        // scrollTop이 섞여 방향이 한 번 반대로 판정된다.
+        const lastY = new WeakMap()
+        const onScroll = (e) => {
+            const el = e.target
+            if (!el || typeof el.matches !== 'function' || !el.matches(selector)) return
             const y = el.scrollTop
-            const delta = y - lastY
-            lastY = y
+            const prev = lastY.get(el)
+            lastY.set(el, y)
+            if (prev === undefined) return
+            const delta = y - prev
             if (y < 80) setHidden(false)
             else if (delta > 4) setHidden(true)
             else if (delta < -4) setHidden(false)
         }
-        el.addEventListener('scroll', onScroll, { passive: true })
-        return () => el.removeEventListener('scroll', onScroll)
+        document.addEventListener('scroll', onScroll, { capture: true, passive: true })
+        return () => document.removeEventListener('scroll', onScroll, { capture: true })
     }, [location.pathname])
 
     // 메뉴가 열려있는데 헤더가 숨겨지면 메뉴만 화면 위쪽 허공에 뜬 것처럼

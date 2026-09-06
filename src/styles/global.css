@@ -1591,6 +1591,36 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
   60%, 94% { opacity: 1; }
   97%, 100% { opacity: 0; }
 }
+/* 열차 수요·공석 예측 루프(10초) — 객차가 차례로 차오르고, 가장 붐빌 객차가
+   선택되면 그 객차의 좌석이 예약석부터 채워지고 예측석이 점선으로 더해진다. */
+.rail { stroke: rgba(232,226,214,0.18); stroke-width: 1; }
+.ktx-nose { fill: rgba(232,226,214,0.07); stroke: rgba(232,226,214,0.34); stroke-width: 1; stroke-linejoin: round; }
+.ktx-car { fill: none; stroke: rgba(232,226,214,0.3); stroke-width: 1; }
+.ktx-car.is-sel { stroke: #C9A063; stroke-width: 1.6; animation: car-sel 10s ease-in-out infinite; }
+@keyframes car-sel { 0%, 24% { stroke: rgba(232,226,214,0.3); } 32%, 90% { stroke: #C9A063; } 96%, 100% { stroke: rgba(232,226,214,0.3); } }
+.ktx-win { fill: rgba(232,226,214,0.14); stroke: none; }
+.ktx-bogie { fill: rgba(232,226,214,0.22); }
+.ktx-fill { fill: rgba(201,160,99,0.42); transform-box: fill-box; transform-origin: center bottom; transform: scaleY(0); animation: car-fill 10s ease-in-out infinite; }
+@keyframes car-fill { 0%, 4% { transform: scaleY(0); } 22%, 90% { transform: scaleY(1); } 96%, 100% { transform: scaleY(0); } }
+.tx-car { font-family: 'sarrif', sans-serif; font-size: 8px; letter-spacing: 0.1em; fill: #706a5e; }
+
+.route-seg { stroke-linecap: round; opacity: 0; animation: route-in 10s ease-in-out infinite; }
+.route-dot { fill: #C9A063; opacity: 0; animation: route-in 10s ease-in-out infinite; }
+@keyframes route-in { 0%, 26% { opacity: 0; } 38%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.tx-st { font-family: 'sarrif', sans-serif; font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; fill: #706a5e; }
+
+.car-shell { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.aisle { stroke: rgba(232,226,214,0.1); stroke-width: 1; stroke-dasharray: 2 5; }
+.seat { stroke-width: 1; }
+.seat-e { fill: rgba(232,226,214,0.05); stroke: rgba(232,226,214,0.12); }
+.seat-b { fill: rgba(201,160,99,0.75); stroke: none; opacity: 0; animation: seat-b 10s ease-in-out infinite; }
+.seat-p { fill: rgba(201,160,99,0.14); stroke: #C9A063; stroke-dasharray: 3 3; opacity: 0; animation: seat-p 10s ease-in-out infinite; }
+.seat.lg { opacity: 1; animation: none; }
+@keyframes seat-b { 0%, 34% { opacity: 0; } 46%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes seat-p { 0%, 56% { opacity: 0; } 68%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.tx-sum { font-family: 'Romelio', serif; font-size: 15px; fill: #a8a094; }
+.tx-hi { fill: #C9A063; }
+
 /* 점포 추천 도식 루프(10초) — 유사도 선이 뻗고 → 상위 점포가 켜지고 →
    추천 상품이 위에서부터 차례로 채워진다. */
 .sim-edges line {
@@ -1691,23 +1721,12 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
 
 /* 상세의 도식 — 카드보다 확실히 크게(가로 전체, 높이 2배 수준) 그려서
    같은 그림의 반복이 아니라 "자세히 보라"는 신호가 되게 한다. */
-.work-detail-viz {
-  position: relative;
-  margin-top: 44px;
-  /* 도식 viewBox(640x400 = 16:10)와 같은 비율이어야 좌우에 빈 띠가 안 생긴다 */
-  aspect-ratio: 16 / 10;
-  max-height: 66vh;
-  background: rgba(232,226,214,0.02);
-  border: 1px solid rgba(232,226,214,0.08);
-}
-.work-detail-viz svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 순수 래퍼다 — 비율/테두리/배경은 .wdv-frame 이 갖는다.
+   여기에 다시 얹으면 단일 도식 페이지에서 같은 박스가 이중으로 겹친다. */
+.work-detail-viz { position: relative; margin-top: 44px; }
 
-/* 도식이 둘일 때는 좌우 2개 카드로 — 테두리는 각 카드가 갖는다 */
+/* 도식이 둘일 때는 좌우 2개 카드로 */
 .work-detail-viz.is-pair {
-  aspect-ratio: auto;
-  max-height: none;
-  background: none;
-  border: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 22px;
@@ -1776,7 +1795,7 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
   .work-row-meta { flex-direction: row; align-items: baseline; text-align: left; gap: 16px; }
   .work-row-period { margin-top: 0; }
   .work-row-arrow { display: none; }
-  .work-detail-viz { aspect-ratio: 16 / 10; margin-top: 32px; }
+  .work-detail-viz { margin-top: 32px; }
   .work-detail-viz.is-pair { grid-template-columns: 1fr; gap: 26px; }
   .work-detail-cols { grid-template-columns: 1fr; gap: 40px; }
   .work-detail-nav-link { max-width: 48%; }
