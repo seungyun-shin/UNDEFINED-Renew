@@ -5,7 +5,7 @@ import Lenis from 'lenis'
 import { icoTransition } from '../lib/icoBus'
 import ScrollGauge from '../components/ScrollGauge'
 import { WORKS, WORK_CATS } from '../assets/data/works'
-import { WORK_VIZ } from '../assets/data/workViz'
+import { indexViz } from '../assets/data/workViz'
 
 // WORK 인덱스 — 카드마다 그 프로젝트의 도식이 주인공이고, 제목·지표는 아래로
 // 물러난다. 카드 크기는 전부 동일하게 2열로 — 크기를 섞으면 오히려 어수선해진다.
@@ -114,7 +114,7 @@ function WorkScreen() {
                                 <Link to={`/WorkScreen/${w.id}`} className="wcard" key={w.id}>
                                     {/* 목록에서는 "무엇을 해주는 서비스인지"가 먼저 와닿아야 한다 —
                                         서비스 흐름 도식이 있으면 그걸 쓰고, 없으면 기본 도식. */}
-                                    <span className="wcard-viz">{WORK_VIZ[`${w.id}-service`] || WORK_VIZ[w.id]}</span>
+                                    <span className="wcard-viz">{indexViz(w.id)}</span>
                                     <span className="wcard-meta">
                                         <span className="wcard-l">
                                             <span className="wcard-tag">{w.tag}</span>

@@ -5,7 +5,7 @@ import Lenis from 'lenis'
 import { icoTransition } from '../lib/icoBus'
 import ScrollGauge from '../components/ScrollGauge'
 import { WORKS, findWork } from '../assets/data/works'
-import { WORK_VIZ } from '../assets/data/workViz'
+import { WORK_VIZ, vizCaps } from '../assets/data/workViz'
 
 // 데이터 문자열의 **...** 를 강조로 바꾼다 — 데이터 파일에 JSX를 섞지 않기 위해.
 function emph(text) {
@@ -92,12 +92,12 @@ function WorkDetailScreen() {
                             {WORK_VIZ[`${work.id}-service`] && (
                                 <figure className="wdv">
                                     <div className="wdv-frame">{WORK_VIZ[`${work.id}-service`]}</div>
-                                    <figcaption className="wdv-cap">Service flow — ask in plain language, get an answer</figcaption>
+                                    <figcaption className="wdv-cap">{vizCaps(work.id).service}</figcaption>
                                 </figure>
                             )}
                             <figure className="wdv">
                                 <div className="wdv-frame">{WORK_VIZ[work.id]}</div>
-                                <figcaption className="wdv-cap">Architecture — how it is built</figcaption>
+                                <figcaption className="wdv-cap">{vizCaps(work.id).arch}</figcaption>
                             </figure>
                         </motion.div>
 
