@@ -982,6 +982,13 @@ center가 헤더까지 포함한 전체 100vh 기준으로 잡혀서 실제로 �
 (모바일처럼 렌더링이 느린 기기에서 특히 눈에 띔). 마스크를 없애고
 opacity+y 이동만 남겨 부드럽게 떠오르며 페이드인하는 방식으로 바꿔
 해결했다 — 이동 거리/속도/스태거는 그대로라 리듬은 동일하다. */
+/* Romelio 의 소문자 g 는 아래 고리가 크게 말려서 잉크가 글자 박스보다 9px
+아래까지 내려간다. GSAP 가 글자마다 transform 을 애니메이션하면 각 span 이
+합성 레이어로 승격되는데, iOS Safari 는 그 레이어를 요소 박스 기준으로
+래스터해서 박스 밖 잉크를 안 그린다 — 애니메이션 동안 g 꼬리가 사라졌다가
+레이어가 해제되며 다시 나타났다. padding 으로 박스를 늘려 잉크를 품게 하고
+같은 크기의 음수 margin 으로 레이아웃은 그대로 둔다. */
+.about-hero-title .magnetic-char { padding-bottom: 12px; margin-bottom: -12px; }
 .about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); }
 .about-hero-role {
   font-size: clamp(2.8rem, 7.4vw, 6.4rem);
@@ -1317,7 +1324,18 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 .about-card-info.in { opacity: 1; transform: none; }
-.about-card-info .about-sig { font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 1.1; margin-top: 0; color: #f5efe4; }
+/* line-height 1.1 이라 잉크 여유가 위 0.4px · 아래 7.3px 뿐이다. 등장 시
+transform 트랜지션으로 이 카드가 합성 레이어가 되면 iOS Safari 가 요소 박스
+기준으로 래스터해서 글자 위아래가 잘린다. padding 으로 박스를 넓히고 같은
+크기의 음수 margin 으로 레이아웃은 그대로 둔다 — margin-top 은 여기서
+지정해야 한다(기본 .about-sig 규칙보다 이 선택자의 특정도가 높다). */
+.about-card-info .about-sig {
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  line-height: 1.1;
+  color: #f5efe4;
+  padding: 8px 0 10px;
+  margin: -8px 0 -10px;
+}
 .about-card-info .about-sig-sub { margin-top: 6px; font-size: 1.05rem; color: #C9A063; }
 .about-card-info .about-contact-email-link { margin-top: 18px; }
 .about-card-info .about-contact-email { font-size: 1.05rem; }
