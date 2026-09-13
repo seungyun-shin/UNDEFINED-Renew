@@ -19,13 +19,16 @@ const SCROLL_HIDE_SELECTORS = {
 // 여기서 zoomHide까지 같이 쏘면 막 시작된 다이브 애니메이션을 EarthScreen의
 // hide가 곧바로 덮어써버려 두 트랜지션이 충돌했다. mode를 비워서 EarthScreen
 // 쪽 트랜지션 하나만 걸리게 한다.
+// 실제로 페이지가 있는 메뉴만 둔다. SHOP/RECORD/Login 은 라우트가 없어 전부
+// UpdatingScreen(준비중)으로 떨어졌는데, 여섯 중 셋이 빈 페이지면 방문자가
+// 나머지도 안 눌러본다. 페이지를 만들면 아래에 한 줄씩 되살리면 된다.
+//   { label: 'SHOP', to: '/ShopScreen', mode: 'zoom' },
+//   { label: 'RECORD', to: '/RecordScreen', mode: 'zoom' },
+//   { label: 'Login', to: '/login', mode: 'zoom' },
 const MENUS = [
     { label: 'WORK', to: '/WorkScreen', mode: 'zoomHide' },
-    { label: 'SHOP', to: '/ShopScreen', mode: 'zoom' },
-    { label: 'RECORD', to: '/RecordScreen', mode: 'zoom' },
     { label: 'MEMORY', to: '/MemoryScreen', mode: null },
     { label: 'ABOUT', to: '/AboutMe', mode: 'zoomHide' },
-    { label: 'Login', to: '/login', mode: 'zoom' },
 ]
 
 function Header() {
