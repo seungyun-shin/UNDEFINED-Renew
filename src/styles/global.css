@@ -960,10 +960,14 @@ center가 헤더까지 포함한 전체 100vh 기준으로 잡혀서 실제로 �
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: #C9A063;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
   /* 진입 애니메이션(글자가 아래에서 올라옴)이 라인 밖에서 시작해 마스킹된
   채 드러나도록 — MainScreen의 .main-title-wraper와 같은 기법. */
   overflow: hidden;
+  /* 마스크 아래쪽 여유 — 이게 없으면 ENGINEER 의 g 꼬리 끝이 마스크 경계에
+  정확히 걸린다(실측 여유 0px). 폰트나 자간이 조금만 바뀌어도 잘린다.
+  margin-bottom 에서 4px 을 가져와 아래 간격은 그대로 유지한다. */
+  padding-bottom: 4px;
 }
 .about-hero-title {
   font-family: 'Romelio', serif;
@@ -1618,8 +1622,440 @@ Patents 로우에도 심어서, 색이 하나도 없어 다른 섹션들과 톤�
 .seat.lg { opacity: 1; animation: none; }
 @keyframes seat-b { 0%, 34% { opacity: 0; } 46%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
 @keyframes seat-p { 0%, 56% { opacity: 0; } 68%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
-.tx-sum { font-family: 'Romelio', serif; font-size: 15px; fill: #a8a094; }
+/* 도식 안의 숫자 라벨에서는 Romelio 의 st/ct 합자를 끈다 — 제목 크기에선 장식이지만
+   15px 에서는 취소선처럼 보인다(+9% vs statistical model 에서 발견). */
+.tx-sum { font-family: 'Romelio', serif; font-size: 15px; fill: #a8a094; font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'dlig' 0, 'hlig' 0; }
 .tx-hi { fill: #C9A063; }
+
+/* 부품 발주예측 · 모델 선정 루프(10초) — 원천 4종이 전처리로 흘러들고, 통계
+   2종과 ML/DL 2종이 동시에 붙은 뒤 교차검증 오차 막대가 자라 SARIMA가 켜진다. */
+.pb-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+/* 그룹 라벨은 제목(.tx-g)보다 한 단계 흐린 골드 — 같은 골드로 두면 승자 표시가 묻힌다.
+   .work-detail .tx / .work-screen .tx 보다 특정도가 높아야 이겨서 3중 선택자로 쓴다. */
+.work-detail .tx.pb-grp, .work-screen .tx.pb-grp { fill: rgba(201,160,99,0.55); }
+.pb-src { opacity: 0; animation: pb-src 10s ease-in-out infinite; }
+@keyframes pb-src { 0%, 2% { opacity: 0; } 12%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.pb-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: pb-flow-in 10s ease-in-out infinite, pb-flow-move 2.4s linear infinite; }
+@keyframes pb-flow-in { 0%, 12% { opacity: 0; } 22%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes pb-flow-move { to { stroke-dashoffset: -36; } }
+.pb-pre { opacity: 0; animation: pb-pre 10s ease-in-out infinite; }
+@keyframes pb-pre { 0%, 20% { opacity: 0; } 30%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.pb-row { opacity: 0; animation: pb-row 10s ease-in-out infinite; }
+@keyframes pb-row { 0%, 34% { opacity: 0; } 44%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+/* 막대는 왼쪽에서 자란다 — fill-box 가 없으면 SVG 사용자 좌표계 원점 기준이라 엉뚱하게 움직인다 */
+.pb-bar { fill: rgba(232,226,214,0.22); transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: pb-bar 10s ease-in-out infinite; }
+@keyframes pb-bar { 0%, 46% { transform: scaleX(0); } 62%, 90% { transform: scaleX(1); } 96%, 100% { transform: scaleX(0); } }
+.pb-bar.is-win { animation: pb-bar 10s ease-in-out infinite, pb-win 10s ease-in-out infinite; }
+@keyframes pb-win { 0%, 66% { fill: rgba(232,226,214,0.22); } 74%, 90% { fill: rgba(201,160,99,0.8); } 96%, 100% { fill: rgba(232,226,214,0.22); } }
+.pb-wtx { animation: pb-wtx 10s ease-in-out infinite; }
+@keyframes pb-wtx { 0%, 66% { fill: #706a5e; } 74%, 90% { fill: #C9A063; } 96%, 100% { fill: #706a5e; } }
+.pb-sel { fill: #C9A063; opacity: 0; animation: pb-sel 10s ease-in-out infinite; }
+@keyframes pb-sel { 0%, 66% { opacity: 0; } 74%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+/* 초기 프로젝트 4종 · 격자(10초) — 성격이 다른 넷이라 흐름으로 묶지 않고 병치한다. */
+.ep-box { fill: rgba(232,226,214,0.02); stroke: rgba(232,226,214,0.14); stroke-width: 1; }
+.work-detail .tx.ep-name, .work-screen .tx.ep-name { fill: rgba(201,160,99,0.62); }
+.ep-bar { fill: rgba(201,160,99,0.7); }
+.ep-bar.is-dim { fill: rgba(232,226,214,0.22); }
+.ep-face { fill: rgba(232,226,214,0.05); stroke: rgba(232,226,214,0.24); stroke-width: 1; }
+.ep-mask { fill: rgba(201,160,99,0.3); stroke: none; }
+.ep-det { fill: none; stroke: #C9A063; stroke-width: 1.2; stroke-dasharray: 4 3; }
+.ep-solid { fill: rgba(232,226,214,0.16); stroke: none; }
+.ep-edge { fill: none; stroke: #C9A063; stroke-width: 1.4; }
+.ep-pin { fill: none; stroke: rgba(201,160,99,0.6); stroke-width: 1.4; }
+.ep-pindot { fill: #C9A063; }
+.ep-flow { fill: none; stroke: rgba(232,226,214,0.3); stroke-width: 1.2; stroke-dasharray: 3 4; }
+.ep-cell { opacity: 0; animation: ep-cell 10s ease-in-out infinite; }
+@keyframes ep-cell { 0%, 2% { opacity: 0; } 14%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 초기 프로젝트 4종 · 타임라인(10초) — 막대가 왼쪽에서 자라난다. */
+.ep-span { fill: rgba(201,160,99,0.62); transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: ep-span 10s ease-in-out infinite; }
+@keyframes ep-span { 0%, 20% { transform: scaleX(0); } 36%, 92% { transform: scaleX(1); } 97%, 100% { transform: scaleX(0); } }
+.ep-axis { opacity: 0; animation: ep-axis 10s ease-in-out infinite; }
+@keyframes ep-axis { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.ep-row { opacity: 0; animation: ep-row 10s ease-in-out infinite; }
+@keyframes ep-row { 0%, 12% { opacity: 0; } 24%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 부동산 뉴스 감정분석 · 라벨링(10초) — 기사 한 줄씩 긍·부정으로 갈라진다. */
+.ns-item { fill: rgba(232,226,214,0.04); stroke: rgba(232,226,214,0.14); stroke-width: 1; }
+.work-detail .tx-item.ns-hl, .work-screen .tx-item.ns-hl { fill: #a8a094; font-size: 11px; }
+.ns-link { fill: none; stroke: rgba(201,160,99,0.4); stroke-width: 1.2; stroke-dasharray: 3 4; }
+.ns-bin { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.ns-bin.is-pos { fill: rgba(201,160,99,0.06); stroke: rgba(201,160,99,0.45); }
+.ns-lane { opacity: 0; animation: ns-lane 10s ease-in-out infinite; }
+@keyframes ns-lane { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.ns-row { opacity: 0; animation: ns-row 10s ease-in-out infinite; }
+@keyframes ns-row { 0%, 10% { opacity: 0; } 22%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.ns-note { opacity: 0; animation: ns-note 10s ease-in-out infinite; }
+@keyframes ns-note { 0%, 64% { opacity: 0; } 72%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 부동산 뉴스 감정분석 · 전이학습(10초) — 고정된 사전학습 층은 무채색,
+   새로 학습한 헤드만 골드. 색 하나로 전이학습이 설명된다. */
+.tl-layer { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.14); stroke-width: 1; }
+.tl-layer.is-new { fill: rgba(201,160,99,0.08); stroke: rgba(201,160,99,0.55); }
+.work-detail .tx.tl-name, .work-screen .tx.tl-name { fill: #a8a094; }
+.work-detail .tx.tl-modttl, .work-screen .tx.tl-modttl { fill: rgba(201,160,99,0.55); }
+.tl-head { opacity: 0; animation: tl-head 10s ease-in-out infinite; }
+@keyframes tl-head { 0%, 16% { opacity: 0; } 28%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.tl-pulse { animation: tl-pulse 2.6s ease-in-out infinite; }
+@keyframes tl-pulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+.tl-body { opacity: 0; animation: tl-body 10s ease-in-out infinite; }
+@keyframes tl-body { 0%, 2% { opacity: 0; } 14%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.tl-cap { opacity: 0; animation: tl-cap 10s ease-in-out infinite; }
+@keyframes tl-cap { 0%, 36% { opacity: 0; } 46%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.tl-modttl, .tl-mod { opacity: 0; animation: tl-mod 10s ease-in-out infinite; }
+@keyframes tl-mod { 0%, 40% { opacity: 0; } 52%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.tl-aws { opacity: 0; animation: tl-aws 10s ease-in-out infinite; }
+@keyframes tl-aws { 0%, 68% { opacity: 0; } 76%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.tl-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 5; opacity: 0; animation: tl-mod 10s ease-in-out infinite; }
+
+/* 점포 분석 · 영수증(10초) — 종이 한 장이 뜨고 추정 결과가 차례로 붙는다. */
+.rc-paper { fill: rgba(232,226,214,0.04); stroke: rgba(232,226,214,0.2); stroke-width: 1; stroke-linejoin: round; }
+.rc-rule { stroke: rgba(232,226,214,0.14); stroke-width: 1; stroke-dasharray: 2 3; }
+.work-detail .tx.rc-hd, .work-screen .tx.rc-hd { fill: rgba(201,160,99,0.55); }
+.work-detail .tx.rc-lab, .work-detail .tx.rc-lab2,
+.work-screen .tx.rc-lab, .work-screen .tx.rc-lab2 { fill: rgba(201,160,99,0.55); }
+.rc-bar { fill: rgba(201,160,99,0.7); transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: rc-bar 10s ease-in-out infinite; }
+@keyframes rc-bar { 0%, 34% { transform: scaleX(0); } 50%, 92% { transform: scaleX(1); } 97%, 100% { transform: scaleX(0); } }
+.rc-slip { opacity: 0; animation: rc-slip 10s ease-in-out infinite; }
+@keyframes rc-slip { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rc-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: rc-fl 10s ease-in-out infinite, rc-move 2.4s linear infinite; }
+@keyframes rc-fl { 0%, 16% { opacity: 0; } 26%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes rc-move { to { stroke-dashoffset: -36; } }
+.rc-head { fill: #C9A063; opacity: 0; animation: rc-fl 10s ease-in-out infinite; }
+.rc-lab, .rc-pred { opacity: 0; animation: rc-pred 10s ease-in-out infinite; }
+@keyframes rc-pred { 0%, 28% { opacity: 0; } 38%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rc-lab2, .rc-pair { opacity: 0; animation: rc-pair 10s ease-in-out infinite; }
+@keyframes rc-pair { 0%, 56% { opacity: 0; } 66%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 점포 분석 · 공유 데이터에서 네 모델로(10초) — 연결선이 교차하는 그물. */
+.rt-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.rt-box.is-model { stroke: rgba(201,160,99,0.4); }
+.rt-box.is-out { fill: rgba(201,160,99,0.05); stroke: rgba(201,160,99,0.5); }
+.work-detail .tx.rt-name, .work-screen .tx.rt-name { fill: rgba(201,160,99,0.55); }
+.work-detail .tx.rt-name2, .work-screen .tx.rt-name2 { fill: #C9A063; }
+.rt-src { opacity: 0; animation: rt-src 10s ease-in-out infinite; }
+@keyframes rt-src { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rt-mod { opacity: 0; animation: rt-mod 10s ease-in-out infinite; }
+@keyframes rt-mod { 0%, 26% { opacity: 0; } 36%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rt-out { opacity: 0; animation: rt-out 10s ease-in-out infinite; }
+@keyframes rt-out { 0%, 56% { opacity: 0; } 66%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rt-link { fill: none; stroke: rgba(232,226,214,0.24); stroke-width: 1.1; stroke-dasharray: 3 5; opacity: 0; animation: rt-link 10s ease-in-out infinite, rt-move 2.6s linear infinite; }
+@keyframes rt-link { 0%, 16% { opacity: 0; } 26%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes rt-move { to { stroke-dashoffset: -32; } }
+
+/* RAG 챗봇 · 근거가 붙은 답변(10초) — 말풍선 스타일은 카드 01과 공유하고,
+   클라이맥스만 다르다(SQL 생성 → 근거 문서 부착). */
+.rg-user { opacity: 0; animation: rg-user 10s ease-in-out infinite; }
+@keyframes rg-user { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rg-ans { opacity: 0; animation: rg-ans 10s ease-in-out infinite; }
+@keyframes rg-ans { 0%, 22% { opacity: 0; } 34%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rg-card { fill: rgba(201,160,99,0.05); stroke: rgba(201,160,99,0.4); stroke-width: 1; }
+.rg-doc { fill: none; stroke: rgba(201,160,99,0.6); stroke-width: 1.2; stroke-linejoin: round; }
+.work-detail .tx.rg-pg, .work-screen .tx.rg-pg { fill: rgba(201,160,99,0.55); }
+.work-detail .tx.rg-srclab, .work-screen .tx.rg-srclab { fill: rgba(201,160,99,0.55); }
+.rg-srclab { opacity: 0; animation: rg-src 10s ease-in-out infinite; }
+.rg-src { opacity: 0; animation: rg-src 10s ease-in-out infinite; }
+@keyframes rg-src { 0%, 46% { opacity: 0; } 58%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* RAG 챗봇 · 프롬프트 조립(10초) — 세 층으로 쌓인 프롬프트 블록에 검색 결과가
+   끼워지고, 피드백 로그가 호를 그리며 인덱스로 되돌아간다. */
+.rp-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.rp-box.is-idx { stroke: rgba(201,160,99,0.45); }
+.rp-box.is-out { fill: rgba(201,160,99,0.12); stroke: rgba(201,160,99,0.6); }
+.work-detail .tx.rp-ttl, .work-screen .tx.rp-ttl { fill: #C9A063; }
+.work-detail .tx.rp-ptt, .work-screen .tx.rp-ptt { fill: rgba(201,160,99,0.55); }
+.rp-band { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.rp-band.is-hit { fill: rgba(201,160,99,0.08); stroke: rgba(201,160,99,0.5); }
+.rp-src { opacity: 0; animation: rp-src 10s ease-in-out infinite; }
+@keyframes rp-src { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rp-idx { opacity: 0; animation: rp-idx 10s ease-in-out infinite; }
+@keyframes rp-idx { 0%, 16% { opacity: 0; } 26%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rp-stack { opacity: 0; animation: rp-stack 10s ease-in-out infinite; }
+@keyframes rp-stack { 0%, 30% { opacity: 0; } 42%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rp-gpt { opacity: 0; animation: rp-gpt 10s ease-in-out infinite; }
+@keyframes rp-gpt { 0%, 50% { opacity: 0; } 60%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.rp-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: rp-flow-in 10s ease-in-out infinite, rp-flow-move 2.4s linear infinite; }
+@keyframes rp-flow-in { 0%, 12% { opacity: 0; } 22%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes rp-flow-move { to { stroke-dashoffset: -36; } }
+.rp-arc { fill: none; stroke: rgba(201,160,99,0.45); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.rp-fb { opacity: 0; animation: rp-fb 10s ease-in-out infinite; }
+@keyframes rp-fb { 0%, 62% { opacity: 0; } 72%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 행사·손익 분석 · 누진할인 이익 구조(10초) — 매출·이익 두 계열이라 범례를 단다. */
+.pa-series { opacity: 0; animation: pa-series 10s ease-in-out infinite; }
+@keyframes pa-series { 0%, 2% { opacity: 0; } 16%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pa-rev, .pa-pro { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.pa-peak { opacity: 0; animation: pa-peak 10s ease-in-out infinite; }
+@keyframes pa-peak { 0%, 34% { opacity: 0; } 44%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pa-outlier { fill: none; stroke: #C9A063; stroke-width: 1.6; stroke-dasharray: 3 3; }
+.pa-out { opacity: 0; animation: pa-out 10s ease-in-out infinite; }
+@keyframes pa-out { 0%, 52% { opacity: 0; } 62%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pa-axis, .pa-leg { opacity: 0; animation: pa-series 10s ease-in-out infinite; }
+
+/* 행사·손익 분석 · 질문–분석–결과 보드(10초) — 줄기가 위에서부터 차례로 들어온다. */
+.work-detail .tx.pd-ttl, .work-screen .tx.pd-ttl { fill: rgba(201,160,99,0.55); }
+.work-detail .tx.pd-out, .work-screen .tx.pd-out { fill: #a8a094; }
+.pd-head { opacity: 0; animation: pd-head 10s ease-in-out infinite; }
+@keyframes pd-head { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pd-row { opacity: 0; animation: pd-row 10s ease-in-out infinite; }
+@keyframes pd-row { 0%, 14% { opacity: 0; } 26%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pd-arrow { fill: none; stroke: rgba(201,160,99,0.5); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.pd-note { opacity: 0; animation: pd-note 10s ease-in-out infinite; }
+@keyframes pd-note { 0%, 62% { opacity: 0; } 70%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 스포츠 자세분석 · 자세 비교(10초) — 기준 자세(점선)가 먼저 뜨고 학습자 뼈대가
+   그 위에 얹힌 뒤, 각도 호와 유사도 점수가 차례로 붙는다. */
+.ps-refbone { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.4; stroke-dasharray: 3 3; stroke-linecap: round; }
+/* 머리 윤곽은 흐리게 깔기만 한다 — 없으면 얼굴 키포인트가 허공에 뜬 별처럼 보이고,
+   진하게 그리면 졸라맨이 된다. 검출된 얼굴점이 머리 안에 들어 있는 상태가 목표. */
+.ps-head { fill: rgba(201,160,99,0.05); stroke: rgba(201,160,99,0.35); stroke-width: 1.2; }
+.ps-refhead { fill: none; stroke: rgba(232,226,214,0.18); stroke-width: 1; stroke-dasharray: 3 3; }
+.ps-bone { fill: none; stroke: #C9A063; stroke-width: 2; stroke-linecap: round; }
+.ps-kp { fill: #f5efe4; stroke: #C9A063; stroke-width: 1; }
+.ps-refkp { fill: none; stroke: rgba(232,226,214,0.3); stroke-width: 1; }
+.ps-arc { fill: none; stroke: rgba(201,160,99,0.6); stroke-width: 1.2; }
+.ps-num { font-family: 'Romelio', serif; font-size: 40px; fill: #C9A063; font-variant-ligatures: none; }
+.ps-ref { opacity: 0; animation: ps-ref 10s ease-in-out infinite; }
+@keyframes ps-ref { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.ps-figure { opacity: 0; animation: ps-figure 10s ease-in-out infinite; }
+@keyframes ps-figure { 0%, 14% { opacity: 0; } 26%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.ps-ang { opacity: 0; animation: ps-ang 10s ease-in-out infinite; }
+@keyframes ps-ang { 0%, 34% { opacity: 0; } 44%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.ps-leg { opacity: 0; animation: ps-ang 10s ease-in-out infinite; }
+.ps-score { opacity: 0; animation: ps-score 10s ease-in-out infinite; }
+@keyframes ps-score { 0%, 56% { opacity: 0; } 66%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 스포츠 자세분석 · 스윙 타임라인(10초) — 프레임 띠에서 스윙 구간이 켜지고,
+   템포 구간과 스피드 곡선이 차례로 얹힌다. */
+.sw-frame { fill: rgba(232,226,214,0.04); stroke: rgba(232,226,214,0.14); stroke-width: 1; opacity: 0; animation: sw-frame 10s ease-in-out infinite; }
+@keyframes sw-frame { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sw-frame.is-hit { fill: rgba(201,160,99,0.12); stroke: rgba(201,160,99,0.6); }
+.sw-brace { fill: none; stroke: rgba(201,160,99,0.5); stroke-width: 1.2; }
+.sw-det { opacity: 0; animation: sw-det 10s ease-in-out infinite; }
+@keyframes sw-det { 0%, 24% { opacity: 0; } 34%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sw-seg { stroke: rgba(232,226,214,0.3); stroke-width: 3; stroke-linecap: round; }
+.sw-seg.is-hit { stroke: #C9A063; stroke-width: 4; }
+.sw-tempo { opacity: 0; animation: sw-tempo 10s ease-in-out infinite; }
+@keyframes sw-tempo { 0%, 40% { opacity: 0; } 50%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.work-detail .tx.sw-ax, .work-screen .tx.sw-ax { fill: rgba(201,160,99,0.55); }
+.sw-line { stroke-linecap: round; stroke-linejoin: round; }
+.sw-speed { opacity: 0; animation: sw-speed 10s ease-in-out infinite; }
+@keyframes sw-speed { 0%, 54% { opacity: 0; } 64%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sw-note { opacity: 0; animation: sw-note 10s ease-in-out infinite; }
+@keyframes sw-note { 0%, 68% { opacity: 0; } 76%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 암호화폐 예측 · 캔들/거래량(10초) — 가격과 거래량은 단위가 달라 한 축에 겹치지
+   않고 위아래 칸으로 나눈다. 예측 구간은 채우지 않고 윤곽만 둬서 실적과 구분된다. */
+.cd-panel { opacity: 0; animation: cd-panel 10s ease-in-out infinite; }
+@keyframes cd-panel { 0%, 2% { opacity: 0; } 14%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.cd-wick { stroke-width: 1; }
+.cd-body { stroke-width: 1; }
+.cd-up { stroke: rgba(201,160,99,0.75); fill: rgba(201,160,99,0.75); }
+.cd-dn { stroke: rgba(232,226,214,0.34); fill: rgba(232,226,214,0.16); }
+.cd-fore { stroke: rgba(201,160,99,0.55); fill: none; stroke-dasharray: 2 2; }
+.cd-vol { fill: rgba(232,226,214,0.22); }
+.cd-vol.is-fore { fill: none; stroke: rgba(201,160,99,0.5); stroke-width: 1; stroke-dasharray: 2 2; }
+.work-detail .tx.cd-ax, .work-screen .tx.cd-ax { fill: rgba(201,160,99,0.55); }
+.cd-split { opacity: 0; animation: cd-split 10s ease-in-out infinite; }
+@keyframes cd-split { 0%, 40% { opacity: 0; } 50%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.cd-note { opacity: 0; animation: cd-note 10s ease-in-out infinite; }
+@keyframes cd-note { 0%, 60% { opacity: 0; } 68%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 암호화폐 예측 · 군집화(10초) — 무리는 색이 아니라 위치와 점선 윤곽으로 구분한다. */
+.cl-hull { fill: rgba(201,160,99,0.03); stroke: rgba(201,160,99,0.4); stroke-width: 1; stroke-dasharray: 3 4; }
+.cl-dot { fill: rgba(232,226,214,0.4); }
+.work-detail .tx.cl-name, .work-screen .tx.cl-name { fill: rgba(201,160,99,0.55); }
+.work-detail .tx.cl-ttl, .work-screen .tx.cl-ttl { fill: #C9A063; }
+.cl-group { opacity: 0; animation: cl-group 10s ease-in-out infinite; }
+@keyframes cl-group { 0%, 2% { opacity: 0; } 14%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.cl-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.cl-box.is-out { stroke: rgba(201,160,99,0.45); }
+.cl-out { opacity: 0; animation: cl-out 10s ease-in-out infinite; }
+@keyframes cl-out { 0%, 34% { opacity: 0; } 44%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.cl-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: cl-flow-in 10s ease-in-out infinite, cl-flow-move 2.4s linear infinite; }
+@keyframes cl-flow-in { 0%, 26% { opacity: 0; } 36%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes cl-flow-move { to { stroke-dashoffset: -36; } }
+.cl-note { opacity: 0; animation: cl-note 10s ease-in-out infinite; }
+@keyframes cl-note { 0%, 60% { opacity: 0; } 68%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 데이터 플랫폼 최적화 · 대시보드(10초) — 계열이 하나뿐이라 범례 없이 단일 골드.
+   격자·축은 뒤로 물리고 막대 끝만 둥글려서 데이터가 먼저 읽히게 한다. */
+.bi-shell { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.bi-topbar { fill: rgba(232,226,214,0.05); }
+.work-detail .tx.bi-ttl, .work-screen .tx.bi-ttl { fill: rgba(201,160,99,0.55); }
+.bi-pill { fill: rgba(232,226,214,0.1); }
+.bi-card { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.1); stroke-width: 1; }
+.bi-frame { opacity: 0; animation: bi-frame 10s ease-in-out infinite; }
+@keyframes bi-frame { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.bi-tile { opacity: 0; animation: bi-tile 10s ease-in-out infinite; }
+@keyframes bi-tile { 0%, 14% { opacity: 0; } 24%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.bi-chart { opacity: 0; animation: bi-chart 10s ease-in-out infinite; }
+@keyframes bi-chart { 0%, 30% { opacity: 0; } 38%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.bi-bar { fill: rgba(201,160,99,0.72); transform-box: fill-box; transform-origin: center bottom; transform: scaleY(0); animation: bi-bar 10s ease-in-out infinite; }
+@keyframes bi-bar { 0%, 38% { transform: scaleY(0); } 54%, 92% { transform: scaleY(1); } 97%, 100% { transform: scaleY(0); } }
+
+/* 데이터 플랫폼 최적화 · 마트 구성(10초) — 하나에서 여럿으로 갈라지는 분기. */
+.mt-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.mt-box.is-opt { stroke: rgba(201,160,99,0.45); }
+.mt-tbl { fill: rgba(232,226,214,0.16); }
+.work-detail .tx.mt-name, .work-screen .tx.mt-name { fill: rgba(201,160,99,0.55); }
+.work-detail .tx.mt-optttl, .work-screen .tx.mt-optttl { fill: #C9A063; }
+.mt-src { opacity: 0; animation: mt-src 10s ease-in-out infinite; }
+@keyframes mt-src { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.mt-opt { opacity: 0; animation: mt-opt 10s ease-in-out infinite; }
+@keyframes mt-opt { 0%, 18% { opacity: 0; } 28%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.mt-mart { opacity: 0; animation: mt-mart 10s ease-in-out infinite; }
+@keyframes mt-mart { 0%, 36% { opacity: 0; } 46%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.mt-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: mt-flow-in 10s ease-in-out infinite, mt-flow-move 2.4s linear infinite; }
+@keyframes mt-flow-in { 0%, 14% { opacity: 0; } 24%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes mt-flow-move { to { stroke-dashoffset: -36; } }
+.mt-note { opacity: 0; animation: mt-note 10s ease-in-out infinite; }
+@keyframes mt-note { 0%, 60% { opacity: 0; } 68%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 클라우드 데이터 레이크 · 통합 결과(10초) — 원천 셋이 레이크 안으로 하나씩 쌓인다. */
+.sl-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.sl-lake { fill: rgba(201,160,99,0.03); stroke: rgba(201,160,99,0.4); stroke-width: 1; }
+.sl-inner { fill: rgba(232,226,214,0.05); stroke: rgba(232,226,214,0.12); stroke-width: 1; }
+.sl-src { opacity: 0; animation: sl-src 10s ease-in-out infinite; }
+@keyframes sl-src { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sl-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: sl-flow-in 10s ease-in-out infinite, sl-flow-move 2.4s linear infinite; }
+@keyframes sl-flow-in { 0%, 14% { opacity: 0; } 22%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes sl-flow-move { to { stroke-dashoffset: -36; } }
+.sl-head { fill: #C9A063; opacity: 0; animation: sl-flow-in 10s ease-in-out infinite; }
+.sl-lakettl { opacity: 0; animation: sl-flow-in 10s ease-in-out infinite; }
+.sl-band-in { opacity: 0; animation: sl-band-in 10s ease-in-out infinite; }
+@keyframes sl-band-in { 0%, 28% { opacity: 0; } 38%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sl-note { opacity: 0; animation: sl-note 10s ease-in-out infinite; }
+@keyframes sl-note { 0%, 62% { opacity: 0; } 70%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 클라우드 데이터 레이크 · 계층(10초) — 표식이 레일을 타고 내려가며 층을 켠다.
+   층마다 켜지는 구간이 달라서 공용 keyframes + delay 대신 층별 keyframes 를 쓴다. */
+.sl-rail { stroke: rgba(232,226,214,0.13); stroke-width: 1; stroke-dasharray: 2 4; }
+.sl-mark { fill: #C9A063; animation: sl-mark 10s ease-in-out infinite; }
+@keyframes sl-mark {
+  0%, 26% { transform: translateY(0); }
+  30%, 48% { transform: translateY(52px); }
+  52%, 70% { transform: translateY(104px); }
+  74%, 92% { transform: translateY(156px); }
+  97%, 100% { transform: translateY(0); }
+}
+.work-detail .tx.sl-name, .work-screen .tx.sl-name { fill: rgba(201,160,99,0.55); }
+.sl-layer { opacity: 0; animation: sl-layer 10s ease-in-out infinite; }
+@keyframes sl-layer { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sl-band { fill: rgba(232,226,214,0.02); stroke: rgba(232,226,214,0.14); stroke-width: 1; }
+.sl-b1 { animation: sl-b1 10s ease-in-out infinite; }
+.sl-b2 { animation: sl-b2 10s ease-in-out infinite; }
+.sl-b3 { animation: sl-b3 10s ease-in-out infinite; }
+.sl-b4 { animation: sl-b4 10s ease-in-out infinite; }
+@keyframes sl-b1 { 0%, 26% { stroke: rgba(201,160,99,0.6); } 30%, 100% { stroke: rgba(232,226,214,0.14); } }
+@keyframes sl-b2 { 0%, 28% { stroke: rgba(232,226,214,0.14); } 30%, 48% { stroke: rgba(201,160,99,0.6); } 52%, 100% { stroke: rgba(232,226,214,0.14); } }
+@keyframes sl-b3 { 0%, 50% { stroke: rgba(232,226,214,0.14); } 52%, 70% { stroke: rgba(201,160,99,0.6); } 74%, 100% { stroke: rgba(232,226,214,0.14); } }
+@keyframes sl-b4 { 0%, 72% { stroke: rgba(232,226,214,0.14); } 74%, 92% { stroke: rgba(201,160,99,0.6); } 96%, 100% { stroke: rgba(232,226,214,0.14); } }
+
+/* 판촉물 일괄 생성 · 생성 화면(10초) — 엑셀 행이 채워지고 판촉물 썸네일이 하나씩
+   켜진다. 썸네일 안은 글자가 아니라 막대다(이 크기에서 글자는 못 읽는다). */
+.pg-sheet { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.pg-head { fill: rgba(232,226,214,0.05); }
+.work-detail .tx.pg-ttl, .work-screen .tx.pg-ttl { fill: rgba(201,160,99,0.55); }
+.pg-badge { fill: rgba(201,160,99,0.3); }
+.pg-photo { fill: rgba(232,226,214,0.06); stroke: rgba(232,226,214,0.12); stroke-width: 1; }
+.pg-line { fill: rgba(232,226,214,0.24); }
+.pg-price { fill: rgba(201,160,99,0.7); }
+.pg-excel { opacity: 0; animation: pg-excel 10s ease-in-out infinite; }
+@keyframes pg-excel { 0%, 2% { opacity: 0; } 10%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pg-sheetrow { opacity: 0; animation: pg-sheetrow 10s ease-in-out infinite; }
+@keyframes pg-sheetrow { 0%, 8% { opacity: 0; } 16%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pg-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: pg-flow-in 10s ease-in-out infinite, pg-flow-move 2.4s linear infinite; }
+@keyframes pg-flow-in { 0%, 16% { opacity: 0; } 24%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes pg-flow-move { to { stroke-dashoffset: -36; } }
+.pg-head-mk { fill: #C9A063; opacity: 0; animation: pg-flow-in 10s ease-in-out infinite; }
+.pg-poster { opacity: 0; animation: pg-poster 10s ease-in-out infinite; }
+@keyframes pg-poster { 0%, 24% { opacity: 0; } 32%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.pg-sum { opacity: 0; animation: pg-sum 10s ease-in-out infinite; }
+@keyframes pg-sum { 0%, 66% { opacity: 0; } 74%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 판촉물 일괄 생성 · 레이아웃 엔진(10초) — 판촉물 한 장에 지시선으로 주석을 단다. */
+.le-poster { opacity: 0; animation: le-poster 10s ease-in-out infinite; }
+@keyframes le-poster { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.le-call { opacity: 0; animation: le-call 10s ease-in-out infinite; }
+@keyframes le-call { 0%, 18% { opacity: 0; } 28%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.le-lead { fill: none; stroke: rgba(201,160,99,0.4); stroke-width: 1; stroke-dasharray: 2 4; }
+.le-pin { fill: #C9A063; }
+.le-sum { opacity: 0; animation: le-sum 10s ease-in-out infinite; }
+@keyframes le-sum { 0%, 62% { opacity: 0; } 70%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 쇼카드 자동 검수 · 검수 화면(10초) — 카드가 뜨고 항목이 차례로 대조된 뒤,
+   가격 한 줄만 골드로 걸린다. 통과 항목은 끝까지 무채색으로 둬서 걸린 줄이 도드라진다. */
+.sk-sheet { fill: rgba(232,226,214,0.03); stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.sk-badge { fill: rgba(201,160,99,0.12); stroke: rgba(201,160,99,0.5); stroke-width: 1; }
+.sk-can-body { fill: rgba(232,226,214,0.06); stroke: rgba(232,226,214,0.22); stroke-width: 1; }
+.sk-can-top { fill: rgba(232,226,214,0.12); stroke: rgba(232,226,214,0.22); stroke-width: 1; }
+.sk-can-band { fill: rgba(201,160,99,0.32); }
+.sk-can-tab { stroke: rgba(232,226,214,0.3); stroke-width: 1.4; stroke-linecap: round; }
+.sk-card { opacity: 0; animation: sk-card 10s ease-in-out infinite; }
+@keyframes sk-card { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sk-row { opacity: 0; animation: sk-row 10s ease-in-out infinite; }
+@keyframes sk-row { 0%, 18% { opacity: 0; } 28%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+/* 걸린 줄만 뒤늦게 골드로 바뀐다 — .work-detail .tx 가 (0,2,0)이라 3중 선택자로 이긴다 */
+.work-detail .tx.sk-flag, .work-screen .tx.sk-flag { animation: sk-flag 10s ease-in-out infinite; }
+@keyframes sk-flag { 0%, 62% { fill: #706a5e; } 70%, 92% { fill: #C9A063; } 97%, 100% { fill: #706a5e; } }
+.sk-flagline { stroke: #C9A063; stroke-width: 1; transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: sk-flagline 10s ease-in-out infinite; }
+@keyframes sk-flagline { 0%, 62% { transform: scaleX(0); } 72%, 92% { transform: scaleX(1); } 97%, 100% { transform: scaleX(0); } }
+.sk-sum { opacity: 0; animation: sk-sum 10s ease-in-out infinite; }
+@keyframes sk-sum { 0%, 74% { opacity: 0; } 82%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 쇼카드 자동 검수 · 판정 구조(10초) — 한 장이 두 갈래로 갈렸다가 다시 합쳐진다. */
+.sc-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+.sc-box.is-out { stroke: rgba(201,160,99,0.45); }
+.work-detail .tx.sc-ttl, .work-screen .tx.sc-ttl { fill: rgba(201,160,99,0.55); }
+.sc-stage { opacity: 0; animation: sc-stage 10s ease-in-out infinite; }
+@keyframes sc-stage { 0%, 2% { opacity: 0; } 12%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.sc-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: sc-flow-in 10s ease-in-out infinite, sc-flow-move 2.4s linear infinite; }
+@keyframes sc-flow-in { 0%, 8% { opacity: 0; } 18%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes sc-flow-move { to { stroke-dashoffset: -36; } }
+.sc-sum { opacity: 0; animation: sc-sum 10s ease-in-out infinite; }
+@keyframes sc-sum { 0%, 58% { opacity: 0; } 68%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 열차 수요예측 · 일 단위 자동화 고리(10초) — 매일 다시 훈련·경합·선택한다.
+   표식이 고리를 한 바퀴 돌고 지나가는
+   마디가 골드로 켜진다. 고리는 리셋 없이 계속 돌고(자동화의 성질), 오른쪽 경합
+   블록만 10초 주기로 등장·소멸한다. */
+.kl-ring { fill: none; stroke: rgba(232,226,214,0.13); stroke-width: 1; }
+.work-detail .tx.kl-ttl, .work-screen .tx.kl-ttl { fill: rgba(201,160,99,0.55); }
+.kl-node { fill: rgba(232,226,214,0.28); animation: kl-node 10s linear infinite; }
+@keyframes kl-node { 0%, 1% { fill: #C9A063; } 9%, 100% { fill: rgba(232,226,214,0.28); } }
+/* transform-origin 은 viewBox 좌표(기본 transform-box: view-box)라 고리 중심을 그대로 쓴다 */
+.kl-orbit { transform-origin: 180px 218px; animation: kl-orbit 10s linear infinite; }
+@keyframes kl-orbit { to { transform: rotate(360deg); } }
+.kl-marker { fill: #C9A063; }
+.kl-res { opacity: 0; animation: kl-res 10s ease-in-out infinite; }
+@keyframes kl-res { 0%, 34% { opacity: 0; } 44%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.kl-bar { fill: rgba(232,226,214,0.22); transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: kl-bar 10s ease-in-out infinite; }
+@keyframes kl-bar { 0%, 46% { transform: scaleX(0); } 62%, 92% { transform: scaleX(1); } 97%, 100% { transform: scaleX(0); } }
+.kl-bar.is-win { fill: rgba(201,160,99,0.8); }
+.kl-sum { opacity: 0; animation: kl-sum 10s ease-in-out infinite; }
+@keyframes kl-sum { 0%, 66% { opacity: 0; } 74%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* 점포 추천 · 일 배치 파이프라인 루프(10초) — 3단계가 차례로 켜진 뒤, 회색 막대(전)가
+   깔리고 그 위에 골드 막대(후)가 짧게 들어차면서 감축폭이 눈으로 보인다. */
+.sp-box { fill: none; stroke: rgba(232,226,214,0.16); stroke-width: 1; }
+/* 단계 제목은 본문(.tx)보다 밝되 도식 제목(.tx-g)보다는 흐린 골드 — 위계를 셋으로 나눈다.
+   .work-detail .tx / .work-screen .tx 가 (0,2,0)이라 3중 선택자로 이겨야 한다. */
+.work-detail .tx.sp-ttl, .work-screen .tx.sp-ttl { fill: rgba(201,160,99,0.55); }
+.sp-stage { opacity: 0; animation: sp-stage 10s ease-in-out infinite; }
+@keyframes sp-stage { 0%, 2% { opacity: 0; } 12%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.sp-flow { fill: none; stroke: rgba(232,226,214,0.26); stroke-width: 1.2; stroke-dasharray: 3 6; opacity: 0; animation: sp-flow-in 10s ease-in-out infinite, sp-flow-move 2.4s linear infinite; }
+@keyframes sp-flow-in { 0%, 10% { opacity: 0; } 20%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+@keyframes sp-flow-move { to { stroke-dashoffset: -36; } }
+.sp-res { opacity: 0; animation: sp-res 10s ease-in-out infinite; }
+@keyframes sp-res { 0%, 34% { opacity: 0; } 44%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.sp-before { fill: rgba(232,226,214,0.2); transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: sp-before 10s ease-in-out infinite; }
+@keyframes sp-before { 0%, 46% { transform: scaleX(0); } 58%, 90% { transform: scaleX(1); } 96%, 100% { transform: scaleX(0); } }
+.sp-after { fill: #C9A063; transform-box: fill-box; transform-origin: left center; transform: scaleX(0); animation: sp-after 10s ease-in-out infinite; }
+@keyframes sp-after { 0%, 62% { transform: scaleX(0); } 72%, 90% { transform: scaleX(1); } 96%, 100% { transform: scaleX(0); } }
+.sp-tag { opacity: 0; animation: sp-tag 10s ease-in-out infinite; }
+@keyframes sp-tag { 0%, 66% { opacity: 0; } 74%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
 
 /* 점포 추천 도식 루프(10초) — 유사도 선이 뻗고 → 상위 점포가 켜지고 →
    추천 상품이 위에서부터 차례로 채워진다. */

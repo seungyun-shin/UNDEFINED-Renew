@@ -42,7 +42,7 @@ export const WORKS = [
         ],
         tag: 'Manufacturing · Demand Forecasting',
         title: 'Import Parts Order Forecasting Model',
-        brief: 'ARIMA / Prophet vs XGBoost / LSTM · 5-year order, stock & logistics data',
+        brief: 'SARIMA vs tree ensembles & LSTM · cross-validated selection · 5-year order, stock & logistics data',
         results: [
             '기존 수식 기반 산정 방식 대비 예측 오차(MAPE, RMSE) **약 7% 개선**',
             '테스트 데이터 검증 기준, **연 약 96억 원** 규모의 재고/기회 손실 개선 효과 확인 (모델 적용 시 기대 효과 추정)',
@@ -51,7 +51,8 @@ export const WORKS = [
         impl: [
             '기존 발주량 산정 수식 분석 및 현업 인터뷰를 통한 발주 비즈니스 프로세스 이해, 주요 영향 요인 도출',
             '과거 5년간 발주 이력·재고·판매·물류 데이터 수집, 이상치 제거·결측치 보완·정규화 등 클렌징 수행',
-            '시계열 모델(ARIMA, Prophet)과 머신러닝/딥러닝 모델(XGBoost, LSTM) 실험 및 교차검증을 통한 최적 모델 선정',
+            '시계열 모델(SARIMA·SARIMAX, Holt-Winters, Prophet), 트리 기반 앙상블(XGBoost, LightGBM, CatBoost, RandomForest), 딥러닝(LSTM)을 교차검증으로 비교',
+            '설명 변수가 제한적이고 수요 변동성이 큰 구조라 딥러닝이 통계 모델의 성능을 넘지 못함 — 계절성이 뚜렷한 **SARIMA를 최종 채택**',
             '짧은 시계열 데이터 보강을 위한 전처리 기법 적용',
             '부품별·시즌별 예측 정확도 차이 분석을 통한 보완점 도출',
         ],
@@ -108,20 +109,21 @@ export const WORKS = [
         period: '2026.01 — Present',
         metrics: [
             { num: '200h → 30m', cap: 'Monthly review time', long: true },
-            { num: '₩0', cap: 'Operating cost' },
+            { num: '₩0', cap: 'AI inference cost' },
         ],
         tag: 'Retail · Computer Vision Automation',
         title: 'Automated Show-Card Inspection System',
-        brief: 'MobileNetV3-Small embeddings · cosine-similarity matching · single-EXE deploy',
+        brief: 'MobileNetV3-Small embeddings · cosine-similarity matching · Streamlit web service on EC2',
         results: [
             '전사 MD 팀이 매월 수천 장을 수작업 대조하던 검수(월 약 200시간)를 **팀당 30분 내 자동 검수**로 대체',
-            '유료 Vision API(GPT·Claude Vision) 없이 오픈소스 경량 모델(MobileNetV3-Small) 로컬 실행으로 **운영 비용 0원**의 AI 이미지 검수 체계 구현',
+            '유료 Vision API(GPT·Claude Vision) 없이 오픈소스 경량 모델(MobileNetV3-Small)을 직접 운영해 **AI 추론 비용 0원**의 이미지 검수 체계 구현',
             '담당자별로 상이하던 검수 기준을 표준화하고, 오표기 시 발생할 수 있는 손실 리스크를 사전 차단',
         ],
         impl: [
             'PDF 텍스트·이미지 추출, 상품코드/상품명 다단계 매칭(유사도 기반 오독 교정) 및 가격·쇼카드 번호 자동 대조',
             'CNN 이미지 임베딩과 코사인 유사도를 활용한 행사타입 배너·POP·상품/교차상품 이미지 자동 판정 로직 설계 및 판정 임계값 체계 수립',
             '엑셀 검수 리포트 자동 생성, 단일 EXE 배포로 비개발 부서도 즉시 사용 가능하도록 구현',
+            'EXE 배포 방식의 버전 관리·동시 업데이트 한계와 사내 보안 이슈를 확인하고 **Streamlit 웹 서비스로 재개발**, 사내 AWS EC2에 직접 배포하여 버전을 일원화',
         ],
     },
     {
@@ -134,7 +136,7 @@ export const WORKS = [
         ],
         tag: 'Retail · Workflow Automation',
         title: 'Batch Promotional Material Generator',
-        brief: 'Excel-driven JPG/PPT rendering · dynamic badge & price layout · single-EXE deploy',
+        brief: 'Excel-driven JPG/PPT rendering · dynamic badge & price layout · web service',
         results: [
             '전국 128개 팀(약 1,200명)이 수작업으로 제작하던 행사 홍보물(월 256~1,024시간)을 **엑셀 입력만으로 일괄 생성**하도록 자동화',
             '인건비 기준 연간 약 1.1억~4.4억 원 절감 추산, 담당자별 결과물 품질 편차 제거',
@@ -143,6 +145,7 @@ export const WORKS = [
             '엑셀 상품 리스트 입력만으로 상품별 홍보물 이미지(JPG)와 PPT 합본을 수 분 내 일괄 생성',
             '상품명 자동 줄바꿈, 배지·가격 동적 렌더링, 교차상품 그룹 자동 인식·배치 알고리즘 개발',
             'Python 설치 불필요한 단일 EXE로 배포, 행사 유형별 레이아웃 확장 및 타 팀 전용 버전 고도화',
+            'EXE 배포 방식의 버전 관리·동시 업데이트 한계와 사내 보안 이슈로 **웹 서비스로 전환·배포**, 전국 팀이 항상 같은 버전을 쓰도록 일원화',
         ],
     },
     {
@@ -151,13 +154,14 @@ export const WORKS = [
         period: '2025.03 — 2025.08',
         tag: 'Data Engineering · ETL',
         title: 'Cloud Data Lake Pipeline',
-        brief: 'AWS DMS · Glue · S3 → Snowflake · structured + unstructured integration',
+        brief: 'AWS DMS · Glue catalog · Parquet on S3 → Snowflake · structured + unstructured',
         results: [
             '온프레미스 DB와 외부 시스템 데이터를 클라우드 데이터 레이크로 **안정적으로 이관**하는 파이프라인 구축',
         ],
         impl: [
-            'AWS DMS, Glue, S3를 활용해 온프레미스 DB 및 외부 시스템 데이터를 Snowflake로 안정적으로 이관',
-            'Snowflake 데이터 레이크 기반으로 대규모 원천 데이터를 저장하고 정형/비정형 데이터 통합 관리',
+            '온프레미스 DB와 외부 시스템 데이터를 AWS DMS로 Snowflake에 이관하는 작업을 구성하고 적재 결과 확인',
+            'Glue로 원천별 스키마를 카탈로그화하고 S3에는 **Parquet**으로 적재해, 조회 성능과 저장 비용을 고려한 데이터 레이아웃 구성',
+            '정형 데이터는 Snowflake 테이블로, 비정형 데이터는 S3 원본과 메타데이터로 나눠 보관하는 통합 관리 구조 구성',
         ],
     },
     {
@@ -166,13 +170,13 @@ export const WORKS = [
         period: '2022.12 — 2025.03',
         tag: 'Data Engineering · BI',
         title: 'Data Platform Optimization & BI',
-        brief: 'Spark table & compute optimization · Power BI data mart',
+        brief: 'Shared table & compute optimization · Power BI marts across departments',
         results: [
-            '대규모 데이터 처리 아키텍처를 적용해 팀의 **데이터 테이블과 클라우드 컴퓨팅 자원을 최적화**',
+            '대규모 데이터 처리 아키텍처를 적용해 **데이터 테이블 구조와 클라우드 컴퓨팅 자원을 최적화**',
         ],
         impl: [
-            'Spark 등 대규모 데이터 처리 아키텍처 이해·적용, 데이터 테이블 및 클라우드 컴퓨팅 자원 최적화 관리',
-            'Power BI 시각화를 위한 데이터 마트 구성, 현업 지원용 분석 결과 시각화·서비스화',
+            'Spark 등 대규모 데이터 처리 아키텍처를 적용해 데이터 테이블 구조와 클라우드 컴퓨팅 자원을 지속 최적화·관리',
+            'Power BI 시각화를 위한 데이터 마트 구성, **여러 부서가 조회하는 대시보드로 서비스화**하여 현업 분석 지원',
         ],
     },
     {
@@ -243,7 +247,7 @@ export const WORKS = [
         title: 'Enterprise RAG & Text-to-SQL Chatbot',
         brief: 'Azure Cognitive Search · GPT API · prompt engineering · feedback-loop tuning',
         results: [
-            '2023년 사내 데이터에 최적화된 RAG·Text-to-SQL 챗봇을 **조기 구축**하며 LLM의 강점과 한계를 실무로 체득',
+            '사내 문서를 지식 소스로 **사내 규정·업무 기준을 답변하는 RAG 챗봇**을 2023년에 구축, Text-to-SQL을 더해 규정 확인과 데이터 조회를 한 창구에서 처리',
         ],
         impl: [
             'MS Azure와 AWS 환경의 RAG 아키텍처를 비교 분석하고, 사내 데이터에 최적화된 챗봇 아키텍처 설계·구현',
