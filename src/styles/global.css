@@ -960,10 +960,14 @@ center가 헤더까지 포함한 전체 100vh 기준으로 잡혀서 실제로 �
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: #C9A063;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
   /* 진입 애니메이션(글자가 아래에서 올라옴)이 라인 밖에서 시작해 마스킹된
   채 드러나도록 — MainScreen의 .main-title-wraper와 같은 기법. */
   overflow: hidden;
+  /* 마스크 아래쪽 여유 — 이게 없으면 ENGINEER 의 g 꼬리 끝이 마스크 경계에
+  정확히 걸린다(실측 여유 0px). 폰트나 자간이 조금만 바뀌어도 잘린다.
+  margin-bottom 에서 4px 을 가져와 아래 간격은 그대로 유지한다. */
+  padding-bottom: 4px;
 }
 .about-hero-title {
   font-family: 'Romelio', serif;

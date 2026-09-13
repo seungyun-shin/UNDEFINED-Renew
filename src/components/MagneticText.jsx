@@ -8,8 +8,11 @@ export function splitChars(text) {
     return text.split('').map((ch, i) => (
         <span className="magnetic-char" key={i} style={{ display: 'inline-block' }}>
             {/* inline-block 안에 스페이스 하나만 있으면 "줄 시작/끝 공백"으로
-            취급돼 폭이 0으로 접힌다 — 줄바꿈 없는 공백( )을 써서 폭을 보존. */}
-            {ch === ' ' ? ' ' : ch}
+            취급돼 폭이 0으로 접힌다 — U+00A0(non-breaking space)으로 폭을 보존한다.
+            반드시 이스케이프 표기로 둘 것: 눈에 안 보이는 문자를 직접 넣으면
+            공백을 정규화하는 도구를 거치며 일반 스페이스로 바뀌어 다시 접힌다
+            (실제로 그렇게 돼서 히어로 문구가 "SeungyunShin"으로 붙어 나왔다). */}
+            {ch === ' ' ? '\u00a0' : ch}
         </span>
     ))
 }
@@ -89,40 +92,18 @@ export default function MagneticText({ text, className, radius = 160, strength =
             rafId = requestAnimationFrame(tick)
         }
 
-        // 터치 기기는 호버가 없어서 이 효과가 존재한다는 걸 알 방법이 없다.
-        // 활성화 직후 가짜 포인터가 글자 위를 한 번 훑고 지나가게 해서
-        // "만지면 반응하는 글자"라는 걸 슬쩍 보여준 뒤 스스로 손을 뗀다.
-        function autoSweep() {
-            const rect = container.getBoundingClientRect()
-            const startX = rect.left - 40
-            const endX = rect.right + 40
-            const y = rect.top + rect.height / 2
-            const duration = 900
-            const start = performance.now()
-            function step(now) {
-                if (cancelled) return
-                const t = Math.min(1, (now - start) / duration)
-                const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
-                mouseX = startX + (endX - startX) * eased
-                mouseY = y
-                if (t < 1) requestAnimationFrame(step)
-                else {
-                    mouseX = -9999
-                    mouseY = -9999
-                }
-            }
-            requestAnimationFrame(step)
-        }
-
         function activate() {
             if (cancelled) return
             measure()
             tick()
+            // 터치 기기에서도 실제 터치에는 반응한다. 예전엔 등장 직후 가짜
+            // 포인터가 글자 위를 한 번 훑고 지나가게 해서 효과의 존재를 알렸는데,
+            // 그 자동 훑기가 촌스럽다는 피드백으로 제거했다(2026-09). 되살릴 거면
+            // 속도와 세기를 크게 줄일 것.
             if (isTouch) {
                 window.addEventListener('touchmove', onTouchMove, { passive: true })
                 window.addEventListener('touchend', onLeave)
                 window.addEventListener('touchcancel', onLeave)
-                autoSweep()
             } else {
                 window.addEventListener('mousemove', onMove, { passive: true })
                 container.addEventListener('mouseleave', onLeave)
