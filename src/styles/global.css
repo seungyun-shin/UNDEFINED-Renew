@@ -1065,6 +1065,15 @@ CSS opacity 애니메이션까지 얹으면 둘이 서로의 값을 덮어써 �
 }
 .about-philosophy .about-accent { color: #C9A063; }
 @media (max-width: 900px) {
+  /* 한 줄이 화면보다 길어지면 글자 단위로 접혀 3~4줄이 된다(아이폰 390px 에서
+  두 번째 줄 필요 폭 381px 대 사용 가능 342px). 폭에 따라 글자 크기가 따라가게
+  해서 어느 기기에서도 두 줄로 유지한다 — 계수는 실측에서 나온 값이다:
+  1.2rem(19.2px)일 때 381px 필요, 좌우 여백 합 48px → 19.2*(vw-48)/381 에
+  2.5% 여유를 더한 것. 데스크톱에서는 상한 1.2rem 에 걸려 그대로다.
+  ※ 기본 .about-hero-sub 규칙보다 아래에 있어야 한다 — 특정도가 같아서
+  선언 순서로 갈린다(처음에 위쪽 미디어쿼리에 넣었다가 안 먹었다). */
+  .about-hero-sub { font-size: clamp(0.84rem, calc(4.9vw - 2.3px), 1.2rem); }
+  .about-hero-sub-en { font-size: clamp(0.62rem, calc(3.5vw - 1.6px), 0.86rem); }
   .about-philosophy-section { min-height: auto; padding: 100px 0; }
   .about-philosophy { max-width: none; }
 }
