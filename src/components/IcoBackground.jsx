@@ -212,11 +212,17 @@ function IcoBackground() {
                 // 'hide'를 지구본의 뒤늦은 'show'가 덮어써버리는 경합이 있었다.
                 // "마블이 필요한 화면(MainScreen)이 자기 마운트 시점에 스스로
                 // 복구를 요청"하는 쪽이 타이밍에 안전하다.
+                // 컨테이너에 걸린 이전 트윈을 먼저 죽인다 — 'hide'의 1초 트윈이
+                // 아직 돌고 있을 때 로고를 누르면, 여기서 paused 를 풀어놔도
+                // 0.x초 뒤 그 트윈의 onComplete 가 다시 paused = true 로
+                // 덮어써서 GPU 렌더가 멈춘 채 화면이 정지했다(초당 draw 120 → 0).
+                gsap.killTweensOf(container)
                 paused = false
                 gsap.to(container, { duration: 1, opacity: 1, display: 'flex' })
             }
             if (mode === 'hide') {
                 // 페이드아웃이 끝나면 GPU 렌더링도 멈춘다 (지구본 화면과의 이중 렌더링 방지)
+                gsap.killTweensOf(container)
                 gsap.to(container, {
                     duration: 1, opacity: 0, display: 'none',
                     onComplete: () => { paused = true },

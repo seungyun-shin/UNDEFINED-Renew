@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import gsap from 'gsap'
 
 import IntroOverlay from '../components/IntroOverlay'
@@ -13,14 +14,21 @@ function splitChars(text) {
     ))
 }
 
-// 세션 중 처음 한 번만 타이틀 캐스케이드+오버레이 인트로를 재생한다.
-// 다른 페이지에서 로고를 눌러 돌아올 때는 다시 볼 필요가 없고, 대신
-// 배경 카메라가 줌인 상태에서 제자리로 돌아오는(icoTransition('reset'))
-// 기존 애니메이션만 가려지지 않고 그대로 보이게 둔다.
+// 주소창으로 사이트에 처음 들어온 화면이 메인일 때만 타이틀 캐스케이드+오버레이
+// 인트로를 재생한다. 사이트 안에서 로고를 눌러 돌아올 때는 다시 볼 필요가 없고,
+// 배경 카메라가 줌인 상태에서 제자리로 돌아오는(icoTransition('reset')) 애니메이션이
+// 가려지지 않고 그대로 보여야 한다.
+//
+// 모듈 변수만으로는 부족하다 — 그건 "이 문서에서 MainScreen 이 마운트된 적 있나"를
+// 뜻할 뿐이어서, /WorkScreen 같은 하위 페이지로 먼저 들어온 뒤(새로고침·북마크·배포
+// 후 리로드) 로고를 누르면 그 문서에서는 처음이라 인트로가 다시 나왔다.
+// react-router 는 최초 진입 위치에만 key 를 'default' 로 준다. 그걸로 "직접 들어온
+// 첫 화면"과 "사이트 안에서 이동해 온 것"을 가른다.
 let hasIntroPlayed = false
 
 function MainScreen() {
-    const [showIntro] = useState(() => !hasIntroPlayed)
+    const isEntry = useLocation().key === 'default'
+    const [showIntro] = useState(() => isEntry && !hasIntroPlayed)
 
     // useEffect(일반)는 브라우저가 첫 페인트를 한 뒤에 실행될 수 있어서,
     // 그 사이 헤더/타이틀이 기본 CSS 상태(완전히 보임)로 잠깐 그려졌다가
