@@ -51,7 +51,12 @@ export const WORK_VIZ = {
                 <circle className="av av-a" cx="588" cy="239" r="17" />
                 <text className="tx-av tx-av-g" x="588" y="239" textAnchor="middle" dominantBaseline="central">AI</text>
                 <rect className="bub bub-a" x="228" y="222" width="332" height="138" rx="6" />
-                <text className="tx-a" x="248" y="252" dominantBaseline="central">지난달 매출 1위는 <tspan className="tx-a-hi">강남점(₩142M)</tspan> 입니다.</text>
+                {/* dominantBaseline 을 쓰지 않고 기준선 좌표를 직접 준다 — 이 text 안에는
+                    tspan 이 있는데, WebKit(Safari/iOS)은 tspan 이 부모의 중앙 기준선을
+                    물려받을 때 따로 계산해서 강조 부분만 위로 떠올랐다. 기준선 기준
+                    좌표는 모든 렌더러가 같게 해석한다. y 는 central(252) 일 때와 같은
+                    위치가 되도록 실측해서 맞춘 값이다. */}
+                <text className="tx-a" x="248" y="257.06">지난달 매출 1위는 <tspan className="tx-a-hi">강남점(₩142M)</tspan> 입니다.</text>
                 <g className="bars">
                     <rect x="248" y="292" width="38" height="44" fill="rgba(201,160,99,.8)" />
                     <rect x="294" y="303" width="38" height="33" fill="rgba(232,226,214,.24)" />
