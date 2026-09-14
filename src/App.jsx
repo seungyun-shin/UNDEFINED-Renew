@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 
 import IcoBackground from './components/IcoBackground'
@@ -38,7 +38,10 @@ function App() {
                     <Routes location={location} key={location.pathname}>
                         <Route path="/" element={<PageTransition><MainScreen /></PageTransition>} />
                         <Route path="/MemoryScreen" element={<PageTransition><Suspense fallback={null}><EarthScreen /></Suspense></PageTransition>} />
-                        <Route path="/MemoryPhotoGallery" element={<PageTransition><MemoryPhotoGallery /></PageTransition>} />
+                        <Route path="/MemoryPhotoGallery/:slug" element={<PageTransition><MemoryPhotoGallery /></PageTransition>} />
+                        {/* 슬러그 없이 들어오면 보여줄 갤러리를 알 수 없다 — 막다른 안내
+                            화면 대신 지구본으로 보낸다. 예전 주소를 저장해둔 경우도 여기로 온다. */}
+                        <Route path="/MemoryPhotoGallery" element={<Navigate to="/MemoryScreen" replace />} />
                         <Route path="/AboutMe" element={<PageTransition><AboutScreen /></PageTransition>} />
                         <Route path="/WorkScreen" element={<PageTransition fast><WorkScreen /></PageTransition>} />
                         <Route path="/WorkScreen/:id" element={<PageTransition fast><WorkDetailScreen /></PageTransition>} />

@@ -9,6 +9,7 @@ import gsap from 'gsap'
 import { icoTransition } from '../lib/icoBus'
 import countryPointData from '../assets/data/countryPoint.json'
 import planetGalleries from '../assets/data/planetGalleries.json'
+import { gallerySlug } from '../lib/galleries'
 import { glowDotTexture } from '../lib/glowDot'
 
 import EarthDayMap from '../assets/textures/2k_earth_daymap.jpg'
@@ -54,6 +55,8 @@ function thumbnailOf(point) {
 // problem, which read as tacky rather than designed). Desaturated antique-
 // metal tones — brass / terracotta / verdigris / dusty mauve — read as part
 // of the site's dark-navy + cream palette instead of generic web accents.
+// 같은 팔레트를 lib/galleries.js 도 쓴다(주소로 바로 들어온 갤러리의 강조색).
+// 둘 중 하나만 바꾸면 지구본에서 본 색과 링크로 연 색이 달라진다.
 const HIGHLIGHT_PALETTE = ['#C9A063', '#B5654A', '#6E8F82', '#93748F']
 
 function randomHighlight() {
@@ -490,7 +493,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 지구용 안개(far=22)에 걸리면 절반 가까이 검게 죽어버린다. */}
             <mesh
                 position={PROJECT_PLANET_POS}
-                onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: planetGalleries.project } })}
+                onClick={() => navigate('/MemoryPhotoGallery/project', { state: { countryPoint: planetGalleries.project } })}
                 ref={projectPlanetCover}
             >
                 <icosahedronGeometry args={[1.35, 1]} />
@@ -510,7 +513,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
             {/* Appreciate planet — opens its own photo gallery, same as a travel point */}
             <mesh
                 position={[9, -3, -3]}
-                onClick={() => navigate('/MemoryPhotoGallery', { state: { countryPoint: planetGalleries.appreciate } })}
+                onClick={() => navigate('/MemoryPhotoGallery/appreciate', { state: { countryPoint: planetGalleries.appreciate } })}
                 ref={thanksPlanetCover}
             >
                 <tetrahedronGeometry args={[1.5, 3]} />
@@ -645,7 +648,7 @@ function EarthScreen() {
     // "사진 보기" then navigates. On desktop, a direct-click shortcut stays.
     const handlePointPick = (point) => {
         if (isMobile) handleSelect(point)
-        else navigate('/MemoryPhotoGallery', { state: { countryPoint: point, accentColor: activeColor } })
+        else navigate(`/MemoryPhotoGallery/${gallerySlug(point.name)}`, { state: { countryPoint: point, accentColor: activeColor } })
     }
 
     return (
@@ -661,7 +664,7 @@ function EarthScreen() {
                 <PlaceCard
                     ref={overlayRef}
                     mobile={isMobile}
-                    onView={(point) => navigate('/MemoryPhotoGallery', { state: { countryPoint: point, accentColor: activeColor } })}
+                    onView={(point) => navigate(`/MemoryPhotoGallery/${gallerySlug(point.name)}`, { state: { countryPoint: point, accentColor: activeColor } })}
                 />
 
                 <div className="country-info-show" ref={countryInfo}>

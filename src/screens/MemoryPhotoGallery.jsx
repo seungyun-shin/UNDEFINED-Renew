@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, useParams, Navigate } from 'react-router-dom'
+import { findGallery, accentOf } from '../lib/galleries'
 import { icoTransition } from '../lib/icoBus'
 
 // 화면 폭에 따른 그리드 열 수 — CSS .gallery-grid의 브레이크포인트(900px)와 반드시 같아야 한다.
@@ -98,8 +99,14 @@ function layoutGallery(count, cols) {
 
 function MemoryPhotoGallery() {
     const location = useLocation()
-    const countryPoint = location.state?.countryPoint
-    const accent = location.state?.accentColor || '#C9A063'
+    const { slug } = useParams()
+    // 주소의 슬러그가 기준이다. 지구본에서 넘어온 경우엔 state 에 같은 데이터와
+    // 그 화면이 쓰던 강조색이 함께 오므로 그걸 우선 쓰고(화면 전환이 매끄럽다),
+    // 주소로 바로 들어온 경우엔 슬러그로 찾아 포인트 자신의 색을 강조색으로 쓴다.
+    const fromState = location.state?.countryPoint
+    const fromSlug = findGallery(slug)
+    const countryPoint = fromState || fromSlug
+    const accent = location.state?.accentColor || accentOf(fromSlug)
 
     const photos = countryPoint?.imgList || []
     const [lightboxIndex, setLightboxIndex] = useState(null)
@@ -221,14 +228,9 @@ function MemoryPhotoGallery() {
         touchStartX.current = null
     }
 
-    if (!countryPoint) {
-        return (
-            <div className="memory-gallery">
-                <h1>MEMORY</h1>
-                <p>지구본의 포인트를 클릭해서 들어와주세요. <Link to="/MemoryScreen" style={{ color: '#dfd3c3' }}>← Back to Earth</Link></p>
-            </div>
-        )
-    }
+    // 없는 장소로 들어온 경우(오타·삭제된 포인트). 막다른 안내 화면을 두는 것보다
+    // 지구본으로 보내는 편이 낫다 — 거기서 원하는 곳을 직접 고를 수 있다.
+    if (!countryPoint) return <Navigate to="/MemoryScreen" replace />
 
     return (
         <div className="memory-gallery" style={{ '--accent': accent }} ref={scrollRef}>

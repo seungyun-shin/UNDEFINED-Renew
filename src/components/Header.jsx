@@ -35,7 +35,9 @@ function Header() {
     const [click, setClick] = useState(false)
     const [hidden, setHidden] = useState(false)
     const location = useLocation()
-    const isGallery = location.pathname === '/MemoryPhotoGallery'
+    // 갤러리 주소에 장소 슬러그가 붙으므로 정확히 일치로 보면 안 된다 —
+    // 그러면 깊은 링크로 들어온 갤러리에서 ← EARTH 알약이 사라진다.
+    const isGallery = location.pathname.startsWith('/MemoryPhotoGallery')
 
     const onMenuClick = (mode) => {
         setClick(false)
