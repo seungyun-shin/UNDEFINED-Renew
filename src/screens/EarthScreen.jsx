@@ -381,12 +381,14 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
         overlayRef.current?.track(scr.x, scr.y, facing)
     })
 
-    const showName = (name) => {
+    // note 는 이름 뒤에 작게 붙는 보조 문구(예: secret). 없으면 이름만 나온다.
+    const showName = (name, note) => {
         countryInfo.current.style.display = 'flex'
-        countryInfoName.current.innerHTML = `<div class="country-name-show-up">${name}</div>`
+        countryInfoName.current.innerHTML =
+            `<div class="country-name-show-up">${name}${note ? `<span class="country-name-note">${note}</span>` : ''}</div>`
     }
 
-    const infoShowingUp = (e) => showName(e.object.userData.name)
+    const infoShowingUp = (e) => showName(e.object.userData.name, e.object.userData.note)
 
     const infoShowingDown = () => {
         countryInfo.current.style.display = 'none'
@@ -510,10 +512,12 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
                 <meshPhongMaterial color={0xffffff} opacity={1} side={THREE.DoubleSide} fog={false} />
             </mesh>
 
-            {/* Appreciate planet — opens its own photo gallery, same as a travel point */}
+            {/* Appreciate 행성 — 안에 있던 사진들은 지인들이 찍힌 것이라 공개하지
+                않기로 하고 데이터를 걷어냈다(2026-09). 행성과 호버 이름은 그대로 두되
+                클릭만 뺀다 — 데이터만 지우면 눌렀을 때 조용히 지구본으로 돌아와
+                "먹통"처럼 보인다. 나중에 넣을 내용이 정해지면 onClick 만 되살리면 된다. */}
             <mesh
                 position={[9, -3, -3]}
-                onClick={() => navigate('/MemoryPhotoGallery/appreciate', { state: { countryPoint: planetGalleries.appreciate } })}
                 ref={thanksPlanetCover}
             >
                 <tetrahedronGeometry args={[1.5, 3]} />
@@ -522,7 +526,7 @@ function EarthModel({ countryInfo, countryInfoName, activeId, activeColor, overl
             <mesh
                 position={[9, -3, -3]}
                 ref={thanksPlanet}
-                userData={{ name: 'Appreciate' }}
+                userData={{ name: 'Appreciate', note: 'secret …' }}
                 onPointerOver={infoShowingUp}
                 onPointerOut={infoShowingDown}
             >

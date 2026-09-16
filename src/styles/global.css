@@ -642,6 +642,19 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   font-family: 'Romelio';
 }
 .country-name-show-up { font-family: 'Romelio'; }
+/* 이름 뒤에 붙는 보조 문구 — 이름보다 작고 흐리게 둬서 장소명 자체를 방해하지
+않는다. 클릭이 없는 행성에 "여기 뭔가 있지만 열려 있지 않다"는 신호만 남긴다.
+사이트의 다른 작은 라벨들과 같이 대문자·자간으로 처리한다. */
+.country-name-note {
+  display: block;
+  margin-top: 8px;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(232,226,214,0.45);
+}
 
 /* ── entry hint (earth screen) — minimal, bottom-centered, self-dismissing ── */
 .earth-hint {
