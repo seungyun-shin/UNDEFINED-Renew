@@ -989,7 +989,12 @@ opacity+y 이동만 남겨 부드럽게 떠오르며 페이드인하는 방식�
 레이어가 해제되며 다시 나타났다. padding 으로 박스를 늘려 잉크를 품게 하고
 같은 크기의 음수 margin 으로 레이아웃은 그대로 둔다. */
 .about-hero-title .magnetic-char { padding-bottom: 12px; margin-bottom: -12px; }
-.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); }
+/* 이름 줄을 아래 줄보다 앞에 그린다. Romelio 의 g 꼬리는 자기 상자보다 아래로
+내려가서 바로 밑 .about-hero-role 의 상자 안까지 들어온다(아이패드에서 3~7px).
+둘 다 static 이면 DOM 순서상 아래 줄이 나중에 그려지는데, 등장 애니메이션 중
+그 줄의 글자들이 합성 레이어가 되면서 걸쳐 있던 g 꼬리를 덮어 가려지거나
+깜빡였다. z-index 로 이름 줄을 위에 두면 아래 줄이 움직여도 g 뒤로 지나간다. */
+.about-hero-name { position: relative; z-index: 1; font-size: clamp(2.8rem, 7.4vw, 6.4rem); }
 .about-hero-role {
   font-size: clamp(2.8rem, 7.4vw, 6.4rem);
   margin-top: 8px;
