@@ -25,7 +25,10 @@ function IcoBackground() {
 
         const renderer = new THREE.WebGLRenderer({ antialias: false })
         renderer.setPixelRatio(DPR)
-        renderer.setSize(window.innerWidth, window.innerHeight * 1.5)
+        // 크기는 아래 resize() 한 곳에서만 정한다. 예전엔 여기서 innerHeight*1.5 로
+        // 잡아뒀는데, resize() 가 덮어쓰기 전에 한 프레임이라도 그려지면 캔버스가
+        // 화면보다 1.5배 길어서 구가 아래로 밀린 채 보였다.
+        renderer.setSize(container.offsetWidth || window.innerWidth, container.offsetHeight || window.innerHeight)
         renderer.setClearColor(0x111111, 1)
         renderer.outputColorSpace = THREE.SRGBColorSpace
         container.appendChild(renderer.domElement)
@@ -139,6 +142,8 @@ function IcoBackground() {
         const resize = () => {
             const width = container.offsetWidth
             const height = container.offsetHeight
+            // 레이아웃이 아직 없을 때(0) 맞추면 캔버스가 사라지고 aspect 가 NaN 이 된다.
+            if (!width || !height) return
             renderer.setSize(width, height)
             composer.setSize(width, height)
             camera.aspect = width / height
@@ -235,6 +240,12 @@ function IcoBackground() {
         document.addEventListener('touchmove', onTouchMove, { passive: true })
         document.addEventListener('touchend', onTouchEnd)
         window.addEventListener('resize', resize)
+        // 컨테이너는 height:100dvh 다. 모바일에서 주소창이 접히고 펴지면 이 높이가
+        // 바뀌는데 window resize 는 안 오거나 늦게 온다 — 그러면 캔버스만 옛 크기로
+        // 남아 아래에 검은 띠가 생기고 구가 아래로 내려가 보였다. 창이 아니라
+        // 컨테이너 자체를 관찰해서 원인이 무엇이든 크기를 따라가게 한다.
+        const ro = new ResizeObserver(() => resize())
+        ro.observe(container)
 
         resize()
         render()
@@ -247,6 +258,7 @@ function IcoBackground() {
             document.removeEventListener('touchmove', onTouchMove)
             document.removeEventListener('touchend', onTouchEnd)
             window.removeEventListener('resize', resize)
+            ro.disconnect()
             geometry.dispose()
             material.dispose()
             materialLines.dispose()
