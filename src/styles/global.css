@@ -642,6 +642,19 @@ absolute/fixed 자식들의 containing block에 영향 없음). */
   font-family: 'Romelio';
 }
 .country-name-show-up { font-family: 'Romelio'; }
+/* 이름 뒤에 붙는 보조 문구 — 이름보다 작고 흐리게 둬서 장소명 자체를 방해하지
+않는다. 클릭이 없는 행성에 "여기 뭔가 있지만 열려 있지 않다"는 신호만 남긴다.
+사이트의 다른 작은 라벨들과 같이 대문자·자간으로 처리한다. */
+.country-name-note {
+  display: block;
+  margin-top: 8px;
+  font-family: 'sarrif', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(232,226,214,0.45);
+}
 
 /* ── entry hint (earth screen) — minimal, bottom-centered, self-dismissing ── */
 .earth-hint {
@@ -989,7 +1002,12 @@ opacity+y 이동만 남겨 부드럽게 떠오르며 페이드인하는 방식�
 레이어가 해제되며 다시 나타났다. padding 으로 박스를 늘려 잉크를 품게 하고
 같은 크기의 음수 margin 으로 레이아웃은 그대로 둔다. */
 .about-hero-title .magnetic-char { padding-bottom: 12px; margin-bottom: -12px; }
-.about-hero-name { font-size: clamp(2.8rem, 7.4vw, 6.4rem); }
+/* 이름 줄을 아래 줄보다 앞에 그린다. Romelio 의 g 꼬리는 자기 상자보다 아래로
+내려가서 바로 밑 .about-hero-role 의 상자 안까지 들어온다(아이패드에서 3~7px).
+둘 다 static 이면 DOM 순서상 아래 줄이 나중에 그려지는데, 등장 애니메이션 중
+그 줄의 글자들이 합성 레이어가 되면서 걸쳐 있던 g 꼬리를 덮어 가려지거나
+깜빡였다. z-index 로 이름 줄을 위에 두면 아래 줄이 움직여도 g 뒤로 지나간다. */
+.about-hero-name { position: relative; z-index: 1; font-size: clamp(2.8rem, 7.4vw, 6.4rem); }
 .about-hero-role {
   font-size: clamp(2.8rem, 7.4vw, 6.4rem);
   margin-top: 8px;
@@ -2258,7 +2276,9 @@ padding 으로 박스를 넓히고 같은 크기의 음수 margin 으로 레이�
 .work-list li::before { content: ''; position: absolute; left: 0; top: 0.78em; width: 4px; height: 4px; border-radius: 50%; background: #706a5e; }
 .work-list li:last-child { margin-bottom: 0; }
 .work-list li strong { color: #e8e2d6; font-weight: 400; }
-.work-detail-nav {
+/* 갤러리 푸터도 같은 규칙을 쓴다 — 한쪽만 고치면 두 화면이 달라진다. */
+.work-detail-nav,
+.gallery-nav {
   margin-top: 96px;
   padding-top: 32px;
   border-top: 1px solid rgba(232,226,214,0.13);
@@ -2266,10 +2286,16 @@ padding 으로 박스를 넓히고 같은 크기의 음수 margin 으로 레이�
   justify-content: space-between;
   gap: 32px;
 }
-.work-detail-nav-link { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #a8a094; max-width: 40%; font-family: 'Romelio', serif; font-size: 1.05rem; line-height: 1.3; transition: color 0.3s ease; }
-.work-detail-nav-link--next { text-align: right; align-items: flex-end; }
-.work-detail-nav-link:hover { color: #f5efe4; }
-.work-detail-nav-cap { font-family: 'sarrif', sans-serif; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: #706a5e; }
+.work-detail-nav-link,
+.gallery-nav-link { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #a8a094; max-width: 40%; font-family: 'Romelio', serif; font-size: 1.05rem; line-height: 1.3; transition: color 0.3s ease; }
+.work-detail-nav-link--next,
+.gallery-nav-link--next { text-align: right; align-items: flex-end; }
+.work-detail-nav-link:hover,
+.gallery-nav-link:hover { color: #f5efe4; }
+.work-detail-nav-cap,
+.gallery-nav-cap { font-family: 'sarrif', sans-serif; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: #706a5e; }
+/* 갤러리는 그리드와 같은 폭·여백 안에 놓는다 */
+.gallery-nav { margin: 96px auto 120px; max-width: 1400px; padding: 32px 40px 0; }
 
 @media (max-width: 900px) {
   .work-section, .work-detail { padding-top: 16vh; }
@@ -2281,5 +2307,6 @@ padding 으로 박스를 넓히고 같은 크기의 음수 margin 으로 레이�
   .work-detail-viz { margin-top: 32px; }
   .work-detail-viz.is-pair { grid-template-columns: 1fr; gap: 26px; }
   .work-detail-cols { grid-template-columns: 1fr; gap: 40px; }
-  .work-detail-nav-link { max-width: 48%; }
+  .work-detail-nav-link,
+  .gallery-nav-link { max-width: 48%; }
 }

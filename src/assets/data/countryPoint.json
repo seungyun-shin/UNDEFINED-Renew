@@ -171,233 +171,6 @@
     ]
   },
   {
-    "_id": 2,
-    "name": "SanCristobal",
-    "url": "/SanCristobal",
-    "color": 16777215,
-    "lat": "-0.9589567103236243",
-    "lon": "-89.9444350902189",
-    "latTransit": "0",
-    "lonTransit": "0",
-    "x": "0",
-    "y": "0",
-    "z": "0",
-    "message": "",
-    "mainImg": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/SanCristobalMain.jpg",
-    "imgList": [
-      {
-        "id": 1,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal.jpg"
-      },
-      {
-        "id": 2,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal2.jpg"
-      },
-      {
-        "id": 3,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal3.jpg"
-      },
-      {
-        "id": 4,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal4.jpg"
-      },
-      {
-        "id": 5,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal5.jpg"
-      },
-      {
-        "id": 6,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal6.jpg"
-      },
-      {
-        "id": 7,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal7.jpg"
-      },
-      {
-        "id": 8,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal8.jpg"
-      },
-      {
-        "id": 9,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal9.jpg"
-      },
-      {
-        "id": 10,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal10.jpg"
-      },
-      {
-        "id": 11,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal11.jpg"
-      },
-      {
-        "id": 12,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal12.jpg"
-      },
-      {
-        "id": 13,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal13.jpg"
-      },
-      {
-        "id": 14,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal14.jpg"
-      },
-      {
-        "id": 15,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal15.jpg"
-      },
-      {
-        "id": 16,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal16.jpg"
-      },
-      {
-        "id": 17,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal17.jpg"
-      },
-      {
-        "id": 18,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal18.jpg"
-      },
-      {
-        "id": 19,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal19.jpg"
-      },
-      {
-        "id": 20,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal20.jpg"
-      },
-      {
-        "id": 21,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal21.jpg"
-      },
-      {
-        "id": 22,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal22.jpg"
-      },
-      {
-        "id": 23,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal23.jpg"
-      },
-      {
-        "id": 24,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal24.jpg"
-      },
-      {
-        "id": 25,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal25.jpg"
-      },
-      {
-        "id": 26,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal26.jpg"
-      }
-    ],
-    "simgList": [
-      {
-        "id": 1,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal.jpg"
-      },
-      {
-        "id": 2,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal2.jpg"
-      },
-      {
-        "id": 3,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal3.jpg"
-      },
-      {
-        "id": 4,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal4.jpg"
-      },
-      {
-        "id": 5,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal5.jpg"
-      },
-      {
-        "id": 6,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal6.jpg"
-      },
-      {
-        "id": 7,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal7.jpg"
-      },
-      {
-        "id": 8,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal8.jpg"
-      },
-      {
-        "id": 9,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal9.jpg"
-      },
-      {
-        "id": 10,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal10.jpg"
-      },
-      {
-        "id": 11,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal11.jpg"
-      },
-      {
-        "id": 12,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal12.jpg"
-      },
-      {
-        "id": 13,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal13.jpg"
-      },
-      {
-        "id": 14,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal14.jpg"
-      },
-      {
-        "id": 15,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal15.jpg"
-      },
-      {
-        "id": 16,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal16.jpg"
-      },
-      {
-        "id": 17,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal17.jpg"
-      },
-      {
-        "id": 18,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal18.jpg"
-      },
-      {
-        "id": 19,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal19.jpg"
-      },
-      {
-        "id": 20,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal20.jpg"
-      },
-      {
-        "id": 21,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal21.jpg"
-      },
-      {
-        "id": 22,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal22.jpg"
-      },
-      {
-        "id": 23,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal23.jpg"
-      },
-      {
-        "id": 24,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal24.jpg"
-      },
-      {
-        "id": 25,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal25.jpg"
-      },
-      {
-        "id": 26,
-        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal26.jpg"
-      }
-    ]
-  },
-  {
     "_id": 3,
     "name": "SantaCruz",
     "url": "/SantaCruz",
@@ -2380,6 +2153,233 @@
       {
         "id": 9,
         "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/BuenosAires/300/BuenosAires9.jpg"
+      }
+    ]
+  },
+  {
+    "_id": 2,
+    "name": "SanCristobal",
+    "url": "/SanCristobal",
+    "color": 16777215,
+    "lat": "-0.9589567103236243",
+    "lon": "-89.9444350902189",
+    "latTransit": "0",
+    "lonTransit": "0",
+    "x": "0",
+    "y": "0",
+    "z": "0",
+    "message": "",
+    "mainImg": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/SanCristobalMain.jpg",
+    "imgList": [
+      {
+        "id": 1,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal.jpg"
+      },
+      {
+        "id": 2,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal2.jpg"
+      },
+      {
+        "id": 3,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal3.jpg"
+      },
+      {
+        "id": 4,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal4.jpg"
+      },
+      {
+        "id": 5,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal5.jpg"
+      },
+      {
+        "id": 6,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal6.jpg"
+      },
+      {
+        "id": 7,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal7.jpg"
+      },
+      {
+        "id": 8,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal8.jpg"
+      },
+      {
+        "id": 9,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal9.jpg"
+      },
+      {
+        "id": 10,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal10.jpg"
+      },
+      {
+        "id": 11,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal11.jpg"
+      },
+      {
+        "id": 12,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal12.jpg"
+      },
+      {
+        "id": 13,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal13.jpg"
+      },
+      {
+        "id": 14,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal14.jpg"
+      },
+      {
+        "id": 15,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal15.jpg"
+      },
+      {
+        "id": 16,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal16.jpg"
+      },
+      {
+        "id": 17,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal17.jpg"
+      },
+      {
+        "id": 18,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal18.jpg"
+      },
+      {
+        "id": 19,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal19.jpg"
+      },
+      {
+        "id": 20,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal20.jpg"
+      },
+      {
+        "id": 21,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal21.jpg"
+      },
+      {
+        "id": 22,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal22.jpg"
+      },
+      {
+        "id": 23,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal23.jpg"
+      },
+      {
+        "id": 24,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal24.jpg"
+      },
+      {
+        "id": 25,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal25.jpg"
+      },
+      {
+        "id": 26,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/1170/SanCristobal26.jpg"
+      }
+    ],
+    "simgList": [
+      {
+        "id": 1,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal.jpg"
+      },
+      {
+        "id": 2,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal2.jpg"
+      },
+      {
+        "id": 3,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal3.jpg"
+      },
+      {
+        "id": 4,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal4.jpg"
+      },
+      {
+        "id": 5,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal5.jpg"
+      },
+      {
+        "id": 6,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal6.jpg"
+      },
+      {
+        "id": 7,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal7.jpg"
+      },
+      {
+        "id": 8,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal8.jpg"
+      },
+      {
+        "id": 9,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal9.jpg"
+      },
+      {
+        "id": 10,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal10.jpg"
+      },
+      {
+        "id": 11,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal11.jpg"
+      },
+      {
+        "id": 12,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal12.jpg"
+      },
+      {
+        "id": 13,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal13.jpg"
+      },
+      {
+        "id": 14,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal14.jpg"
+      },
+      {
+        "id": 15,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal15.jpg"
+      },
+      {
+        "id": 16,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal16.jpg"
+      },
+      {
+        "id": 17,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal17.jpg"
+      },
+      {
+        "id": 18,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal18.jpg"
+      },
+      {
+        "id": 19,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal19.jpg"
+      },
+      {
+        "id": 20,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal20.jpg"
+      },
+      {
+        "id": 21,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal21.jpg"
+      },
+      {
+        "id": 22,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal22.jpg"
+      },
+      {
+        "id": 23,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal23.jpg"
+      },
+      {
+        "id": 24,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal24.jpg"
+      },
+      {
+        "id": 25,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal25.jpg"
+      },
+      {
+        "id": 26,
+        "imgSrc": "https://ssyproject.s3.ap-northeast-2.amazonaws.com/Memory/South+America/SanCristobal/300/SanCristobal26.jpg"
       }
     ]
   },

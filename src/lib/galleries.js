@@ -35,3 +35,19 @@ export function accentOf(gallery) {
     if (typeof id !== 'number') return HIGHLIGHT_PALETTE[0]
     return HIGHLIGHT_PALETTE[id % HIGHLIGHT_PALETTE.length]
 }
+
+// 갤러리 푸터의 이전/다음. 목적지 목록과 같은 배열 순서를 쓰되 지역 경계는
+// 넘어간다(전체를 한 줄로 훑는 게 목적). 처음과 끝은 이어 붙인다 — 65곳이라
+// 끝에서 막히는 것보다 다시 처음으로 도는 편이 자연스럽다.
+// 행성 갤러리(project·appreciate)는 이 목록에 없어서 앞뒤가 정의되지 않는다.
+// null 을 돌려주면 화면에서 푸터를 그리지 않는다.
+export function neighborsOf(slug) {
+    const key = gallerySlug(slug)
+    const i = countryPointData.findIndex((p) => gallerySlug(p.name) === key)
+    if (i < 0) return null
+    const n = countryPointData.length
+    return {
+        prev: countryPointData[(i - 1 + n) % n],
+        next: countryPointData[(i + 1) % n],
+    }
+}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useParams, Navigate } from 'react-router-dom'
-import { findGallery, accentOf } from '../lib/galleries'
+import { Link } from 'react-router-dom'
+import { findGallery, accentOf, gallerySlug, neighborsOf } from '../lib/galleries'
 import { icoTransition } from '../lib/icoBus'
 
 // 화면 폭에 따른 그리드 열 수 — CSS .gallery-grid의 브레이크포인트(900px)와 반드시 같아야 한다.
@@ -107,6 +108,7 @@ function MemoryPhotoGallery() {
     const fromSlug = findGallery(slug)
     const countryPoint = fromState || fromSlug
     const accent = location.state?.accentColor || accentOf(fromSlug)
+    const neighbors = neighborsOf(slug)
 
     const photos = countryPoint?.imgList || []
     const [lightboxIndex, setLightboxIndex] = useState(null)
@@ -272,6 +274,21 @@ function MemoryPhotoGallery() {
                     )
                 })}
             </div>
+
+            {/* 다 보고 나면 옆 갤러리로 — WORK 상세 하단과 같은 형태다. 좌상단
+                ← EARTH 가 "목록으로"라면 이건 "옆으로"라 역할이 겹치지 않는다. */}
+            {neighbors && (
+                <nav className="gallery-nav">
+                    <Link to={`/MemoryPhotoGallery/${gallerySlug(neighbors.prev.name)}`} className="gallery-nav-link">
+                        <span className="gallery-nav-cap">← Previous</span>
+                        <span>{neighbors.prev.name}</span>
+                    </Link>
+                    <Link to={`/MemoryPhotoGallery/${gallerySlug(neighbors.next.name)}`} className="gallery-nav-link gallery-nav-link--next">
+                        <span className="gallery-nav-cap">Next →</span>
+                        <span>{neighbors.next.name}</span>
+                    </Link>
+                </nav>
+            )}
 
             {lightboxIndex !== null && createPortal(
                 // 전역 Header가 .overall-Layout(z-index:199)보다 위(200)에 고정돼
