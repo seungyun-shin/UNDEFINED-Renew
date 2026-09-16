@@ -8,15 +8,18 @@
     <!-- 링크 미리보기(Open Graph). 카카오톡·슬랙·페북 등이 이 태그를 읽어 카드를
          만든다. 원본 사이트에는 9개가 다 있었는데 이관하면서 3개만 넘어와,
          이미지 없는 빈 카드가 뜨고 있었다.
+         주소에 www 를 붙이는 이유: apex(seungyunshin.com)는 www 로 308 리다이렉트된다.
+         크롤러가 한 단계 더 타야 하고, 카카오톡 스크래퍼는 까다로운 편이라 이미지를
+         놓칠 수 있다. 정식 호스트를 직접 가리킨다.
          이미지는 S3 대신 public/ 에 둔다 — 버킷 권한을 정리하다 이 파일 하나를
          빠뜨리면 카드가 조용히 깨지고, 깨진 걸 알아채기도 어렵다. -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://seungyunshin.com" />
+    <meta property="og:url" content="https://www.seungyunshin.com" />
     <meta property="og:title" content="SEUNGYUN SHIN" />
     <meta property="og:description" content="Space for SEUNGYUNSHIN" />
     <meta property="og:site_name" content="SEUNGYUN SHIN" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="og:image" content="https://seungyunshin.com/og.jpg" />
+    <meta property="og:image" content="https://www.seungyunshin.com/og.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -25,7 +28,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="SEUNGYUN SHIN" />
     <meta name="twitter:description" content="Space for SEUNGYUNSHIN" />
-    <meta name="twitter:image" content="https://seungyunshin.com/og.jpg" />
+    <meta name="twitter:image" content="https://www.seungyunshin.com/og.jpg" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preload" href="/fonts/Romelio-Sans.woff2" as="font" type="font/woff2" crossorigin />
