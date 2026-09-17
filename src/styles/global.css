@@ -2294,8 +2294,11 @@ padding 으로 박스를 넓히고 같은 크기의 음수 margin 으로 레이�
 .gallery-nav-link:hover { color: #f5efe4; }
 .work-detail-nav-cap,
 .gallery-nav-cap { font-family: 'sarrif', sans-serif; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: #706a5e; }
-/* 갤러리는 그리드와 같은 폭·여백 안에 놓는다 */
-.gallery-nav { margin: 96px auto 120px; max-width: 1400px; padding: 32px 40px 0; }
+/* 갤러리는 그리드와 같은 폭·여백 안에 놓는다.
+   아래 여백이 70px 인 이유: .memory-gallery 컨테이너에 이미 padding-bottom 90px 이
+   있어서 합이 160px 이 된다 — WORK 상세 푸터 아래 여백과 같은 값이다. 여기에
+   120px 을 주면 합이 210px 이 되어 그쪽보다 훨씬 헐거워 보였다. */
+.gallery-nav { margin: 96px auto 70px; max-width: 1400px; padding: 32px 40px 0; }
 
 @media (max-width: 900px) {
   .work-section, .work-detail { padding-top: 16vh; }
