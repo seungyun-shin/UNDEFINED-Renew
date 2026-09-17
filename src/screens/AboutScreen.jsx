@@ -322,10 +322,6 @@ function AboutScreen() {
                         <div className="about-hero-title about-hero-role">
                             <MagneticText text="Independence Builder" activateDelay={HERO_REVEAL_ACTIVATE_DELAY} />
                         </div>
-                        <p className="about-hero-sub">
-                            <MagneticText text="데이터와 AI로 더 나은 삶의 방식을 만들고" radius={50} strength={7} activateDelay={HERO_REVEAL_ACTIVATE_DELAY} /><br />
-                            <MagneticText text="스스로 가치를 창출하며 독립적인 삶을 구축합니다." radius={50} strength={7} activateDelay={HERO_REVEAL_ACTIVATE_DELAY} />
-                        </p>
                         <p className="about-hero-sub-en">
                             <MagneticText text="Building a better way of life with data and AI," radius={40} strength={5} activateDelay={HERO_REVEAL_ACTIVATE_DELAY} /><br />
                             <MagneticText text="creating value on my own terms toward independence." radius={40} strength={5} activateDelay={HERO_REVEAL_ACTIVATE_DELAY} />

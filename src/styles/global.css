@@ -1026,14 +1026,15 @@ opacity+y 이동만 남겨 부드럽게 떠오르며 페이드인하는 방식�
   font-weight: 300;
   color: #cbc3b4;
 }
+/* 한글 문구를 빼면서 이 영문이 히어로의 유일한 문장이 됐다. 각주 크기·이탤릭·
+   흐린 색 그대로 두면 설명이 사라진 것처럼 보여서, 본문 자리로 올린다. */
 .about-hero-sub-en {
-  margin-top: 14px;
+  margin-top: 40px;
   max-width: 560px;
-  font-size: 0.86rem;
-  line-height: 1.6;
+  font-size: 1.12rem;
+  line-height: 1.75;
   font-weight: 300;
-  font-style: italic;
-  color: #706a5e;
+  color: #cbc3b4;
 }
 .about-scroll-cue {
   margin-top: 80px;
@@ -1091,7 +1092,7 @@ CSS opacity 애니메이션까지 얹으면 둘이 서로의 값을 덮어써 �
   ※ 기본 .about-hero-sub 규칙보다 아래에 있어야 한다 — 특정도가 같아서
   선언 순서로 갈린다(처음에 위쪽 미디어쿼리에 넣었다가 안 먹었다). */
   .about-hero-sub { font-size: clamp(0.84rem, calc(4.9vw - 2.3px), 1.2rem); }
-  .about-hero-sub-en { font-size: clamp(0.62rem, calc(3.5vw - 1.6px), 0.86rem); }
+  .about-hero-sub-en { font-size: clamp(0.68rem, calc(3.96vw - 1.9px), 1.12rem); }
   .about-philosophy-section { min-height: auto; padding: 100px 0; }
   .about-philosophy { max-width: none; }
 }
